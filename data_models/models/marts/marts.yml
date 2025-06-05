@@ -74,6 +74,7 @@ models:
         description: Total cost of goods sold attributed to this product
       - name: profit
         description: Profit, calculated by sales amount minus cost of goods sold
+        
   - name: distribution_center_inventory
     description: Inventory levels and sales for each distribution center
     columns:

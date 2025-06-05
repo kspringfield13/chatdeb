@@ -75,49 +75,6 @@ def extract_limit_from_question(q: str) -> int | None:
         return int(m.group(1) or m.group(2))
     return None
 
-def format_as_markdown_table(
-    column_names: list[str],
-    rows: list[tuple],
-    limit: int | None = None
-) -> str:
-    """
-    Build a Markdown table from:
-      - column_names: ["product_name", "product_category", "profit"], etc.
-      - rows: a list of tuples returned by your SQL engine  
-      - limit: if given, only show that many rows (e.g. top 3)
-
-      | col1 | col2 | col3 |
-      | ---  | ---  | ---  |
-      | val1 | val2 | val3 |
-      | ...  | ...  | ...  |
-    """
-    if not rows:
-        return f"_No data returned._"
-
-    display_rows = rows[:limit] if limit is not None else rows
-
-    # 1) Build the header row: | col1 | col2 | col3 |
-    header = "| " + " | ".join(column_names) + " |\n"
-    # 2) Build the separator row: | --- | --- | --- |
-    separator = "| " + " | ".join("---" for _ in column_names) + " |\n"
-
-    # 3) Build each data row, formatting floats as currency if desired
-    data_lines = []
-    for row in display_rows:
-        formatted_cells = []
-        for value in row:
-            if isinstance(value, float):
-                # Format floats as $X,XXX.XX
-                formatted_cells.append(f"{value:,.2f}")
-            else:
-                formatted_cells.append(str(value))
-        data_lines.append("| " + " | ".join(formatted_cells) + " |")
-
-    # 4) Join header + separator + every data row
-    body = header + separator + "\n".join(data_lines)
-
-    return f"{body}"
-
 def is_data_question(query_text: str) -> bool:
     """
     If the question mentions keywords like “count”, “profit”, “customers”,
@@ -254,6 +211,35 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
             else:
                 lines.append(f"Product ID {product_id} not found (score={score:.3f})")
 
+        elif mid.startswith("dc_"):
+            try:
+                dc_id = int(mid.split("_", 1)[1])
+            except ValueError:
+                meta = m.metadata or m.get("metadata", {})
+                lines.append(f"Unparsable distribution center ID='{mid}', metadata: {meta}")
+                continue
+
+            sql = text("""
+                SELECT
+                    distribution_center_id,
+                    distribution_center_name,
+                    items_in_stock,
+                    total_sales,
+                    total_inventory_cost
+                FROM distribution_center_inventory
+                WHERE distribution_center_id = :dcid
+            """)
+            result = ENGINE.execute(sql, {"dcid": dc_id}).fetchone()
+
+            if result:
+                did, name, stock, sales, inv_cost = result
+                lines.append(
+                    f"Center '{name}' (ID {did}): stock={stock}, sales=${sales:,.2f}, cost=${inv_cost:,.2f} "
+                    f"(score={score:.3f})"
+                )
+            else:
+                lines.append(f"Distribution center ID {dc_id} not found (score={score:.3f})")
+                
         # --- 4c) Fallback if Pinecone returns an unexpected ID format
         else:
             meta = m.metadata if hasattr(m, "metadata") else m.get("metadata", {})
@@ -299,55 +285,48 @@ def format_numbered_list(rows: List[Tuple]) -> str:
         lines.append(f"{i}. {single}  ")
     return "\n".join(lines)
 
-def format_markdown_table(rows: List[Tuple], limit: int | None = None) -> str:
+def format_markdown_table(
+    rows: list[tuple],
+    limit: int | None = None
+) -> str:
     """
-    Build a Markdown table with columns: “Name” and “Value”.
-    We drop user_id completely.
-    If limit is provided, only show that many rows.
+    Build a Markdown table from:
+      - column_names: ["product_name", "product_category", "profit"], etc.
+      - rows: a list of tuples returned by your SQL engine  
+      - limit: if given, only show that many rows (e.g. top 3)
+
+    Example output:
+    
+    <blank line>
+    | col1 | col2 | col3 |
+    | ---- | ---- | ---- |
+    | val1 | val2 | val3 |
+    | ...  | ...  | ...  |
+    <blank line>
     """
     if not rows:
-        return "No records found."
+        return "_No data returned._"
 
-    display_rows = rows[:limit] if limit is not None else rows
-    first_row = display_rows[0]
+    # If limit is set, only keep that many rows:
+    display_rows = rows[:limit] if (limit is not None) else rows
 
-    # If customers (4‐tuples)
-    if len(first_row) == 4:
-        column_names = ["Name", "User ID", "Value"]
-        header = "| " + " | ".join(column_names) + " |\n"
-        separator = "| " + " | ".join("---" for _ in column_names) + " |\n"
-        data_lines = []
-        for row in display_rows:
-            uid, first, last, total = row
-            name = f"{first} {last}"
-            data_lines.append(f"| {name} | {uid} | {total:,.2f} |")
-        return header + separator + "\n".join(data_lines)
+    # 3) Build each data row. Format floats as "1,234.56" if needed:
+    data_lines: list[str] = []
+    for row in display_rows:
+        formatted_cells: list[str] = []
+        for value in row:
+            if isinstance(value, float):
+                # Format floats with commas and two decimals
+                formatted_cells.append(f"{value:,.2f}")
+            else:
+                formatted_cells.append(str(value))
+        data_lines.append("| " + " | ".join(formatted_cells) + " |")
 
-    # If products (3‐tuples)
-    elif len(first_row) == 3:
-        column_names = ["Product Name", "Category", "Sales Amount"]
-        header = "| " + " | ".join(column_names) + " |\n"
-        separator = "| " + " | ".join("---" for _ in column_names) + " |\n"
-        data_lines = []
-        for row in display_rows:
-            name, category, sales = row
-            data_lines.append(f"| {name} | {category} | {sales:,.2f} |")
-        return header + separator + "\n".join(data_lines)
-
-    # Otherwise: fallback, show raw tuples
-    else:
-        header = "| " + " | ".join([f"Col{i}" for i in range(len(first_row))]) + " |\n"
-        separator = "| " + " | ".join("---" for _ in first_row) + " |\n"
-        data_lines = []
-        for row in display_rows:
-            cells = []
-            for val in row:
-                if isinstance(val, (float, int)):
-                    cells.append(f"{val:,.2f}")
-                else:
-                    cells.append(str(val))
-            data_lines.append("| " + " | ".join(cells) + " |")
-        return header + separator + "\n".join(data_lines)
+    # 4) Join header + separator + every data row, with a blank line before/after
+    body_lines = data_lines
+    # Insert a blank line before the table, and one after, so Markdown doesn't treat it as code.
+    result = "\n".join(body_lines) + "\n"
+    return result
     
 def _save_to_history(query: str, response: str, confidence: float | None):
     """
@@ -417,11 +396,7 @@ def handle_query(query_text: str) -> str:
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
-            # n > 5
-            limit = extract_limit_from_question(q)  # e.g. “3” from “Top 3 Customers”
-            # only show up to that many, if present; otherwise show all
-            to_show = rows[:limit] if limit else rows
-            reply = format_markdown_table(to_show, limit=None)
+            reply = format_markdown_table(rows, limit=None)
             _save_to_history(q, reply, confidence=None)
             return reply
 

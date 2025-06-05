@@ -46,5 +46,119 @@
     "retrieved_response": "1. John Rasmussen \u2014 4.00  \n2. Joann Adams \u2014 4.00  \n3. Carlos Ward \u2014 4.00  \n4. Lynn Richardson \u2014 2.00  \n5. John Lopez \u2014 2.00  ",
     "timestamp": "2025-06-04T18:58:16.602113",
     "confidence_score": null
+  },
+  {
+    "query_text": "Which distribution center does the most sales?",
+    "retrieved_response": "Memphis TN \u2014 1,418,119.34",
+    "timestamp": "2025-06-04T22:32:58.327315",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List the top 3 by sales.",
+    "retrieved_response": "1. Canada Goose Men's The Chateau Jacket (Outerwear & Coats) \u2014 9,780.00  \n2. Canada Goose Women's Solaris (Active) \u2014 9,730.00  \n3. Catherine Malandrino Women's Skinny Stretch Leather Pant (Pants & Capris) \u2014 7,160.00  ",
+    "timestamp": "2025-06-04T22:33:19.416709",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List the top 3 DCs by sales",
+    "retrieved_response": "1. Memphis TN \u2014 1,418,119.34  \n2. Chicago IL \u2014 1,039,087.27  \n3. New Orleans LA \u2014 0.00  ",
+    "timestamp": "2025-06-04T22:33:36.117497",
+    "confidence_score": null
+  },
+  {
+    "query_text": "How many DCs have no sales?",
+    "retrieved_response": "8.00",
+    "timestamp": "2025-06-04T22:33:52.722094",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "1. New Orleans LA  \n2. Charleston SC  \n3. Savannah GA  \n4. Mobile AL  \n5. Philadelphia PA  ",
+    "timestamp": "2025-06-04T22:34:07.954471",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "| Col0 | Col1 |\n| --- | --- |\n| 5.00 | New Orleans LA |\n| 9.00 | Charleston SC |\n| 10.00 | Savannah GA |\n| 8.00 | Mobile AL |\n| 7.00 | Philadelphia PA |\n| 4.00 | Los Angeles CA |\n| 3.00 | Houston TX |\n| 6.00 | Port Authority of New York/New Jersey NY/NJ |",
+    "timestamp": "2025-06-04T22:39:09.837596",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "| Col0 | Col1 |\n| --- | --- |\n| 5.00 | New Orleans LA |\n| 9.00 | Charleston SC |\n| 10.00 | Savannah GA |\n| 8.00 | Mobile AL |\n| 7.00 | Philadelphia PA |\n| 4.00 | Los Angeles CA |\n| 3.00 | Houston TX |\n| 6.00 | Port Authority of New York/New Jersey NY/NJ |",
+    "timestamp": "2025-06-04T22:45:14.591066",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "| Col0 | Col1 |\n| --- | --- |\n| 5.00 | New Orleans LA |\n| 9.00 | Charleston SC |\n| 10.00 | Savannah GA |\n| 8.00 | Mobile AL |\n| 7.00 | Philadelphia PA |\n| 4.00 | Los Angeles CA |\n| 3.00 | Houston TX |\n| 6.00 | Port Authority of New York/New Jersey NY/NJ |",
+    "timestamp": "2025-06-04T22:47:44.564698",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "Certainly! However, your request is a little ambiguous\u2014I'm interpreting \"DCs\" as **Distribution Centers** and \"sales\" as having made transactions or shipped products.\n\nAssuming you have a database, spreadsheet, or list of Distribution Centers (DCs), you would need to filter out those with no sales. Since I don't have access to your actual data, I'll show you how you'd do this in different contexts:\n\n**1. In a Spreadsheet (such as Excel or Google Sheets):**\nSuppose you have a table like:\n\n| DC Name | Sales |\n|---------|-------|\n| DC01    | 150   |\n| DC02    | 0     |\n| DC03    | 0     |\n| DC04    | 45    |\n\n**You'd filter the \"Sales\" column for 0.**  \nDCs with no sales in the example above: **DC02, DC03**\n\n**2. Using SQL (if your data is in a database):**\n```sql\nSELECT DC_Name\nFROM Distribution_Centers\nWHERE Sales = 0;\n```\n\n**3. If you provide the data in your next message**, I can list the DCs with no sales directly!\n\n**Please provide your data/table if you'd like a specific answer with your own DC names.**",
+    "timestamp": "2025-06-04T22:50:17.381065",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "\n| 5 | New Orleans LA |\n| 9 | Charleston SC |\n| 10 | Savannah GA |\n| 8 | Mobile AL |\n| 7 | Philadelphia PA |\n| 4 | Los Angeles CA |\n| 3 | Houston TX |\n| 6 | Port Authority of New York/New Jersey NY/NJ |\n",
+    "timestamp": "2025-06-04T22:56:35.246527",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "To provide a list of all DCs (Distribution Centers) with no sales, I would need access to specific sales data or a table/database showing DC locations and their corresponding sales numbers.\n\nIf you have a table or data about the DCs and their sales, please share it (for example, in this format):\n\n| DC Name | Sales |\n|---------|-------|\n| DC1     | 100   |\n| DC2     | 0     |\n| DC3     | 250   |\n| DC4     | 0     |\n\nGiven this, I can then identify DCs with zero sales:\n\n**DCs with no sales:**\n- DC2\n- DC4\n\n**Next Steps:**\n- If you have a table, please copy and paste it here.\n- If you have a database or a system where this is stored, you can use a query such as:\n\n**For Excel/Table:**\n- Filter the list where Sales = 0\n\n**For SQL:**\n```sql\nSELECT DC_Name FROM YourTable WHERE Sales = 0;\n```\n\nIf you provide your data, I can list the specific DCs with no sales for you!",
+    "timestamp": "2025-06-04T22:57:18.246890",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List all of the DCs with no sales",
+    "retrieved_response": "| 5 | New Orleans LA |\n| 9 | Charleston SC |\n| 10 | Savannah GA |\n| 8 | Mobile AL |\n| 7 | Philadelphia PA |\n| 4 | Los Angeles CA |\n| 3 | Houston TX |\n| 6 | Port Authority of New York/New Jersey NY/NJ |\n",
+    "timestamp": "2025-06-04T22:57:40.040125",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Which month in 2023 was our best revenue wise?",
+    "retrieved_response": "I currently don\u2019t have access to your specific revenue data for 2023. If you provide your monthly revenue figures or a summary, I can help identify which month was the best revenue-wise. Could you please share the relevant data?",
+    "timestamp": "2025-06-04T22:59:30.145176",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Do you have last months orders?",
+    "retrieved_response": "I don't have access to your specific order data, but I can help you figure out how to find last month's orders! If you let me know which platform or system you're using (for example: Amazon, Shopify, an internal database, etc.), I can guide you step-by-step to locate your order history for last month. Could you provide a bit more detail?",
+    "timestamp": "2025-06-04T23:00:10.075843",
+    "confidence_score": null
+  },
+  {
+    "query_text": "monthly sales numbers?",
+    "retrieved_response": "Certainly! Could you please clarify which product, service, or company you are interested in obtaining monthly sales numbers for? Additionally, let me know if you are looking for recent sales data, a specific month, or a range of months. This will help me provide the most accurate information.",
+    "timestamp": "2025-06-04T23:01:28.927659",
+    "confidence_score": null
+  },
+  {
+    "query_text": "whats our best month for revenue on record?",
+    "retrieved_response": "I don\u2019t have direct access to your company\u2019s records or financial data. If you\u2019re using a business management or accounting tool (such as QuickBooks, Xero, Shopify, or something similar), you can usually find your best revenue month by generating a sales or revenue report and sorting it by month.\n\nHere are some general steps you can follow:\n\n1. Log in to your accounting or sales platform.\n2. Go to the Reports section.\n3. Select a Profit and Loss, Revenue, or Sales Summary report.\n4. Set the date range to cover all available records.\n5. Group or filter the report by month.\n6. Sort the results to see which month had the highest revenue.\n\nIf you share which system or software you use, I can provide more specific instructions!",
+    "timestamp": "2025-06-04T23:02:32.207027",
+    "confidence_score": null
+  },
+  {
+    "query_text": "What were the average revenue across months for last 5 on record?",
+    "retrieved_response": "I don\u2019t have access to your specific data or records. Could you please provide the monthly revenue figures for the last 5 months you have on record? Once you share those numbers, I can calculate the average for you.",
+    "timestamp": "2025-06-04T23:12:45.076190",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Do we have sales by month?",
+    "retrieved_response": "Could you please specify which product, service, or time period you are referring to? If you need a sales-by-month report for a particular item or timeframe, let me know the details so I can assist you more accurately. If you\u2019re asking in general, I can also share how to organize or obtain monthly sales data. Please clarify your request!",
+    "timestamp": "2025-06-04T23:13:34.540102",
+    "confidence_score": null
+  },
+  {
+    "query_text": "What was the revenue for the month of 2023-12-01",
+    "retrieved_response": "To help you with the revenue for the month of 2023-12-01, I need to clarify your request:\n\n- Are you asking for the total revenue for December 2023? (the whole month)\n- Or just for the single day of 2023-12-01?\n\nAdditionally, I would need to know which company, service, or context you are referring to, as I don't have default access to specific company financials unless provided.\n\nCould you please specify the company or data source you'd like revenue information for?",
+    "timestamp": "2025-06-04T23:14:20.003047",
+    "confidence_score": null
   }
 ]

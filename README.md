@@ -13,13 +13,18 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Backend (FastAPI)
 
-  * ```server.py``` defines two endpoints. ```/chat``` calls ```handle_query()``` and ```/clear_history``` resets memory. CORS is configured for the local React app
+  * ```server.py``` exposes API endpoints. ```/register``` and ```/login``` manage credentials, while ```/chat``` requires an ```X-Token``` header obtained after login. ```/clear_history``` is optional. CORS is configured for the local React app
 
   * Primary business logic in ```chatbot.py```. It decides whether a query is data-related (SQL via LangChain) or semantic search via Pinecone, with a fallback to a direct OpenAI call. It also saves all interactions in ```chatbot_responses.json```
 
   * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB
 
   * ```db.py``` handles the DuckDB connection and SQLAlchemy engine instantiation
+  
+  * ```auth.py``` manages authentication. Users register with Google Sign-In,
+    providing a password and the secret code stored as ``SECRET_KEY`` in ```.env```.
+    A verification email is sent after registration. Endpoints ```/register```,
+    ```/login```, and ```/verify``` return short-lived tokens stored in-memory.
 
 * Data Ingestion & dbt
 
@@ -35,7 +40,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Frontend
 
-  * ```ReactApp/``` contains a small Vite + React UI. The main component ```ChatBox.jsx``` posts questions to ```/chat``` and displays responses in a scrollable chat interface with simple styling
+* ```ReactApp/``` contains a small Vite + React UI. ```Login.jsx``` now renders a "Sign in with Google" button. After selecting an account and providing the secret code, it sends the Google ID token and password to ```/login``` or ```/register```. ```ChatBox.jsx``` posts questions to ```/chat``` with the issued token.
 
 * Data & Logs
 
@@ -98,6 +103,10 @@ OPENAI_API_KEY=
 PINECONE_API_KEY=
 PINECONE_ENVIRONMENT=
 PINECONE_INDEX_NAME=
+SECRET_KEY=
+GOOGLE_CLIENT_ID=
+GMAIL_USERNAME=
+GMAIL_PASSWORD=
 ```
 
 **Load Raw Data**

@@ -139,6 +139,7 @@ tzdata==2025.2
 ujson==5.10.0
 urllib3==2.4.0
 uvicorn==0.34.3
+google-auth==2.30.0
 watchfiles==1.0.5
 wcwidth==0.2.13
 websockets==15.0.1

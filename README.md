@@ -17,35 +17,35 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
   * Primary business logic in ```chatbot.py```. It decides whether a query is data-related (SQL via LangChain) or semantic search via Pinecone, with a fallback to a direct OpenAI call. It also saves all interactions in ```chatbot_responses.json```
 
- * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB
+  * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB
 
- * ```db.py``` handles the DuckDB connection and SQLAlchemy engine instantiation
+  * ```db.py``` handles the DuckDB connection and SQLAlchemy engine instantiation
 
 * Data Ingestion & dbt
 
- * ```data_ingest/load_data.py``` loads raw CSV files from ```raw_data/``` into staging tables in DuckDB and verifies row counts
+  * ```data_ingest/load_data.py``` loads raw CSV files from ```raw_data/``` into staging tables in DuckDB and verifies row counts
 
- * ```data_ingest/drop_all_data.py``` drops all tables/views in DuckDB for a clean slate
+  * ```data_ingest/drop_all_data.py``` drops all tables/views in DuckDB for a clean slate
 
- * ```data_models/``` contains the dbt project with models (e.g., ```marts/customers.sql```, ```marts/products.sql```) that build analytical tables. There is also a macro ```coalesce_and_round.sql``` used in the product model
+  * ```data_models/``` contains the dbt project with models (e.g., ```marts/customers.sql```, ```marts/products.sql```) that build analytical tables. There is also a macro ```coalesce_and_round.sql``` used in the product model
 
 * Semantic Search with Pinecone
 
- * ```pinecone_utils.py``` sets up the Pinecone index, offers functions to embed/ingest customers and products, and exposes ```get_embedding()``` plus a simple ```semantic_search()``` helper
+  * ```pinecone_utils.py``` sets up the Pinecone index, offers functions to embed/ingest customers and products, and exposes ```get_embedding()``` plus a simple ```semantic_search()``` helper
 
 * Frontend
 
- * ```ReactApp/``` contains a small Vite + React UI. The main component ```ChatBox.jsx``` posts questions to ```/chat``` and displays responses in a scrollable chat interface with simple styling
+  * ```ReactApp/``` contains a small Vite + React UI. The main component ```ChatBox.jsx``` posts questions to ```/chat``` and displays responses in a scrollable chat interface with simple styling
 
 * Data & Logs
 
- * ```raw_data/``` holds sample CSVs for customers, products, etc.
+  * ```raw_data/``` holds sample CSVs for customers, products, etc.
 
- * ```logs/dbt.log``` shows past dbt invocations.
+  * ```logs/dbt.log``` shows past dbt invocations.
 
 * Configuration
 
- * ```README.md``` provides setup instructions: create a Python virtual environment, install ```requirements.txt```, load data via ```data_ingest```, run dbt, configure ```.env``` with API keys, and start the FastAPI server and React app
+  * ```README.md``` provides setup instructions: create a Python virtual environment, install ```requirements.txt```, load data via ```data_ingest```, run dbt, configure ```.env``` with API keys, and start the FastAPI server and React app
 
 
 **Prerequisites**

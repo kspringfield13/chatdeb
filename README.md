@@ -35,7 +35,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Frontend
 
-  * ```ReactApp/``` contains a small Vite + React UI. A new ```Login.jsx``` component hits the ```/login``` and ```/register``` endpoints and stores the returned token in ```localStorage```. ```ChatBox.jsx``` then posts questions to ```/chat```.
+  * ```ReactApp/``` contains a small Vite + React UI. ```ChatBox.jsx``` then posts questions to ```/chat```.
 
 * Data & Logs
 

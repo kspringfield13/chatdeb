@@ -34,7 +34,7 @@ python3 -m venv chatbot_env
 
 # (2) Activate it
 source chatbot_env/bin/activate
-# You should now see "(venv)" at the front of your prompt.
+# You should now see "(chatbot_env)" at the front of your prompt.
 
 # (3) Upgrade pip (optional, but recommended)
 pip install --upgrade pip

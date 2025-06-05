@@ -101,7 +101,7 @@ python pinecone_utils.py
 **Start the Backend Server**
 
 * The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
-* Start the server
+* Start the server from a terminal in root directory
 
 ```bash
 uvicorn server:app --host 0.0.0.0 --port 8000 --reload

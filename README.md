@@ -13,7 +13,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Backend (FastAPI)
 
-  * ```server.py``` exposes API endpoints. ```/register``` and ```/login``` manage credentials, while ```/chat``` requires an ```X-Token``` header obtained after login. ```/clear_history``` is optional. CORS is configured for the local React app
+  * ```server.py``` exposes API endpoints. ```/register``` and ```/login``` manage credentials, while ```/chat```. ```/clear_history``` is optional. CORS is configured for the local React app
 
   * Primary business logic in ```chatbot.py```. It decides whether a query is data-related—looking for counts, totals or business metrics such as *sales*, *revenue* or *orders*—and routes those questions to SQL via LangChain. All other queries fall back to semantic search with Pinecone or a direct OpenAI call. It also saves all interactions in ```chatbot_responses.json```
 

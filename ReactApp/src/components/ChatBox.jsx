@@ -1,7 +1,7 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
 
-export default function ChatBox() {
+export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const messagesEndRef = useRef(null);
@@ -27,10 +27,13 @@ export default function ChatBox() {
     setQuery("");
 
     try {
-      // 3) Send to backend (assumes Vite proxy or CORS is set up)
+      // 3) Send to backend with auth token
       const res = await fetch("/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Token": token,
+        },
         body: JSON.stringify({ query: trimmed }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

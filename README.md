@@ -72,8 +72,8 @@ cd kydxbot
 * Inside the project root, create and activate a fresh Python 3.11 virtual environment
 
 ```bash
-# (1) Create a venv in a folder named "venv"
-python3 -m venv chatbot_env
+# (1) Create a venv in a folder named "chatbot_env" using python version 3.11
+py -3.11 -m venv chatbot_env
 
 # (2) Activate it
 source chatbot_env/bin/activate

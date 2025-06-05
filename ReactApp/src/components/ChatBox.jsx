@@ -117,24 +117,7 @@ export default function ChatBox() {
              *         inside a <div> with white-space: pre-wrap.
              * Case C: otherwise, render as a normal single-line bubble.
              */}
-            {msg.text.includes("\n") && msg.text.includes("|") ? (
-              // ── Case A: Markdown‐style table ─────────────────────────────────────
-              <pre
-                style={{
-                  backgroundColor: "#3a3a3a",
-                  color: "#fff",
-                  padding: "0.75rem 1rem",
-                  borderRadius: 20,
-                  maxWidth: "80%",
-                  fontFamily: "monospace",
-                  whiteSpace: "pre-wrap",
-                  lineHeight: 1.2,
-                  fontSize: "0.85rem",
-                }}
-              >
-                {msg.text}
-              </pre>
-            ) : msg.text.includes("\n") ? (
+            {msg.text.includes("\n") ? (
               // ── Case B: Any multiline (e.g. numbered list) ────────────────────
               <div
                 style={{
@@ -148,7 +131,6 @@ export default function ChatBox() {
                   fontSize: "0.95rem",
                   textAlign: "left",
                   whiteSpace: "pre-wrap", // preserve all newline breaks
-                  fontFamily: "monospace", // optional: use monospace for neat alignment
                 }}
               >
                 {msg.text}

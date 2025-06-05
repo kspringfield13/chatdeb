@@ -98,18 +98,3 @@ models:
         description: Revenue generated from items shipped from this center
       - name: total_inventory_cost
         description: Total recorded cost of inventory at the center
-
-  - name: monthly_sales
-    description: Revenue and order volume aggregated by month
-    columns:
-      - name: month
-        description: Calendar month of the order activity
-        data_tests:
-          - unique
-          - not_null
-      - name: num_orders
-        description: Number of orders created in the month
-      - name: items_ordered
-        description: Total number of items ordered
-      - name: revenue
-        description: Sum of sale price for order items in the month

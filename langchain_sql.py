@@ -22,7 +22,6 @@ db = SQLDatabase(
         "customers",
         "products",
         "distribution_center_inventory",
-        "monthly_sales",
     ],
 )
 
@@ -41,6 +40,7 @@ llm = ChatOpenAI(
 sql_chain = SQLDatabaseChain.from_llm(
     llm=ChatOpenAI(temperature=0),  # whatever params you want
     db=db,
+    top_k=20,
     verbose=True,
     return_direct=True
 )

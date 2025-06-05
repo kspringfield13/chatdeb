@@ -31,8 +31,7 @@ export default function ChatBox({ token }) {
       const res = await fetch("/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-Token": token,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ query: trimmed }),
       });

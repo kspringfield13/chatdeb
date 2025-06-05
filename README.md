@@ -20,11 +20,6 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
   * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB
 
   * ```db.py``` handles the DuckDB connection and SQLAlchemy engine instantiation
-  
-  * ```auth.py``` manages simple user authentication. Registration requires a
-    secret code stored in ```.env``` as ``SECRET_KEY``. Use ```/register``` with
-    the correct code to create accounts and ```/login``` to obtain a session
-    token stored in ```data.db```.
 
 * Data Ingestion & dbt
 
@@ -40,7 +35,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Frontend
 
-  * ```ReactApp/``` contains a small Vite + React UI. A new ```Login.jsx``` component hits the ```/login``` and ```/register``` endpoints and stores the returned token in ```localStorage```. ```ChatBox.jsx``` then posts questions to ```/chat``` with this token in the ```X-Token``` header.
+  * ```ReactApp/``` contains a small Vite + React UI. A new ```Login.jsx``` component hits the ```/login``` and ```/register``` endpoints and stores the returned token in ```localStorage```. ```ChatBox.jsx``` then posts questions to ```/chat```.
 
 * Data & Logs
 

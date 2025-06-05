@@ -7,11 +7,20 @@ import pandas as pd
 import openai
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
+from pathlib import Path
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1) Load environment variables
 # ─────────────────────────────────────────────────────────────────────────────
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    package_dir = Path(__file__).parent
+    dotenv_file = package_dir / ".env"
+    load_dotenv(dotenv_path=dotenv_file)
+except Exception:
+    # If python-dotenv isn't installed or .env is missing,
+    # continue without loading environment variables
+    load_dotenv = lambda *a, **kw: None
 
 OPENAI_API_KEY       = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY     = os.getenv("PINECONE_API_KEY")

@@ -2,19 +2,24 @@
 
 import os, datetime
 import numpy as np
+from .db import get_engine
+from .pinecone_utils import get_embedding, index
+from .langchain_sql import query_via_sqlagent
+from sqlalchemy import text
+from typing import List, Tuple
+import re, math, json
 from openai import OpenAI
+from pathlib import Path
+
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    package_dir = Path(__file__).parent
+    dotenv_file = package_dir / ".env"
+    load_dotenv(dotenv_path=dotenv_file)
 except Exception:
     # If python-dotenv isn't installed or .env is missing,
     # continue without loading environment variables
     load_dotenv = lambda *a, **kw: None
-from db import get_engine
-from sqlalchemy import text
-
-from typing import List, Tuple
-import re, math, json
 
 ## pip freeze > requirements.txt
 
@@ -112,7 +117,6 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     5) Return a plain‐text summary (one line per match)
     """
     # ── 1) Compute the embedding vector for query_text ─────────────────────────────
-    from pinecone_utils import get_embedding, index
     q_emb = get_embedding(query_text)
     
     if hasattr(q_emb, "tolist"):
@@ -393,7 +397,6 @@ def handle_query(query_text: str) -> str:
 
     if is_data_question(q):
         try:
-            from langchain_sql import query_via_sqlagent
             rows = query_via_sqlagent(q)
             n = len(rows)
 

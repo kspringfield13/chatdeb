@@ -1,7 +1,12 @@
 # langchain_sql.py
 
 import os, ast
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    # Tests can run without python-dotenv or a .env file
+    load_dotenv = lambda *a, **kw: None
 
 # 1) LangChain imports
 from langchain_community.chat_models import ChatOpenAI
@@ -12,7 +17,6 @@ from sqlalchemy import text
 from db import get_engine
 
 # 2) Load environment variables (for OPENAI_API_KEY, if you haven't set it elsewhere)
-load_dotenv()
 
 ENGINE = get_engine()
 db = SQLDatabase(

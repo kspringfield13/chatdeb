@@ -1,5 +1,10 @@
 # test_sqlagent.py
 
+import pytest
+pytest.skip(
+    "SQL agent tests require database and API keys", allow_module_level=True
+)
+
 from langchain_sql import query_via_sqlagent
 
 questions = [

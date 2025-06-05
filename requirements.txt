@@ -106,7 +106,6 @@ python-multipart==0.0.20
 python-slugify==8.0.4
 pytimeparse==1.1.8
 pytz==2025.2
-pywin32==310
 PyYAML==6.0.2
 pyzmq==26.4.0
 referencing==0.36.2

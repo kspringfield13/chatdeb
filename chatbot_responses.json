@@ -160,5 +160,23 @@
     "retrieved_response": "To help you with the revenue for the month of 2023-12-01, I need to clarify your request:\n\n- Are you asking for the total revenue for December 2023? (the whole month)\n- Or just for the single day of 2023-12-01?\n\nAdditionally, I would need to know which company, service, or context you are referring to, as I don't have default access to specific company financials unless provided.\n\nCould you please specify the company or data source you'd like revenue information for?",
     "timestamp": "2025-06-04T23:14:20.003047",
     "confidence_score": null
+  },
+  {
+    "query_text": "what is the top DC?",
+    "retrieved_response": "Memphis TN \u2014 1,418,119.34",
+    "timestamp": "2025-06-04T23:39:13.528836",
+    "confidence_score": null
+  },
+  {
+    "query_text": "What is our top selling product?",
+    "retrieved_response": "Canada Goose Men's The Chateau Jacket \u2014 15,485.00",
+    "timestamp": "2025-06-04T23:39:27.768154",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Who are our top 5 customers?",
+    "retrieved_response": "1. Sarah Brown \u2014 251.37  \n2. Carlos Ward \u2014 194.88  \n3. John Lopez \u2014 181.94  \n4. Joann Adams \u2014 175.90  \n5. John Rasmussen \u2014 148.11  ",
+    "timestamp": "2025-06-04T23:39:40.969648",
+    "confidence_score": null
   }
 ]

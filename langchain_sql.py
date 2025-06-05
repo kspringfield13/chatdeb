@@ -15,7 +15,16 @@ from db import get_engine
 load_dotenv()
 
 ENGINE = get_engine()
-db = SQLDatabase(ENGINE, schema="main", include_tables=["customers", "products"])
+db = SQLDatabase(
+    ENGINE,
+    schema="main",
+    include_tables=[
+        "customers",
+        "products",
+        "distribution_center_inventory",
+        "monthly_sales",
+    ],
+)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:

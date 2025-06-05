@@ -1,0 +1,50 @@
+[
+  {
+    "query_text": "Top 3 customers?",
+    "retrieved_response": "1. Sarah Brown \u2014 251.37  \n2. Carlos Ward \u2014 194.88  \n3. John Lopez \u2014 181.94  ",
+    "timestamp": "2025-06-04T18:54:22.664285",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Best selling products?",
+    "retrieved_response": "1. Canada Goose Men's The Chateau Jacket (Outerwear & Coats) \u2014 9,780.00  \n2. Canada Goose Women's Solaris (Active) \u2014 9,730.00  \n3. Catherine Malandrino Women's Skinny Stretch Leather Pant (Pants & Capris) \u2014 7,160.00  \n4. Canada Goose Women's Expedition Parka (Outerwear & Coats) \u2014 7,155.00  \n5. Canada Goose Women's Mystique (Active) \u2014 6,750.00  ",
+    "timestamp": "2025-06-04T18:54:33.020596",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Product with the highest cost of goods?",
+    "retrieved_response": "Canada Goose Men's The Chateau Jacket \u2014 4,537.92",
+    "timestamp": "2025-06-04T18:55:17.115185",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List of 5 products with the lowest cost of goods?",
+    "retrieved_response": "1. Purple Pink Push Up Bra Sheer Mesh Jr Cheeky Panty 2 Piece Set B or C Cups (Intimates) \u2014 0.00  \n2. Luli Fama Cosita Buena Ballet Halter Top (Swim) \u2014 0.00  \n3. Silver Jeans Juniors Natsuki Bootcut Jean (Jeans) \u2014 0.00  \n4. Berkshire Silky Sheer Control Top Lycra Pantyhose - Queen Size (Plus) \u2014 0.00  \n5. Alki'i Embroidered Full/Ankle Length gypsy bohemian long skirt (Skirts) \u2014 0.00  ",
+    "timestamp": "2025-06-04T18:55:57.161925",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List of 5 products with the lowest cost of goods but have at least on sale.",
+    "retrieved_response": "1. Purple Pink Push Up Bra Sheer Mesh Jr Cheeky Panty 2 Piece Set B or C Cups Intimates \u2014 0.00  \n2. Luli Fama Cosita Buena Ballet Halter Top Swim \u2014 0.00  \n3. Silver Jeans Juniors Natsuki Bootcut Jean Jeans \u2014 0.00  \n4. Berkshire Silky Sheer Control Top Lycra Pantyhose - Queen Size Plus \u2014 0.00  \n5. Alki'i Embroidered Full/Ankle Length gypsy bohemian long skirt Skirts \u2014 0.00  ",
+    "timestamp": "2025-06-04T18:56:29.002246",
+    "confidence_score": null
+  },
+  {
+    "query_text": "List of 5 products with the lowest cost of goods but have some sales.",
+    "retrieved_response": "1. 12,255.00 \u2014 Purple Pink Push Up Bra Sheer Mesh Jr Cheeky Panty 2 Piece Set B or C Cups \u2014 Intimates \u2014 0.00 \u2014 0.00 \u2014 0.00  \n2. 13,434.00 \u2014 Luli Fama Cosita Buena Ballet Halter Top \u2014 Swim \u2014 0.00 \u2014 0.00 \u2014 0.00  \n3. 4,575.00 \u2014 Silver Jeans Juniors Natsuki Bootcut Jean \u2014 Jeans \u2014 0.00 \u2014 0.00 \u2014 0.00  \n4. 15,848.00 \u2014 Berkshire Silky Sheer Control Top Lycra Pantyhose - Queen Size \u2014 Plus \u2014 0.00 \u2014 0.00 \u2014 0.00  \n5. 7,102.00 \u2014 Alki'i Embroidered Full/Ankle Length gypsy bohemian long skirt \u2014 Skirts \u2014 0.00 \u2014 0.00 \u2014 0.00  ",
+    "timestamp": "2025-06-04T18:56:58.220714",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Customers with the most sessions",
+    "retrieved_response": "1. Joann Adams \u2014 6.00  \n2. Rachael Perez \u2014 5.00  \n3. Antonio Saunders \u2014 5.00  \n4. Douglas Mccormick \u2014 4.00  \n5. Carlos Ward \u2014 4.00  ",
+    "timestamp": "2025-06-04T18:57:56.018080",
+    "confidence_score": null
+  },
+  {
+    "query_text": "customers with the most purhcases",
+    "retrieved_response": "1. John Rasmussen \u2014 4.00  \n2. Joann Adams \u2014 4.00  \n3. Carlos Ward \u2014 4.00  \n4. Lynn Richardson \u2014 2.00  \n5. John Lopez \u2014 2.00  ",
+    "timestamp": "2025-06-04T18:58:16.602113",
+    "confidence_score": null
+  }
+]

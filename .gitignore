@@ -1,0 +1,7 @@
+__pycache__/
+.env
+chatbot_env/
+data/data.db
+raw_data/raw_events.csv
+raw_data/raw_inventory_items.csv
+raw_data/raw_orders.csv

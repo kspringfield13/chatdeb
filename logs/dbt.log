@@ -1,0 +1,67 @@
+[0m10:48:23.479054 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A707443890>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A707290610>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A707442C50>]}
+
+
+============================== 10:48:23.483384 | 54145377-0a55-486a-80fc-36e5419b8845 ==============================
+[0m10:48:23.483384 [info ] [MainThread]: Running with dbt=1.9.6
+[0m10:48:23.484402 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': 'C:\\Users\\kspri\\.dbt', 'debug': 'False', 'fail_fast': 'False', 'log_path': 'logs', 'version_check': 'True', 'warn_error': 'None', 'use_colors': 'True', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'introspect': 'True', 'static_parser': 'True', 'invocation_command': 'dbt init data_models', 'target_path': 'None', 'log_format': 'default', 'send_anonymous_usage_stats': 'True'}
+[0m10:48:23.505938 [debug] [MainThread]: Starter project path: C:\Users\kspri\dev\chatbot\chatbot_env\Lib\site-packages\dbt\include\starter_project
+[0m10:48:23.527590 [info ] [MainThread]: 
+Your new dbt project "data_models" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m10:48:23.527590 [info ] [MainThread]: Setting up your profile.
+[0m10:48:33.261871 [debug] [MainThread]: Command `dbt init` succeeded at 10:48:33.261871 after 9.87 seconds
+[0m10:48:33.262871 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A7074C6550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A700987AD0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002A707437110>]}
+[0m10:48:33.262871 [debug] [MainThread]: Flushing usage events
+[0m10:48:33.392295 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m11:41:13.185614 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2EECC3190>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2EED22D90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2EED23F50>]}
+
+
+============================== 11:41:13.190806 | 9d9729f2-5872-4cb5-8509-73d56ebd9cd8 ==============================
+[0m11:41:13.190806 [info ] [MainThread]: Running with dbt=1.9.6
+[0m11:41:13.191777 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': 'C:\\Users\\kspri\\.dbt', 'version_check': 'True', 'debug': 'False', 'log_path': 'logs', 'warn_error': 'None', 'fail_fast': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'empty': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'invocation_command': 'dbt debug', 'static_parser': 'True', 'introspect': 'True', 'target_path': 'None', 'log_format': 'default', 'send_anonymous_usage_stats': 'True'}
+[0m11:41:13.216658 [info ] [MainThread]: dbt version: 1.9.6
+[0m11:41:13.217657 [info ] [MainThread]: python version: 3.11.8
+[0m11:41:13.217657 [info ] [MainThread]: python path: C:\Users\kspri\dev\chatbot\chatbot_env\Scripts\python.exe
+[0m11:41:13.218659 [info ] [MainThread]: os info: Windows-10-10.0.26100-SP0
+[0m11:41:13.313612 [info ] [MainThread]: Error importing adapter: No module named 'dbt.adapters.snowflake'
+[0m11:41:13.314506 [info ] [MainThread]: Using profiles dir at C:\Users\kspri\.dbt
+[0m11:41:13.315511 [info ] [MainThread]: Using profiles.yml file at C:\Users\kspri\.dbt\profiles.yml
+[0m11:41:13.315511 [info ] [MainThread]: Using dbt_project.yml file at C:\Users\kspri\Dev\chatbot\dbt_project.yml
+[0m11:41:13.316510 [info ] [MainThread]: Configuration:
+[0m11:41:13.317203 [info ] [MainThread]:   profiles.yml file [[31mERROR invalid[0m]
+[0m11:41:13.317203 [info ] [MainThread]:   dbt_project.yml file [[31mERROR not found[0m]
+[0m11:41:13.318210 [info ] [MainThread]: Required dependencies:
+[0m11:41:13.318210 [debug] [MainThread]: Executing "git --help"
+[0m11:41:13.365083 [debug] [MainThread]: STDOUT: "b"usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           [--config-env=<name>=<envvar>] <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n   mv        Move or rename a file, a directory, or a symlink\n   restore   Restore working tree files\n   rm        Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect    Use binary search to find the commit that introduced a bug\n   diff      Show changes between commits, commit and working tree, etc\n   grep      Print lines matching a pattern\n   log       Show commit logs\n   show      Show various types of objects\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   merge     Join two or more development histories together\n   rebase    Reapply commits on top of another base tip\n   reset     Reset current HEAD to the specified state\n   switch    Switch branches\n   tag       Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch     Download objects and refs from another repository\n   pull      Fetch from and integrate with another repository or a local branch\n   push      Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m11:41:13.366082 [debug] [MainThread]: STDERR: "b''"
+[0m11:41:13.367082 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m11:41:13.367082 [info ] [MainThread]: Connection test skipped since no profile was found
+[0m11:41:13.368082 [info ] [MainThread]: [31m2 checks failed:[0m
+[0m11:41:13.368082 [info ] [MainThread]: Could not load dbt_project.yml
+Profile loading failed for the following reason:
+Runtime Error
+  Credentials in profile "elt_pipeline", target "dev" invalid: Runtime Error
+    Could not find adapter type snowflake!
+
+
+[0m11:41:13.369082 [info ] [MainThread]: Project loading failed for the following reason:
+ project path <C:\Users\kspri\Dev\chatbot\dbt_project.yml> not found
+
+[0m11:41:13.370082 [debug] [MainThread]: Command `dbt debug` failed at 11:41:13.370082 after 0.28 seconds
+[0m11:41:13.371082 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2E84006D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2EEB247D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001B2E8481DD0>]}
+[0m11:41:13.371082 [debug] [MainThread]: Flushing usage events
+[0m11:41:13.562819 [debug] [MainThread]: An error was encountered while trying to flush usage events

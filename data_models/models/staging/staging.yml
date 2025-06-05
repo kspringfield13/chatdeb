@@ -1,0 +1,233 @@
+version: 2
+
+models:
+  - name: stg_distribution_centers
+    description: Distribution center name and location
+    columns:
+      - name: id 
+        description: Unique ID for the distribution center
+        data_tests:
+          - unique
+          - not_null
+      - name: name 
+        description: Distribution center name
+        data_tests:
+          - not_null
+      - name: latitude
+        description: Distribution center location latitude
+      - name: longitude
+        description: Distribution center location longitude
+
+  - name: stg_users
+    description: Users demographics and location information
+    columns:
+      - name: id
+        description: Unique ID for the user
+        data_tests:
+          - unique
+          - not_null     
+      - name: first_name
+        description: User first name
+        data_tests:
+          - not_null
+      - name: last_name
+        description: User last name
+        data_tests:
+          - not_null
+      - name: email
+        description: User email
+        data_tests:
+          - not_null
+      - name: age
+        description: User age in years
+        data_tests:
+          - not_null       
+      - name: gender
+        description: User gender
+      - name: state
+        description: User residing state
+      - name: street_address
+        description: User residing street address
+      - name: postal_code
+        description: User residing postal code
+      - name: city
+        description: User residing city 
+      - name: country
+        description: User residing country
+      - name: latitude
+        description: User residing address latitude
+      - name: longitude
+        description: User residing address longitude
+      - name: traffic_source
+        description: Traffic source for user information 
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Display', 'Email', 'Facebook', 'Organic', 'Search']
+      - name: created_at
+        description: User created at timestamp
+        data_tests:
+          - not_null
+
+  - name: stg_events
+    description: User event data
+    columns: 
+      - name: id
+        description: Unique ID for event entity
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: User ID tied to the event 
+      - name: sequence_number
+        description: Sequence number for the event 
+      - name: session_id
+        description: Event session ID 
+        data_tests:
+          - not_null
+      - name: created_at
+        description: Event created at timestamp
+        data_tests:
+          - not_null
+      - name: ip_address        
+        description: Event IP address
+        data_tests:
+          - not_null
+      - name: city
+        description: City where event occurred 
+      - name: state
+        description: State where event occurred
+      - name: postal_code
+        description: Postal code where event occurred
+      - name: browser
+        description: Browser used for event 
+      - name: traffic_source
+        description: Traffic source for event information
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Adwords', 'Email', 'Facebook', 'Organic', 'YouTube']
+      - name: uri
+        description: Event URI
+      - name: event_type    
+        description: Event type
+
+  - name: stg_inventory_items
+    description: Inventory items information
+    columns: 
+      - name: id
+        description: Unique ID for the inventory item
+        data_tests:
+          - unique
+          - not_null
+      - name: product_id
+        description: Product ID associated with the inventory
+        data_tests:
+          - not_null
+      - name: created_at
+        description: Inventory created at timestamp 
+        data_tests:
+          - not_null
+      - name: sold_at
+        description: Timestamp inventory item was sold at 
+      - name: cost
+        description: Cost of the item 
+      - name: product_category
+        description: Product category
+      - name: product_name
+        description: Product name
+      - name: product_brand
+        description: Product brand 
+      - name: product_retail_price
+        description: Product retail price
+      - name: product_department
+        description: Product department
+      - name: product_sku
+        description: Product SKU number
+      - name: product_distribution_center_id
+        description: Distribution center ID where the product is stored
+
+  - name: stg_order_items
+    description: Order information on the item level
+    columns: 
+      - name: id
+        description: Unique ID for the order item
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Order ID associated with the order item
+      - name: user_id
+        description: User ID associated with the order item
+      - name: product_id
+        description: Product ID associatd with the order item 
+      - name: inventory_item_id
+        description: Inventory item ID associated with the order item 
+      - name: status
+        description: Status of the order
+      - name: created_at
+        description: Order item created at timestamp 
+      - name: shipped_at
+        description: Order item shipped at timestamp
+      - name: delivered_at
+        description: Order item delivered at timestamp
+      - name: returned_at
+        description: Order item returned at timestamp
+      - name: sale_price
+        description: Order item sale price
+
+  - name: stg_orders
+    description: Order information such as status and timestamps
+    columns:
+      - name: order_id
+        description: Unique ID for the order
+        data_tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: User ID associated with the order
+        data_tests:
+          - not_null        
+      - name: status
+        description: Order status 
+        data_tests:
+          - not_null        
+      - name: gender
+        description: Gender of the user associated with the order
+        data_tests:
+          - not_null
+      - name: created_at
+        description: Order created at timestamp
+      - name: returned_at
+        description: Order returned at timestamp 
+      - name: shipped_at
+        description: Order shipped at timestamp
+      - name: delivered_at
+        description: Order delivered at timestamp
+      - name: num_of_item    
+        description: Number of items ordered
+
+  - name: stg_products
+    description: Product information such as category, brand, price and sku details
+    columns: 
+      - name: id
+        description: Unique ID for the product
+        data_tests:
+          - unique
+          - not_null
+      - name: cost
+        description: Product cost
+      - name: category
+        description: Product category
+      - name: name
+        description: Product name 
+      - name: brand
+        description: Product brand 
+      - name: retail_price
+        description: Product retail price
+      - name: department
+        description: Product department
+      - name: sku
+        description: Product SKU number
+      - name: distribution_center_id
+        description: Distribution center ID where the product is stored

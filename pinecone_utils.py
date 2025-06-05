@@ -255,6 +255,117 @@ def ingest_product_texts(duckdb_path: str):
     print(f"✅ Embedded {len(df_prod)} products into Pinecone index `{PINECONE_INDEX_NAME}`")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 5b) Ingest distribution center inventory records as embeddings
+# ─────────────────────────────────────────────────────────────────────────────
+def ingest_distribution_center_inventory(duckdb_path: str):
+    """Embed rows from the distribution_center_inventory table."""
+    import pandas as pd
+
+    con = duckdb.connect(duckdb_path)
+    df_dci = con.execute(
+        """
+            SELECT
+              distribution_center_id,
+              distribution_center_name,
+              total_items,
+              items_sold,
+              items_in_stock,
+              total_sales,
+              total_inventory_cost
+            FROM distribution_center_inventory
+        """
+    ).fetch_df()
+    con.close()
+
+    batch_size = 100
+    to_upsert = []
+
+    for _, row in df_dci.iterrows():
+        dc_id = int(row["distribution_center_id"])
+        name = row["distribution_center_name"] if pd.notna(row["distribution_center_name"]) else ""
+        total_items = int(row["total_items"]) if pd.notna(row["total_items"]) else 0
+        items_sold = int(row["items_sold"]) if pd.notna(row["items_sold"]) else 0
+        items_in_stock = int(row["items_in_stock"]) if pd.notna(row["items_in_stock"]) else 0
+        total_sales = float(row["total_sales"]) if pd.notna(row["total_sales"]) else 0.0
+        inv_cost = float(row["total_inventory_cost"]) if pd.notna(row["total_inventory_cost"]) else 0.0
+
+        text = (
+            f"{name} items_in_stock={items_in_stock} "
+            f"total_sales=${total_sales:.2f} inventory_cost=${inv_cost:.2f}"
+        )
+        vec = get_embedding(text)
+
+        meta = {
+            "source": "distribution_center_inventory",
+            "distribution_center_id": dc_id,
+            "distribution_center_name": name,
+            "total_items": total_items,
+            "items_sold": items_sold,
+            "items_in_stock": items_in_stock,
+            "total_sales": total_sales,
+            "total_inventory_cost": inv_cost,
+        }
+
+        to_upsert.append((f"dc_{dc_id}", vec.tolist(), meta))
+        if len(to_upsert) >= batch_size:
+            index.upsert(vectors=to_upsert)
+            to_upsert = []
+
+    if to_upsert:
+        index.upsert(vectors=to_upsert)
+
+    print(f"✅ Embedded {len(df_dci)} distribution centers into Pinecone index `{PINECONE_INDEX_NAME}`")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5c) Ingest monthly sales records as embeddings
+# ─────────────────────────────────────────────────────────────────────────────
+def ingest_monthly_sales(duckdb_path: str):
+    """Embed rows from the monthly_sales table."""
+    import pandas as pd
+
+    con = duckdb.connect(duckdb_path)
+    df_ms = con.execute(
+        """
+            SELECT month, num_orders, items_ordered, revenue
+            FROM monthly_sales
+        """
+    ).fetch_df()
+    con.close()
+
+    batch_size = 100
+    to_upsert = []
+
+    for _, row in df_ms.iterrows():
+        month_val = str(row["month"])
+        num_orders = int(row["num_orders"]) if pd.notna(row["num_orders"]) else 0
+        items_ordered = int(row["items_ordered"]) if pd.notna(row["items_ordered"]) else 0
+        revenue = float(row["revenue"]) if pd.notna(row["revenue"]) else 0.0
+
+        text = (
+            f"month={month_val} orders={num_orders} "
+            f"items={items_ordered} revenue=${revenue:.2f}"
+        )
+        vec = get_embedding(text)
+
+        meta = {
+            "source": "monthly_sales",
+            "month": month_val,
+            "num_orders": num_orders,
+            "items_ordered": items_ordered,
+            "revenue": revenue,
+        }
+
+        to_upsert.append((f"month_{month_val}", vec.tolist(), meta))
+        if len(to_upsert) >= batch_size:
+            index.upsert(vectors=to_upsert)
+            to_upsert = []
+
+    if to_upsert:
+        index.upsert(vectors=to_upsert)
+
+    print(f"✅ Embedded {len(df_ms)} monthly sales rows into Pinecone index `{PINECONE_INDEX_NAME}`")
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 6) A simple semantic‐search example
 # ─────────────────────────────────────────────────────────────────────────────
 def semantic_search(query: str, top_k: int = 3):
@@ -279,7 +390,13 @@ if __name__ == "__main__":
     # 2) Embed all products
     ingest_product_texts(duckdb_path)
 
-    # 3) Quick test of semantic search
+    # 3) Embed distribution center inventory
+    ingest_distribution_center_inventory(duckdb_path)
+
+    # 4) Embed monthly sales
+    ingest_monthly_sales(duckdb_path)
+
+    # 5) Quick test of semantic search
     print("\nExample search for “top customers” →")
     matches = semantic_search("Which customers have high web_sessions?", top_k=3)
     for m in matches:

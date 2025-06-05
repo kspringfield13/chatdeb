@@ -2,7 +2,7 @@ import os
 import secrets
 from hashlib import sha256
 from sqlalchemy import text
-from db import get_engine, DUCKDB_PATH
+from .db import get_engine, DUCKDB_PATH
 
 _tokens: dict[str, str] = {}
 

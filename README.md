@@ -151,10 +151,17 @@ python pinecone_utils.py
 **Start the Backend Server**
 
 * The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
-* Start the server from a terminal in root directory
+* You need to run the command from one level above the kydxbot/ directory
+* Activate your virtual environment (if you haven’t already)
 
 ```bash
-uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+cd /path/to/your/project_root
+source chatbot_env/bin/activate
+```
+
+```bash
+cd ..
+uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 **Launch the Frontend App**

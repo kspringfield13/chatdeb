@@ -3,8 +3,19 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from chatbot import handle_query, clear_conversation
-from auth import (
+from pathlib import Path
+from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv
+
+# Load .env from the “kydxbot” package directory
+package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
+dotenv_path = package_dir / ".env"
+load_dotenv(dotenv_path=dotenv_path)
+
+from .chatbot import handle_query, clear_conversation
+
+from .auth import (
     init_user_table,
     create_user,
     verify_user,
@@ -12,20 +23,22 @@ from auth import (
     get_username,
 )
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 SECRET_KEY = os.getenv("SECRET_KEY")
-
 _register_attempts: dict[str, int] = {}
 
-app = FastAPI(title="SupportyxBot API")
-
-
-@app.on_event("startup")
-def _startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # —— Startup logic ——
     init_user_table()
+
+    # Tell FastAPI it can now start handling requests
+    yield
+
+    # —— Shutdown logic (optional) ——
+    # e.g. close any database connections or clean up resources here
+    return
+
+app = FastAPI(title="SupportyxBot API",lifespan=lifespan)
 
 # 1) Define which origins are allowed to talk to this API.
 #    If you’re in development, you might allow just localhost:3000.

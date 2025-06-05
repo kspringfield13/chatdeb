@@ -3,9 +3,13 @@
 import os, datetime
 import numpy as np
 from openai import OpenAI
-from dotenv import load_dotenv
-from pinecone_utils import get_embedding, index
-from langchain_sql import query_via_sqlagent
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    # If python-dotenv isn't installed or .env is missing,
+    # continue without loading environment variables
+    load_dotenv = lambda *a, **kw: None
 from db import get_engine
 from sqlalchemy import text
 
@@ -34,8 +38,6 @@ import re, math, json
 ## cd ReactApp
 ## npm install
 ## npm run dev
-
-load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -76,15 +78,28 @@ def extract_limit_from_question(q: str) -> int | None:
     return None
 
 def is_data_question(query_text: str) -> bool:
+    """Return ``True`` if a question is data‑centric.
+
+    A query is considered *data‑centric* when the user is clearly looking for
+    numbers, lists or metrics that can be answered from the database.  Typical
+    examples for small/medium business owners include:
+
+    - "How many orders did we ship last month?"
+    - "Show me the top 10 customers by revenue."
+    - "What's the average order value?"
+    - "List employees with more than 5 sales this quarter."
+
+    When such keywords appear, the question is routed through the SQLAgent
+    chain (LangChain → DuckDB) rather than the semantic search fallback.
     """
-    If the question mentions keywords like “count”, “profit”, “customers”,
-    we send it through SQLAgent (LangChain → DuckDB).
-    """
+
     q = query_text.lower()
     data_keywords = [
         "average", "sum(", "count(", "how many", "what is", "list",
         "top", "highest", "lowest", "per", "between", "profit",
-        "sales", "customers", "products"
+        "sales", "customers", "products", "revenue", "orders",
+        "invoices", "inventory", "expenses", "transactions", "employees",
+        "payroll", "income", "metrics"
     ]
     return any(kw in q for kw in data_keywords)
 
@@ -97,6 +112,7 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     5) Return a plain‐text summary (one line per match)
     """
     # ── 1) Compute the embedding vector for query_text ─────────────────────────────
+    from pinecone_utils import get_embedding, index
     q_emb = get_embedding(query_text)
     
     if hasattr(q_emb, "tolist"):
@@ -377,6 +393,7 @@ def handle_query(query_text: str) -> str:
 
     if is_data_question(q):
         try:
+            from langchain_sql import query_via_sqlagent
             rows = query_via_sqlagent(q)
             n = len(rows)
 

@@ -21,29 +21,6 @@ except Exception:
     # continue without loading environment variables
     load_dotenv = lambda *a, **kw: None
 
-## pip freeze > requirements.txt
-
-## python --version
-## Python 3.11.8
-
-# create python venv:
-## python -m venv chatbot_env
-# Activate it:
-# macOS:
-## source chatbot_env/bin/activate
-# windows:
-# chatbot_env\Scripts\Activate
- 
-## pip install -r requirements.txt
-
-# run server in one cmd terminal:
-## uvicorn server:app --host 0.0.0.0 --port 8000
-
-# run ReactApp in another cmd terminal:
-## cd ReactApp
-## npm install
-## npm run dev
-
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def call_openai_fallback(user_question: str) -> str:

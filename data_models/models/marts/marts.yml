@@ -74,3 +74,41 @@ models:
         description: Total cost of goods sold attributed to this product
       - name: profit
         description: Profit, calculated by sales amount minus cost of goods sold
+  - name: distribution_center_inventory
+    description: Inventory levels and sales for each distribution center
+    columns:
+      - name: distribution_center_id
+        description: Unique ID for the distribution center
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('stg_distribution_centers')
+              field: id
+      - name: distribution_center_name
+        description: Name of the distribution center
+      - name: total_items
+        description: Total inventory items recorded at the center
+      - name: items_sold
+        description: Number of inventory items sold
+      - name: items_in_stock
+        description: Remaining items not yet sold
+      - name: total_sales
+        description: Revenue generated from items shipped from this center
+      - name: total_inventory_cost
+        description: Total recorded cost of inventory at the center
+
+  - name: monthly_sales
+    description: Revenue and order volume aggregated by month
+    columns:
+      - name: month
+        description: Calendar month of the order activity
+        data_tests:
+          - unique
+          - not_null
+      - name: num_orders
+        description: Number of orders created in the month
+      - name: items_ordered
+        description: Total number of items ordered
+      - name: revenue
+        description: Sum of sale price for order items in the month

@@ -178,5 +178,59 @@
     "retrieved_response": "1. Sarah Brown \u2014 251.37  \n2. Carlos Ward \u2014 194.88  \n3. John Lopez \u2014 181.94  \n4. Joann Adams \u2014 175.90  \n5. John Rasmussen \u2014 148.11  ",
     "timestamp": "2025-06-04T23:39:40.969648",
     "confidence_score": null
+  },
+  {
+    "query_text": "rank the DCs by sales",
+    "retrieved_response": "| Memphis TN | 1,418,119.34 |\n| Chicago IL | 1,039,087.27 |\n| New Orleans LA | 0.00 |\n| Charleston SC | 0.00 |\n| Savannah GA | 0.00 |\n| Mobile AL | 0.00 |\n| Philadelphia PA | 0.00 |\n| Los Angeles CA | 0.00 |\n| Houston TX | 0.00 |\n| Port Authority of New York/New Jersey NY/NJ | 0.00 |\n",
+    "timestamp": "2025-06-05T08:52:24.856841",
+    "confidence_score": null
+  },
+  {
+    "query_text": "how many dcs have had no sales?",
+    "retrieved_response": "8.00",
+    "timestamp": "2025-06-05T08:52:39.285641",
+    "confidence_score": null
+  },
+  {
+    "query_text": "what is our best selling product?",
+    "retrieved_response": "Canada Goose Men's The Chateau Jacket \u2014 15,485.00",
+    "timestamp": "2025-06-05T08:52:54.895566",
+    "confidence_score": null
+  },
+  {
+    "query_text": "what is our worst selling product that has had at least one sale?",
+    "retrieved_response": "Indestructable Aluminum Aluma Wallet - RED \u2014 0.12",
+    "timestamp": "2025-06-05T08:53:23.209147",
+    "confidence_score": null
+  },
+  {
+    "query_text": "What is our best selling product in accessories?",
+    "retrieved_response": "Ray-Ban 0RB3498 Polarized Rectangular Sunglasses \u2014 1,980.00",
+    "timestamp": "2025-06-05T08:53:42.557087",
+    "confidence_score": null
+  },
+  {
+    "query_text": "How many Ray-Ban accessories do we have?",
+    "retrieved_response": "84.00",
+    "timestamp": "2025-06-05T08:54:02.317358",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Can you list the top 5 selling Ray-Bans?",
+    "retrieved_response": "1. Ray-Ban 0RB3498 Polarized Rectangular Sunglasses \u2014 1,980.00  \n2. Ray-Ban Men's RB3025 Aviator Large Metal Sunglasses \u2014 1,949.50  \n3. Ray-Ban 0RB3497 004/9A Polarized Rimless SunglassesGunmetal59 mm \u2014 1,800.00  \n4. Ray-Ban RB3016 Classic Clubmaster Sunglasses \u2014 1,754.55  \n5. Ray-Ban ORB8307 Aviator Sunglasses \u2014 1,623.93  ",
+    "timestamp": "2025-06-05T08:54:16.448717",
+    "confidence_score": null
+  },
+  {
+    "query_text": "Who are our top customers?",
+    "retrieved_response": "| Sarah | Brown | 251.37 |\n| Carlos | Ward | 194.88 |\n| John | Lopez | 181.94 |\n| Joann | Adams | 175.90 |\n| John | Rasmussen | 148.11 |\n| Lindsey | Burke | 128.00 |\n| Lynn | Richardson | 100.00 |\n| Jason | Cruz | 98.00 |\n| Larry | Duncan | 78.00 |\n| Roberta | Hayden | 59.00 |\n| Brenda | Bradley | 18.80 |\n| Kevin | Miller | 15.27 |\n| Rachael | Perez | 10.99 |\n| Stephen | Miller | None |\n| Kelly | Hall | None |\n| Alexandria | Brown | None |\n| Karen | Park | None |\n| Kari | Torres | None |\n| Douglas | Mccormick | None |\n| April | Bond | None |\n",
+    "timestamp": "2025-06-05T08:54:42.163530",
+    "confidence_score": null
+  },
+  {
+    "query_text": "What about just the top 3?",
+    "retrieved_response": "1. 46,386.00 \u2014 Julie \u2014 Davis \u2014 Australia \u2014 Organic \u2014 None \u2014 None \u2014 None \u2014 None \u2014 2.00 \u2014 0.00 \u2014 0.00 \u2014 1.00 \u2014 1.00 \u2014 0.00 \u2014 None  \n2. 99,200.00 \u2014 Stephen \u2014 Miller \u2014 Australia \u2014 Search \u2014 None \u2014 None \u2014 None \u2014 None \u2014 1.00 \u2014 0.00 \u2014 0.00 \u2014 1.00 \u2014 0.00 \u2014 0.00 \u2014 None  \n3. 6,235.00 \u2014 Lindsey \u2014 Burke \u2014 Australia \u2014 Search \u2014 128.00 \u2014 1.00 \u2014 2022-04-25 16:25:29+00:00 \u2014 2022-04-25 16:25:29+00:00 \u2014 1.00 \u2014 0.00 \u2014 1.00 \u2014 0.00 \u2014 0.00 \u2014 0.00 \u2014 None  ",
+    "timestamp": "2025-06-05T08:55:00.992057",
+    "confidence_score": null
   }
 ]

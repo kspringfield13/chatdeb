@@ -17,7 +17,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
   * Primary business logic in ```chatbot.py```. It decides whether a query is data-related—looking for counts, totals or business metrics such as *sales*, *revenue* or *orders*—and routes those questions to SQL via LangChain. All other queries fall back to semantic search with Pinecone or a direct OpenAI call. It also saves all interactions in ```chatbot_responses.json```
 
-  * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB
+  * ```langchain_sql.py``` builds a ```SQLDatabaseChain``` around DuckDB. ```query_via_sqlagent()``` sends questions to OpenAI to generate SQL and returns rows from DuckDB. The helper now parses the agent output more robustly so malformed responses don't break the chat flow
 
   * ```db.py``` handles the DuckDB connection and SQLAlchemy engine instantiation
 

@@ -53,18 +53,30 @@ sql_chain = SQLDatabaseChain.from_llm(
     return_direct=True
 )
 
+
+def _parse_rows(result_str: str) -> list[tuple]:
+    """Parse the SQL agent output string into ``list[tuple]`` rows."""
+    try:
+        return ast.literal_eval(result_str)
+    except Exception:
+        pass
+
+    try:
+        start = result_str.index("[")
+        end = result_str.rindex("]") + 1
+        snippet = result_str[start:end]
+        return ast.literal_eval(snippet)
+    except Exception as exc:
+        raise ValueError(f"Unable to parse SQL result: {result_str}") from exc
+
 def query_via_sqlagent(user_question: str) -> list[tuple]:
     """
-    1) Call sql_chain.run(...) to get back a single string that looks like:
-         "[(8794, 'Sarah', 'Brown', 251.37), …]"
-    2) literal_eval that string into a real list of tuples.
-    3) Return that list of tuples. No column names.
+    1) Call ``sql_chain.run()`` to generate SQL and execute it.
+    2) Parse the returned string into ``list[tuple]`` rows.
     """
     try:
         result_str = sql_chain.run(user_question)
-        # result_str is something like: "[(8794, 'Sarah','Brown',251.37), …]"
-        rows = ast.literal_eval(result_str)
-        # rows is now a Python list[tuple].  
+        rows = _parse_rows(result_str)
         return rows
 
     except Exception as e:

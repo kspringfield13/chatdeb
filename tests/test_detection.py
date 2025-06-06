@@ -1,5 +1,5 @@
 import pytest
-from ..chatbot import is_data_question
+from kydxbot.detection import is_data_question
 
 @pytest.mark.parametrize("q", [
     "How many orders did we ship last month?",

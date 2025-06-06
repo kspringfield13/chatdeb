@@ -143,16 +143,21 @@ dbt build
 python pinecone_utils.py
 ```
 
-**Start the Backend Server**
-
-* The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
-* You need to run the command from one level above the kydxbot/ directory
+**Getting Started**
 * Activate your virtual environment (if you haven’t already)
-
 ```bash
 cd /path/to/your/project_root
 source chatbot_env/bin/activate
 ```
+
+* Install required packages
+```bash
+pip install -r requirements.txt
+```
+
+**Start the Backend Server**
+* The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
+* You need to run the command from one level above the kydxbot/ directory
 
 ```bash
 cd ..

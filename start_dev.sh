@@ -13,9 +13,6 @@ fi
 
 export PYTHONPATH="$PROJECT_ROOT"
 
-# Ensure kydxbot is a package
-touch "$PROJECT_ROOT/kydxbot/__init__.py"
-
 # Construct the command to run in the new terminal
 SERVER_CMD="cd \"$PROJECT_ROOT\" && source chatbot_env/bin/activate && export PYTHONPATH=\"$PROJECT_ROOT\" && uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
 

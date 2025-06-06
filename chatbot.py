@@ -115,6 +115,23 @@ def is_data_question(query_text: str) -> bool:
     ]
     return any(kw in q for kw in data_keywords)
 
+
+def is_db_path_question(query_text: str) -> bool:
+    """Return True if the user asks for the database file location."""
+    q = query_text.lower()
+    keywords = [
+        "db path",
+        "database path",
+        "path to database",
+        "where is the database",
+        "database location",
+        "path to db",
+        "where is your db",
+        "file path",
+        "database file",
+    ]
+    return any(kw in q for kw in keywords)
+
 def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     """
     1) Embed the query  
@@ -392,6 +409,14 @@ def handle_query(query_text: str) -> str:
     q = query_text.strip()
     if not q:
         return "Please type a question."
+
+    if is_db_path_question(q):
+        reply = (
+            "The sample data is already loaded in memory. "
+            "Would you like to use this DuckDB data?"
+        )
+        _save_to_history(q, reply, confidence=None)
+        return reply
 
     if is_data_question(q):
         try:

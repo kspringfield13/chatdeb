@@ -13,3 +13,20 @@ def is_data_question(query_text: str) -> bool:
         "my datasets", "my dataset", "this data", "the tables", "my tables"
     ]
     return any(kw in q for kw in keywords)
+
+
+def is_db_path_question(query_text: str) -> bool:
+    """Return True if the user is asking for the database file location."""
+    q = query_text.lower()
+    keywords = [
+        "db path",
+        "database path",
+        "path to database",
+        "where is the database",
+        "database location",
+        "path to db",
+        "where is your db",
+        "file path",
+        "database file",
+    ]
+    return any(kw in q for kw in keywords)

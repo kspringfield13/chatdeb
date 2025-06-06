@@ -5,8 +5,6 @@ from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import great_tables as gt
-import imgkit
 from openai import OpenAI
 from .db import get_engine
 
@@ -137,7 +135,7 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
 
 def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
-    """Create a table image using ``great_tables`` and return the path."""
+    """Create a table image from a list of rows and return the path."""
 
     if not rows:
         return ""
@@ -147,22 +145,20 @@ def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
     df = pd.DataFrame(display_rows)
     df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
 
-    try:
-        table = gt.GT(df)
-        html = table.as_raw_html()
-    except Exception as e:  # noqa: BLE001
-        print("create_table_visual render error", e)
-        return ""
-
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
 
     try:
-        config = imgkit.config(wkhtmltoimage="/usr/bin/wkhtmltoimage")
-        imgkit.from_string(html, str(file_path), config=config)
+        fig, ax = plt.subplots()
+        ax.axis("off")
+        ax.table(cellText=df.values, colLabels=df.columns, loc="center")
+        fig.tight_layout()
+        fig.savefig(file_path, bbox_inches="tight")
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""
+    finally:
+        plt.close(fig)
 
     return str(file_path)

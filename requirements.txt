@@ -302,8 +302,6 @@ websockets==15.0.1
 yarl==1.20.0
 zipp==3.22.0
 zstandard==0.23.0
-great_tables==0.17.0
-imgkit==1.2.3
 agate==1.9.1
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.9
@@ -518,7 +516,6 @@ httptools==0.6.4
 httpx==0.28.1
 httpx-sse==0.4.0
 idna==3.10
-imgkit==1.2.3
 importlib-metadata==6.11.0
 importlib_resources==6.5.2
 ipykernel==6.29.5

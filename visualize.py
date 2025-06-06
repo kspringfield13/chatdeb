@@ -132,3 +132,56 @@ def create_matplotlib_visual(answers: list[str]) -> str:
         plt.close(fig)
 
     return str(file_path)
+
+
+def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
+    """Create a table image with matplotlib and return the file path.
+
+    ``rows`` should be a list of tuples representing table rows.  A
+    subset of rows can be displayed using ``limit``.  The table is styled
+    with a light background to make it more pleasant.
+    """
+
+    if not rows:
+        return ""
+
+    display_rows = rows[:limit] if limit is not None else rows
+
+    df = pd.DataFrame(display_rows)
+    df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
+
+    fig, ax = plt.subplots()
+    ax.axis("off")
+
+    tbl = ax.table(
+        cellText=df.values,
+        colLabels=df.columns,
+        cellLoc="center",
+        loc="center",
+    )
+    tbl.auto_set_font_size(False)
+    tbl.set_fontsize(10)
+
+    header_color = "#dae8f6"
+    cell_color = "#f2f6fc"
+    for (row, _), cell in tbl.get_celld().items():
+        if row == 0:
+            cell.set_facecolor(header_color)
+            cell.set_text_props(weight="bold")
+        else:
+            cell.set_facecolor(cell_color)
+
+    fig.tight_layout()
+
+    charts_dir = Path("charts")
+    charts_dir.mkdir(exist_ok=True)
+    file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
+    try:
+        fig.savefig(file_path, bbox_inches="tight")
+    except Exception as e:  # noqa: BLE001
+        print("create_table_visual save error", e)
+        return ""
+    finally:
+        plt.close(fig)
+
+    return str(file_path)

@@ -2,63 +2,6 @@
 import React, { useState, useRef, useEffect } from "react";
 // Visualization questions are now asked through the chat flow
 
-function renderMarkdownTable(text, sender) {
-  const lines = text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.includes("|") && l.startsWith("|"));
-  if (lines.length === 0) return null;
-  const rows = lines.map((line) =>
-    line
-      .split("|")
-      .filter((c) => c.trim() !== "")
-      .map((c) => c.trim())
-  );
-  const rowCount = rows.length;
-  const colCount = rows[0] ? rows[0].length : 0;
-  if (rowCount === 1 && colCount === 1) return null;
-  const bg = sender === "user" ? "#004080" : "#3a3a3a";
-  return (
-    <div
-      style={{
-        backgroundColor: bg,
-        padding: "0.75rem 1rem",
-        borderRadius: 20,
-        maxWidth: "80%",
-        overflowX: "auto",
-      }}
-    >
-      <table
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-          color: "#fff",
-          fontSize: "0.9rem",
-        }}
-      >
-        <tbody>
-          {rows.map((cells, i) => (
-            <tr key={i}>
-              {cells.map((cell, j) => (
-                <td
-                  key={j}
-                  style={{
-                    border: "1px solid #555",
-                    padding: "0.35rem 0.6rem",
-                    textAlign: "left",
-                  }}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
@@ -221,7 +164,18 @@ export default function ChatBox({ token }) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
-      setChatHistory((prev) => [...prev, { sender: "bot", text: data.response }]);
+      if (data.response && data.response.startsWith("TABLE:")) {
+        const img = data.response.replace("TABLE:", "");
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Here is your table:", image: img },
+        ]);
+      } else {
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: data.response },
+        ]);
+      }
       setShowVisualize(true);
       setLoading(false);
     } catch (err) {
@@ -295,28 +249,21 @@ export default function ChatBox({ token }) {
             {msg.image ? (
               <img src={msg.image} alt="chart" style={{ maxWidth: "80%", borderRadius: 8 }} />
             ) : (
-              (() => {
-                const maybeTable = renderMarkdownTable(msg.text, msg.sender);
-                if (maybeTable) return maybeTable;
-            
-                return (
-                  <div
-                    style={{
-                      backgroundColor: msg.sender === "user" ? "#004080" : "#3a3a3a",
-                      color: "#fff",
-                      padding: "0.75rem 1rem",
-                      borderRadius: 20,
-                      maxWidth: "80%",
-                      lineHeight: 1.4,
-                      fontSize: "0.95rem",
-                      textAlign: "left",
-                      whiteSpace: msg.text.includes("\n") ? "pre-wrap" : "normal",
-                    }}
-                  >
-                    {msg.text}
-                  </div>
-                );
-              })()
+              <div
+                style={{
+                  backgroundColor: msg.sender === "user" ? "#004080" : "#3a3a3a",
+                  color: "#fff",
+                  padding: "0.75rem 1rem",
+                  borderRadius: 20,
+                  maxWidth: "80%",
+                  lineHeight: 1.4,
+                  fontSize: "0.95rem",
+                  textAlign: "left",
+                  whiteSpace: msg.text.includes("\n") ? "pre-wrap" : "normal",
+                }}
+              >
+                {msg.text}
+              </div>
             )}
           </div>
         ))}

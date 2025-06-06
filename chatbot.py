@@ -314,46 +314,20 @@ def format_numbered_list(rows: List[Tuple]) -> str:
 
 def format_markdown_table(
     rows: list[tuple],
-    limit: int | None = None
+    limit: int | None = None,
 ) -> str:
-    """
-    Build a Markdown table from:
-      - column_names: ["product_name", "product_category", "profit"], etc.
-      - rows: a list of tuples returned by your SQL engine  
-      - limit: if given, only show that many rows (e.g. top 3)
+    """Return a ``TABLE:`` prefixed path to a matplotlib table image."""
 
-    Example output:
-    
-    <blank line>
-    | col1 | col2 | col3 |
-    | ---- | ---- | ---- |
-    | val1 | val2 | val3 |
-    | ...  | ...  | ...  |
-    <blank line>
-    """
+    from .visualize import create_table_visual
+
     if not rows:
         return "_No data returned._"
 
-    # If limit is set, only keep that many rows:
-    display_rows = rows[:limit] if (limit is not None) else rows
+    path = create_table_visual(rows, limit)
+    if not path:
+        return "_No data returned._"
 
-    # 3) Build each data row. Format floats as "1,234.56" if needed:
-    data_lines: list[str] = []
-    for row in display_rows:
-        formatted_cells: list[str] = []
-        for value in row:
-            if isinstance(value, float):
-                # Format floats with commas and two decimals
-                formatted_cells.append(f"{value:,.2f}")
-            else:
-                formatted_cells.append(str(value))
-        data_lines.append("| " + " | ".join(formatted_cells) + " |")
-
-    # 4) Join header + separator + every data row, with a blank line before/after
-    body_lines = data_lines
-    # Insert a blank line before the table, and one after, so Markdown doesn't treat it as code.
-    result = "\n".join(body_lines) + "\n"
-    return result
+    return f"TABLE:{path}"
     
 def _save_to_history(query: str, response: str, confidence: float | None):
     """

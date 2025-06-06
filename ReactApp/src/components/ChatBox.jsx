@@ -108,6 +108,10 @@ export default function ChatBox() {
       setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
     } catch (err) {
       console.error("Error generating summary", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Sorry, I couldn't generate a summary." },
+      ]);
     } finally {
       setLoading(false);
       setShowVisualize(true);

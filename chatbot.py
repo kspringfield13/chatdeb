@@ -108,7 +108,10 @@ def is_data_question(query_text: str) -> bool:
         "top", "highest", "lowest", "per", "between", "profit",
         "sales", "customers", "products", "revenue", "orders",
         "invoices", "inventory", "expenses", "transactions", "employees",
-        "payroll", "income", "metrics"
+        "payroll", "income", "metrics",
+        # Consider references to generic data or database terms
+        "database", "duckdb", "dataset", "datasets", "db",
+        "loaded data", "imported data", "shared data", "the data",
     ]
     return any(kw in q for kw in data_keywords)
 

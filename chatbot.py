@@ -4,12 +4,35 @@ import os, datetime
 import numpy as np
 from .db import get_engine
 from .pinecone_utils import get_embedding, index
-from .langchain_sql import query_via_sqlagent
 from sqlalchemy import text
 from typing import List, Tuple
 import re, math, json
 from openai import OpenAI
 from pathlib import Path
+
+VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
+
+def _load_metadata() -> dict:
+    if VISION_METADATA_FILE.exists():
+        try:
+            with open(VISION_METADATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:  # noqa: BLE001
+            print("metadata load error", e)
+    return {}
+
+VISION_METADATA = _load_metadata()
+
+def _metadata_summary(meta: dict) -> str:
+    lines = []
+    for name, info in meta.items():
+        cols = ", ".join(info.get("headers", [])[:5])
+        summary = info.get("summary", "")
+        piece = f"{name}: columns {cols}. {summary}".strip()
+        lines.append(piece)
+    return "\n".join(lines)
+
+METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
 
 try:
     from dotenv import load_dotenv
@@ -31,12 +54,16 @@ def call_openai_fallback(user_question: str) -> str:
     try:
         client = OpenAI()
 
+        system_msg = "You are a helpful assistant."
+        if METADATA_SUMMARY:
+            system_msg += "\nHere is data the user provided:\n" + METADATA_SUMMARY
+
         completion = client.chat.completions.create(
-          model="gpt-4.1",
-          messages=[
-            {"role": "developer", "content": "You are a helpful assistant."},
-            {"role": "user", "content": user_question}
-          ]
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_question},
+            ],
         )
 
         # Extract the text portion of the first choice
@@ -164,7 +191,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM customers
                 WHERE user_id = :uid
             """)
-            result = ENGINE.execute(sql, {"uid": user_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"uid": user_id}).fetchone()
 
             if result:
                 uid, first, last, cancelled, returned, sessions = result
@@ -196,7 +224,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM products
                 WHERE product_id = :pid
             """)
-            result = ENGINE.execute(sql, {"pid": product_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"pid": product_id}).fetchone()
 
             if result:
                 pid, name, category, sales, cogs, profit = result
@@ -226,7 +255,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM distribution_center_inventory
                 WHERE distribution_center_id = :dcid
             """)
-            result = ENGINE.execute(sql, {"dcid": dc_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"dcid": dc_id}).fetchone()
 
             if result:
                 did, name, stock, sales, inv_cost = result
@@ -374,6 +404,7 @@ def handle_query(query_text: str) -> str:
 
     if is_data_question(q):
         try:
+            from .langchain_sql import query_via_sqlagent
             rows = query_via_sqlagent(q)
             n = len(rows)
 
@@ -474,3 +505,55 @@ def summarize_history() -> str:
         lines.append("\nContinue with these aggregates? Adjust logic if needed.")
 
     return "\n".join(lines)
+=======
+    """
+    If you have any global state to clear, do it here.
+    (Currently, none is needed, but this stub satisfies the /clear_history endpoint.)
+    """
+    pass
+
+
+def get_intro_message() -> str:
+    """Return a short greeting referencing the extracted data."""
+    if not METADATA_SUMMARY:
+        return ""
+    return (
+        "Here is what I found in your data files:\n"
+        f"{METADATA_SUMMARY}\n"
+        "Is this the information you'd like to analyze?"
+    )
+
+
+def summarize_conversation(history: list[dict], visuals: list[str] | None = None) -> str:
+    """Return a short text summary of the conversation history.
+
+    ``history`` should be a list of objects with ``sender`` and ``text`` keys.
+    Any chart URLs passed via ``visuals`` will be included at the end of the
+    summary.
+    """
+
+    messages = []
+    for entry in history:
+        role = "user" if entry.get("sender") == "user" else "assistant"
+        text = entry.get("text", "")
+        messages.append({"role": role, "content": text})
+
+    if visuals:
+        desc = "\n".join(f"Chart created: {url}" for url in visuals)
+        messages.append({"role": "assistant", "content": desc})
+
+    system_prompt = (
+        "Provide a concise bullet-point recap of the conversation. "
+        "Highlight any data mentioned and reference charts or visuals that were created."
+    )
+
+    try:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=[{"role": "system", "content": system_prompt}] + messages,
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as e:  # noqa: BLE001
+        print("summarize_conversation error", e)
+        return "Sorry, I couldn't generate a summary."

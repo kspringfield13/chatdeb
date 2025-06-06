@@ -175,6 +175,7 @@ npm install
 npm run dev
 ```
 
+
 **Query the DuckDB database manually via CLI:**
 
 ```bash
@@ -185,6 +186,21 @@ duckdb data.db
 SELECT * FROM customers LIMIT 5;
 ```
 
+**Generate Local Visualizations**
+
+The `/visualize/complete` endpoint now returns a path to a PNG file created
+with `matplotlib`. Provide the SQL query along with x and y columns and a chart
+type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
+the file path is returned to the frontend.
+
+**Summarize Conversation**
+
+After chatting, click the "Summarize?" button to receive a concise bullet style
+recap. While the summary is being generated, "Processing..." appears at the
+bottom of the chat. The frontend posts your chat history to the `/summarize`
+endpoint which uses OpenAI to craft the summary based on the questions, answers
+and any visuals created.
+
 **Run the Tests**
 
 After installing dependencies, you can execute the small test suite with
@@ -194,3 +210,12 @@ pytest -q
 ```
 These tests only cover helper functions and will run even if you don't have a
 `.env` file configured.
+
+### Troubleshooting Data Questions
+
+If the bot asks you to provide data when you already loaded the sample CSVs,
+double‑check that you ran `python data_ingest/load_data.py` and that your `.env`
+contains valid OpenAI and Pinecone keys. Including keywords like *sales*,
+*revenue* or *orders* in your question helps the chatbot route it through the
+DuckDB SQL agent so it can use the existing data without prompting for an
+upload.

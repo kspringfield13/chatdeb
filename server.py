@@ -11,7 +11,13 @@ package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
 dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-from .chatbot import handle_query, clear_conversation, summarize_history
+from .chatbot import (
+    handle_query,
+    clear_conversation,
+    summarize_conversation,
+    get_intro_message,
+)
+from .visualize import generate_context_questions, create_matplotlib_visual
 
 app = FastAPI(title="KYDxBot API")
 
@@ -38,6 +44,42 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
 
+
+class VizQuestionsRequest(BaseModel):
+    history: list[dict]
+
+
+class VizQuestionsResponse(BaseModel):
+    questions: list[str]
+
+
+class VizCompleteRequest(BaseModel):
+    history: list[dict]
+    answers: list[str]
+
+
+class VizCompleteResponse(BaseModel):
+    chart_url: str | None
+
+
+class SummarizeRequest(BaseModel):
+    history: list[dict]
+    visuals: list[str] | None = None
+
+
+class SummarizeResponse(BaseModel):
+    summary: str
+
+
+class IntroResponse(BaseModel):
+    message: str
+
+
+@app.get("/intro", response_model=IntroResponse)
+async def intro():
+    msg = get_intro_message()
+    return IntroResponse(message=msg)
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     """
@@ -51,6 +93,33 @@ async def chat_endpoint(request: ChatRequest):
 
     response_text = handle_query(user_query)
     return ChatResponse(response=response_text)
+
+
+@app.post("/visualize/questions", response_model=VizQuestionsResponse)
+async def viz_questions(req: VizQuestionsRequest):
+    try:
+        qs = generate_context_questions(req.history)
+        return VizQuestionsResponse(questions=qs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/visualize/complete", response_model=VizCompleteResponse)
+async def viz_complete(req: VizCompleteRequest):
+    try:
+        url = create_matplotlib_visual(req.answers)
+        return VizCompleteResponse(chart_url=url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/summarize", response_model=SummarizeResponse)
+async def summarize(req: SummarizeRequest):
+    try:
+        text = summarize_conversation(req.history, req.visuals)
+        return SummarizeResponse(summary=text)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/clear_history")

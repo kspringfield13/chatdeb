@@ -1,5 +1,6 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
+// Visualization questions are now asked through the chat flow
 
 function renderMarkdownTable(text, sender) {
   const lines = text
@@ -61,7 +62,118 @@ function renderMarkdownTable(text, sender) {
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [showVisualize, setShowVisualize] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [contextQuestions, setContextQuestions] = useState([]);
+  const [chartUrl, setChartUrl] = useState(null);
+  const [visuals, setVisuals] = useState([]);
+  const [vizQuestions, setVizQuestions] = useState([]);
+  const [vizAnswers, setVizAnswers] = useState([]);
+  const [vizStep, setVizStep] = useState(0);
+  const [collectingViz, setCollectingViz] = useState(false);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Fetch intro message on mount
+  useEffect(() => {
+    const fetchIntro = async () => {
+      try {
+        const res = await fetch("/intro");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.message) {
+          setChatHistory((prev) => [...prev, { sender: "bot", text: data.message }]);
+        }
+      } catch (e) {
+        console.error("intro fetch error", e);
+      }
+    };
+    fetchIntro();
+  }, []);
+
+  const openVisualization = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/visualize/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const qs = data.questions || [];
+      if (!qs.length) return;
+      setVizQuestions(qs);
+      setVizAnswers([]);
+      setVizStep(0);
+      setCollectingViz(true);
+      setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
+      setShowVisualize(false);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching context questions", err);
+      setLoading(false);
+    }
+  };
+  
+
+  const completeVisualization = async (answers) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/visualize/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, answers }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChartUrl(data.chart_url);
+      if (data.chart_url) {
+        setVisuals((prev) => [...prev, data.chart_url]);
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Here is your chart:", image: data.chart_url },
+        ]);
+      } else {
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Sorry, I couldn't create the chart." },
+        ]);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Error creating visualization", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Error creating visualization." },
+      ]);
+      setLoading(false);
+    }
+  };
+
+  const openSummary = async () => {
+    setShowVisualize(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, visuals }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+    } catch (err) {
+      console.error("Error generating summary", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Sorry, I couldn't generate a summary." },
+      ]);
+    } finally {
+      setLoading(false);
+      setShowVisualize(true);
+    }
+  };
 
   // Whenever chatHistory changes, scroll to bottom
   useEffect(() => {
@@ -75,37 +187,48 @@ export default function ChatBox({ token }) {
     if (!trimmed) return;
 
     // 1) Add user message
-    setChatHistory((prev) => [
-      ...prev,
-      { sender: "user", text: trimmed },
-    ]);
+    setChatHistory((prev) => [...prev, { sender: "user", text: trimmed }]);
 
     // 2) Clear input immediately
     setQuery("");
 
+    if (collectingViz) {
+      const newAnswers = [...vizAnswers, trimmed];
+      setVizAnswers(newAnswers);
+
+      const next = vizStep + 1;
+      if (next < vizQuestions.length) {
+        setVizStep(next);
+        setChatHistory((prev) => [...prev, { sender: "bot", text: vizQuestions[next] }]);
+      } else {
+        setCollectingViz(false);
+        await completeVisualization(newAnswers);
+        setShowVisualize(true);
+      }
+      setLoading(false);
+      return;
+    }
+
+    setShowVisualize(false);
+    setLoading(true);
+
     try {
-      // 3) Send to backend with auth token
       const res = await fetch("/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trimmed }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
-      // 4) Add bot response
-      setChatHistory((prev) => [
-        ...prev,
-        { sender: "bot", text: data.response },
-      ]);
+      setChatHistory((prev) => [...prev, { sender: "bot", text: data.response }]);
+      setShowVisualize(true);
+      setLoading(false);
     } catch (err) {
       console.error("Error calling API:", err);
-      setChatHistory((prev) => [
-        ...prev,
-        { sender: "bot", text: "Sorry, something went wrong." },
-      ]);
+      setChatHistory((prev) => [...prev, { sender: "bot", text: "Sorry, something went wrong." }]);
+      setShowVisualize(true);
+      setLoading(false);
     }
   };
 
@@ -124,6 +247,7 @@ export default function ChatBox({ token }) {
   };
 
   return (
+    <>
     <div
       style={{
         height: "85vh",
@@ -177,62 +301,92 @@ export default function ChatBox({ token }) {
             key={idx}
             style={{
               display: "flex",
-              justifyContent:
-                msg.sender === "user" ? "flex-end" : "flex-start",
+              justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
               marginBottom: "0.75rem",
             }}
           >
-            {/**
-             * Case A: if the text contains BOTH "\n" and "|", treat it as a table
-             *         and render inside a <pre> with monospace.
-             * Case B: if the text contains just "\n" (but no "|"), treat it as
-             *         a general multiline block (e.g. numbered list) and render
-             *         inside a <div> with white-space: pre-wrap.
-             * Case C: otherwise, render as a normal single-line bubble.
-             */}
-            {renderMarkdownTable(msg.text, msg.sender) ||
-              (msg.text.includes("\n") ? (
-                // --- Case B: Any multiline (e.g. numbered list) ---
-                <div
-                  style={{
-                    backgroundColor:
-                      msg.sender === "user" ? "#004080" : "#3a3a3a",
-                    color: "#fff",
-                    padding: "0.75rem 1rem",
-                    borderRadius: 20,
-                    maxWidth: "80%",
-                    lineHeight: 1.4,
-                    fontSize: "0.95rem",
-                    textAlign: "left",
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              ) : (
-                // --- Case C: Single-line text ---
-                <div
-                  style={{
-                    backgroundColor:
-                      msg.sender === "user" ? "#004080" : "#3a3a3a",
-                    color: "#fff",
-                    padding: "0.75rem 1rem",
-                    borderRadius: 20,
-                    maxWidth: "80%",
-                    lineHeight: 1.4,
-                    fontSize: "0.95rem",
-                    textAlign: "left",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              ))}
+            {msg.image ? (
+              <img src={msg.image} alt="chart" style={{ maxWidth: "80%", borderRadius: 8 }} />
+            ) : (
+              (() => {
+                const maybeTable = renderMarkdownTable(msg.text, msg.sender);
+                if (maybeTable) return maybeTable;
+            
+                return (
+                  <div
+                    style={{
+                      backgroundColor: msg.sender === "user" ? "#004080" : "#3a3a3a",
+                      color: "#fff",
+                      padding: "0.75rem 1rem",
+                      borderRadius: 20,
+                      maxWidth: "80%",
+                      lineHeight: 1.4,
+                      fontSize: "0.95rem",
+                      textAlign: "left",
+                      whiteSpace: msg.text.includes("\n") ? "pre-wrap" : "normal",
+                    }}
+                  >
+                    {msg.text}
+                  </div>
+                );
+              })()
+            )}
           </div>
         ))}
+
 
         {/* Dummy div to scroll into view */}
         <div ref={messagesEndRef} />
       </div>
+
+      {loading && (
+        <div style={{ color: "#888", textAlign: "center", padding: "0.25rem" }}>
+          Processing...
+        </div>
+      )}
+
+      {showVisualize && (
+        <div
+          style={{
+            backgroundColor: "#1f1f1f",
+            padding: "0.5rem 0",
+            textAlign: "left",
+            borderTop: "1px solid #333",
+            display: "flex",
+            justifyContent: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <button
+            onClick={openVisualization}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#004080",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Visualize?
+          </button>
+          <button
+            onClick={openSummary}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#008000",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Summarize?
+          </button>
+        </div>
+      )}
 
       {/* === 3) Input bar pinned at bottom === */}
       <div
@@ -316,5 +470,14 @@ export default function ChatBox({ token }) {
         </button>
       </div>
     </div>
+    {showModal && (
+      <VisualModal
+        onClose={() => setShowModal(false)}
+        questions={contextQuestions}
+        onSubmit={completeVisualization}
+        chartUrl={chartUrl}
+      />
+    )}
+    </>
   );
 }

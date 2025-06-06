@@ -9,6 +9,7 @@ export default function ChatBox() {
   const [showModal, setShowModal] = useState(false);
   const [contextQuestions, setContextQuestions] = useState([]);
   const [chartUrl, setChartUrl] = useState(null);
+  const [visuals, setVisuals] = useState([]);
   const messagesEndRef = useRef(null);
 
   const openVisualization = async () => {
@@ -38,8 +39,26 @@ export default function ChatBox() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setChartUrl(data.chart_url);
+      if (data.chart_url) {
+        setVisuals((prev) => [...prev, data.chart_url]);
+      }
     } catch (err) {
       console.error("Error creating visualization", err);
+    }
+  };
+
+  const openSummary = async () => {
+    try {
+      const res = await fetch("/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, visuals }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+    } catch (err) {
+      console.error("Error generating summary", err);
     }
   };
 
@@ -210,6 +229,9 @@ export default function ChatBox() {
             padding: "0.5rem 0",
             textAlign: "center",
             borderTop: "1px solid #333",
+            display: "flex",
+            justifyContent: "center",
+            gap: "0.5rem",
           }}
         >
           <button
@@ -225,6 +247,20 @@ export default function ChatBox() {
             }}
           >
             Visualize?
+          </button>
+          <button
+            onClick={openSummary}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#004080",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Summarize?
           </button>
         </div>
       )}

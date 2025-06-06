@@ -424,3 +424,38 @@ def clear_conversation():
     (Currently, none is needed, but this stub satisfies the /clear_history endpoint.)
     """
     pass
+
+
+def summarize_conversation(history: list[dict], visuals: list[str] | None = None) -> str:
+    """Return a short text summary of the conversation history.
+
+    ``history`` should be a list of objects with ``sender`` and ``text`` keys.
+    Any chart URLs passed via ``visuals`` will be included at the end of the
+    summary.
+    """
+
+    messages = []
+    for entry in history:
+        role = "user" if entry.get("sender") == "user" else "assistant"
+        text = entry.get("text", "")
+        messages.append({"role": role, "content": text})
+
+    if visuals:
+        desc = "\n".join(f"Chart created: {url}" for url in visuals)
+        messages.append({"role": "assistant", "content": desc})
+
+    system_prompt = (
+        "Summarize the conversation so far. Focus on the questions asked, "
+        "the answers provided and briefly mention any charts referenced."
+    )
+
+    try:
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=[{"role": "system", "content": system_prompt}] + messages,
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as e:  # noqa: BLE001
+        print("summarize_conversation error", e)
+        return "Sorry, I couldn't generate a summary."

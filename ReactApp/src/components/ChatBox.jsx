@@ -28,6 +28,10 @@ export default function ChatBox() {
     }
   };
 
+  const openSummarize = () => {
+    console.log("Summarize clicked");
+  };
+
   const handleCompleteVisualization = async (answers) => {
     try {
       const res = await fetch("/visualize/complete", {
@@ -208,8 +212,10 @@ export default function ChatBox() {
           style={{
             backgroundColor: "#1f1f1f",
             padding: "0.5rem 0",
-            textAlign: "center",
+            textAlign: "left",
             borderTop: "1px solid #333",
+            display: "flex",
+            gap: "0.5rem",
           }}
         >
           <button
@@ -225,6 +231,20 @@ export default function ChatBox() {
             }}
           >
             Visualize?
+          </button>
+          <button
+            onClick={openSummarize}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#008000",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Summarize?
           </button>
         </div>
       )}

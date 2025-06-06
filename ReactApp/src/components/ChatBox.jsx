@@ -1,63 +1,6 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
 
-function renderMarkdownTable(text, sender) {
-  const lines = text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.includes("|") && l.startsWith("|"));
-  if (lines.length === 0) return null;
-  const rows = lines.map((line) =>
-    line
-      .split("|")
-      .filter((c) => c.trim() !== "")
-      .map((c) => c.trim())
-  );
-  const rowCount = rows.length;
-  const colCount = rows[0] ? rows[0].length : 0;
-  if (rowCount === 1 && colCount === 1) return null;
-  const bg = sender === "user" ? "#004080" : "#3a3a3a";
-  return (
-    <div
-      style={{
-        backgroundColor: bg,
-        padding: "0.75rem 1rem",
-        borderRadius: 20,
-        maxWidth: "80%",
-        overflowX: "auto",
-      }}
-    >
-      <table
-        style={{
-          borderCollapse: "collapse",
-          width: "100%",
-          color: "#fff",
-          fontSize: "0.9rem",
-        }}
-      >
-        <tbody>
-          {rows.map((cells, i) => (
-            <tr key={i}>
-              {cells.map((cell, j) => (
-                <td
-                  key={j}
-                  style={{
-                    border: "1px solid #555",
-                    padding: "0.35rem 0.6rem",
-                    textAlign: "left",
-                  }}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
@@ -176,43 +119,42 @@ export default function ChatBox({ token }) {
              *         inside a <div> with white-space: pre-wrap.
              * Case C: otherwise, render as a normal single-line bubble.
              */}
-            {renderMarkdownTable(msg.text, msg.sender) ||
-              (msg.text.includes("\n") ? (
-                // --- Case B: Any multiline (e.g. numbered list) ---
-                <div
-                  style={{
-                    backgroundColor:
-                      msg.sender === "user" ? "#004080" : "#3a3a3a",
-                    color: "#fff",
-                    padding: "0.75rem 1rem",
-                    borderRadius: 20,
-                    maxWidth: "80%",
-                    lineHeight: 1.4,
-                    fontSize: "0.95rem",
-                    textAlign: "left",
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              ) : (
-                // --- Case C: Single-line text ---
-                <div
-                  style={{
-                    backgroundColor:
-                      msg.sender === "user" ? "#004080" : "#3a3a3a",
-                    color: "#fff",
-                    padding: "0.75rem 1rem",
-                    borderRadius: 20,
-                    maxWidth: "80%",
-                    lineHeight: 1.4,
-                    fontSize: "0.95rem",
-                    textAlign: "left",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              ))}
+            {msg.text.includes("\n") ? (
+              // ── Case B: Any multiline (e.g. numbered list) ────────────────────
+              <div
+                style={{
+                  backgroundColor:
+                    msg.sender === "user" ? "#004080" : "#3a3a3a",
+                  color: "#fff",
+                  padding: "0.75rem 1rem",
+                  borderRadius: 20,
+                  maxWidth: "80%",
+                  lineHeight: 1.4,
+                  fontSize: "0.95rem",
+                  textAlign: "left",
+                  whiteSpace: "pre-wrap", // preserve all newline breaks
+                }}
+              >
+                {msg.text}
+              </div>
+            ) : (
+              // ── Case C: Single‐line text ───────────────────────────────────────
+              <div
+                style={{
+                  backgroundColor:
+                    msg.sender === "user" ? "#004080" : "#3a3a3a",
+                  color: "#fff",
+                  padding: "0.75rem 1rem",
+                  borderRadius: 20,
+                  maxWidth: "80%",
+                  lineHeight: 1.4,
+                  fontSize: "0.95rem",
+                  textAlign: "left",
+                }}
+              >
+                {msg.text}
+              </div>
+            )}
           </div>
         ))}
 

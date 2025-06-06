@@ -24,11 +24,15 @@ tell application "Terminal"
 end tell
 EOF
 
-# Launch React frontend in current terminal
+# Launch React frontend in current terminal and open browser to app
 FRONTEND_DIR="$PROJECT_ROOT/ReactApp"
 if [ -d "$FRONTEND_DIR" ]; then
   cd "$FRONTEND_DIR"
-  npm run dev
+  npm run dev &
+  NPM_PID=$!
+  sleep 2
+  open http://localhost:5173
+  wait $NPM_PID
 else
   echo "❌ ReactApp directory not found at $FRONTEND_DIR"
 fi

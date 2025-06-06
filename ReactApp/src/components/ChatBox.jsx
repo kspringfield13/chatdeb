@@ -19,7 +19,9 @@ export default function ChatBox({ token }) {
   const [infographStep, setInfographStep] = useState(0);
   const [collectingInfograph, setCollectingInfograph] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showScrollDown, setShowScrollDown] = useState(false);
   const messagesEndRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Fetch intro message on mount
   useEffect(() => {
@@ -180,11 +182,20 @@ export default function ChatBox({ token }) {
     }
   };
 
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const atBottom = scrollHeight - scrollTop - clientHeight < 50;
+    setShowScrollDown(!atBottom);
+  };
+
   // Whenever chatHistory changes, scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+    handleScroll();
   }, [chatHistory]);
 
   const sendQuery = async () => {
@@ -281,6 +292,7 @@ export default function ChatBox({ token }) {
         borderRadius: "8px",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.5)",
         overflow: "hidden",
+        position: "relative",
       }}
     >
       {/* ─── 1) Header: title in top‐right, minimal padding ──────────────────────────── */}
@@ -309,6 +321,8 @@ export default function ChatBox({ token }) {
 
       {/* === 2) Message list: flex:1, scrollable === */}
       <div
+        ref={containerRef}
+        onScroll={handleScroll}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -351,6 +365,41 @@ export default function ChatBox({ token }) {
         {/* Dummy div to scroll into view */}
         <div ref={messagesEndRef} />
       </div>
+
+      {showScrollDown && (
+        <button
+          onClick={() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            handleScroll();
+          }}
+          style={{
+            position: "absolute",
+            bottom: "4.5rem",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(255,255,255,0.2)",
+            border: "none",
+            borderRadius: "50%",
+            padding: "0.5rem",
+            cursor: "pointer",
+            opacity: 0.8,
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      )}
 
       {loading && (
         <div style={{ color: "#888", textAlign: "center", padding: "0.25rem" }}>

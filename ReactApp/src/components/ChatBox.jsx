@@ -95,6 +95,7 @@ export default function ChatBox() {
   };
 
   const openSummary = async () => {
+    setShowVisualize(false);
     setLoading(true);
     try {
       const res = await fetch("/summarize", {
@@ -105,10 +106,11 @@ export default function ChatBox() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
-      setLoading(false);
     } catch (err) {
       console.error("Error generating summary", err);
+    } finally {
       setLoading(false);
+      setShowVisualize(true);
     }
   };
 

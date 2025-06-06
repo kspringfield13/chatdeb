@@ -1,8 +1,24 @@
+import os
 import re
-from ..visualize import generate_context_questions
+from ..visualize import generate_context_questions, infer_headers, create_table_visual
 
 
 def test_default_intro_included():
     qs = generate_context_questions([])
     assert qs, "No questions returned"
     assert qs[0].startswith("To create your visualization"), qs[0]
+
+
+def test_infer_headers_typing():
+    rows = [
+        (123, "abc", "2024-01-01"),
+        (456, "def", "2024-02-01"),
+    ]
+    assert infer_headers(rows) == ["Number 1", "Text 2", "Date 3"]
+
+
+def test_create_table_visual_file(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    path = create_table_visual([(1, "a"), (2, "b")])
+    assert path.endswith(".png")
+    assert os.path.exists(path)

@@ -9,6 +9,39 @@ from openai import OpenAI
 from .db import get_engine
 
 
+def infer_headers(rows: list[tuple]) -> list[str]:
+    """Generate fallback column headers based on sample data types."""
+    if not rows:
+        return []
+
+    num_cols = len(rows[0])
+    headers: list[str] = []
+
+    for idx in range(num_cols):
+        sample = None
+        for row in rows:
+            if idx < len(row) and row[idx] is not None:
+                sample = row[idx]
+                break
+
+        label = "Value"
+        if isinstance(sample, (int, float)):
+            label = "Number"
+        elif isinstance(sample, str):
+            try:
+                pd.to_datetime(sample)
+                label = "Date"
+            except Exception:
+                if sample.isdigit() or "_" in sample or "-" in sample:
+                    label = "ID"
+                else:
+                    label = "Text"
+
+        headers.append(f"{label} {idx + 1}")
+
+    return headers
+
+
 INTRO = (
     "To create your visualization I'll need a bit more information."
 )
@@ -154,10 +187,11 @@ def create_table_visual(
     display_rows = rows[:limit] if limit is not None else rows
 
     df = pd.DataFrame(display_rows)
+
     if headers and len(headers) == df.shape[1]:
         df.columns = headers
     else:
-        df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
+        df.columns = infer_headers(display_rows)
 
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
@@ -177,15 +211,19 @@ def create_table_visual(
             loc="center",
         )
         table.auto_set_font_size(False)
-        table.set_fontsize(10)
+        table.set_fontsize(11)
         table.scale(1, 1.4)
+        table.auto_set_column_width(col=list(range(len(df.columns))))
 
         for (row, col), cell in table.get_celld().items():
-            cell.set_edgecolor("#cccccc")
+            cell.set_edgecolor("#777777")
             cell.set_linewidth(0.5)
-            cell.set_facecolor("none")
             if row == 0:
-                cell.set_text_props(weight="bold")
+                cell.set_facecolor("#333333")
+                cell.set_text_props(weight="bold", color="white")
+            else:
+                cell.set_facecolor("none")
+                cell.set_text_props(color="#e0e0e0")
 
         fig.tight_layout()
         fig.savefig(file_path, bbox_inches="tight", transparent=True)

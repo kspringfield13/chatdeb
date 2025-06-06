@@ -38,9 +38,6 @@ export default function ChatBox() {
     }
   };
   
-  const openSummarize = () => {
-    console.log("Summarize clicked");
-  };
 
   const completeVisualization = async (answers) => {
     try {
@@ -54,7 +51,6 @@ export default function ChatBox() {
       setChartUrl(data.chart_url);
       if (data.chart_url) {
         setVisuals((prev) => [...prev, data.chart_url]);
-      if (data.chart_url) {
         setChatHistory((prev) => [
           ...prev,
           { sender: "bot", text: "Here is your chart:", image: data.chart_url },
@@ -271,11 +267,6 @@ export default function ChatBox() {
           </button>
           <button
             onClick={openSummary}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: 20,
-              backgroundColor: "#004080",
-            onClick={openSummarize}
             style={{
               padding: "0.5rem 1rem",
               borderRadius: 20,

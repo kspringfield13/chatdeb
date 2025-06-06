@@ -164,7 +164,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM customers
                 WHERE user_id = :uid
             """)
-            result = ENGINE.execute(sql, {"uid": user_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"uid": user_id}).fetchone()
 
             if result:
                 uid, first, last, cancelled, returned, sessions = result
@@ -196,7 +197,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM products
                 WHERE product_id = :pid
             """)
-            result = ENGINE.execute(sql, {"pid": product_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"pid": product_id}).fetchone()
 
             if result:
                 pid, name, category, sales, cogs, profit = result
@@ -226,7 +228,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 FROM distribution_center_inventory
                 WHERE distribution_center_id = :dcid
             """)
-            result = ENGINE.execute(sql, {"dcid": dc_id}).fetchone()
+            with ENGINE.connect() as conn:
+                result = conn.execute(sql, {"dcid": dc_id}).fetchone()
 
             if result:
                 did, name, stock, sales, inv_cost = result

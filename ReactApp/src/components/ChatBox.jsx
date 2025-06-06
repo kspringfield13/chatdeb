@@ -102,6 +102,7 @@ export default function ChatBox() {
     // 2) Clear input immediately
     setQuery("");
 
+
     if (collectingViz) {
       const newAnswers = [...vizAnswers, trimmed];
       setVizAnswers(newAnswers);
@@ -120,6 +121,10 @@ export default function ChatBox() {
 
     setShowVisualize(false);
 
+    // Show a temporary processing message while waiting for a response
+    const processingIndex = chatHistory.length + 1;
+    setChatHistory((prev) => [...prev, { sender: "bot", text: "Processing..." }]);
+
     try {
       const res = await fetch("/chat", {
         method: "POST",
@@ -129,11 +134,21 @@ export default function ChatBox() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
-      setChatHistory((prev) => [...prev, { sender: "bot", text: data.response }]);
+      setChatHistory((prev) =>
+        prev.map((m, i) =>
+          i === processingIndex ? { sender: "bot", text: data.response } : m
+        )
+      );
       setShowVisualize(true);
     } catch (err) {
       console.error("Error calling API:", err);
-      setChatHistory((prev) => [...prev, { sender: "bot", text: "Sorry, something went wrong." }]);
+      setChatHistory((prev) =>
+        prev.map((m, i) =>
+          i === processingIndex
+            ? { sender: "bot", text: "Sorry, something went wrong." }
+            : m
+        )
+      );
       setShowVisualize(true);
     }
   };

@@ -72,5 +72,15 @@ def main():
     con.close()
     print("\n✅ QA complete. Connection closed.")
 
+    # ── Additional step: extract dataset metadata using OpenAI Vision ──
+    try:
+        from pathlib import Path
+        from .vision_metadata import generate_metadata
+
+        generate_metadata(Path(RAW_DIR))
+        print("✅ Metadata extracted with vision\n")
+    except Exception as e:  # noqa: BLE001
+        print("⚠️ Vision metadata step failed", e)
+
 if __name__ == "__main__":
     main()

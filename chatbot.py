@@ -10,6 +10,30 @@ import re, math, json
 from openai import OpenAI
 from pathlib import Path
 
+VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
+
+def _load_metadata() -> dict:
+    if VISION_METADATA_FILE.exists():
+        try:
+            with open(VISION_METADATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:  # noqa: BLE001
+            print("metadata load error", e)
+    return {}
+
+VISION_METADATA = _load_metadata()
+
+def _metadata_summary(meta: dict) -> str:
+    lines = []
+    for name, info in meta.items():
+        cols = ", ".join(info.get("headers", [])[:5])
+        summary = info.get("summary", "")
+        piece = f"{name}: columns {cols}. {summary}".strip()
+        lines.append(piece)
+    return "\n".join(lines)
+
+METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
+
 try:
     from dotenv import load_dotenv
     package_dir = Path(__file__).parent
@@ -30,12 +54,16 @@ def call_openai_fallback(user_question: str) -> str:
     try:
         client = OpenAI()
 
+        system_msg = "You are a helpful assistant."
+        if METADATA_SUMMARY:
+            system_msg += "\nHere is data the user provided:\n" + METADATA_SUMMARY
+
         completion = client.chat.completions.create(
-          model="gpt-4.1",
-          messages=[
-            {"role": "developer", "content": "You are a helpful assistant."},
-            {"role": "user", "content": user_question}
-          ]
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_question},
+            ],
         )
 
         # Extract the text portion of the first choice
@@ -424,6 +452,17 @@ def clear_conversation():
     (Currently, none is needed, but this stub satisfies the /clear_history endpoint.)
     """
     pass
+
+
+def get_intro_message() -> str:
+    """Return a short greeting referencing the extracted data."""
+    if not METADATA_SUMMARY:
+        return ""
+    return (
+        "Here is what I found in your data files:\n"
+        f"{METADATA_SUMMARY}\n"
+        "Is this the information you'd like to analyze?"
+    )
 
 
 def summarize_conversation(history: list[dict], visuals: list[str] | None = None) -> str:

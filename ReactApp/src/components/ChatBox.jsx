@@ -14,6 +14,10 @@ export default function ChatBox({ token }) {
   const [vizAnswers, setVizAnswers] = useState([]);
   const [vizStep, setVizStep] = useState(0);
   const [collectingViz, setCollectingViz] = useState(false);
+  const [infographQuestions, setInfographQuestions] = useState([]);
+  const [infographAnswers, setInfographAnswers] = useState([]);
+  const [infographStep, setInfographStep] = useState(0);
+  const [collectingInfograph, setCollectingInfograph] = useState(false);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -58,6 +62,31 @@ export default function ChatBox({ token }) {
       setLoading(false);
     }
   };
+
+  const openInfograph = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/infograph/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const qs = data.questions || [];
+      if (!qs.length) return;
+      setInfographQuestions(qs);
+      setInfographAnswers([]);
+      setInfographStep(0);
+      setCollectingInfograph(true);
+      setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
+      setShowVisualize(false);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching infographic questions", err);
+      setLoading(false);
+    }
+  };
   
 
   const completeVisualization = async (answers) => {
@@ -89,6 +118,39 @@ export default function ChatBox({ token }) {
       setChatHistory((prev) => [
         ...prev,
         { sender: "bot", text: "Error creating visualization." },
+      ]);
+      setLoading(false);
+    }
+  };
+
+  const completeInfograph = async (answers) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/infograph/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, answers }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.image_url) {
+        setVisuals((prev) => [...prev, data.image_url]);
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Here is your infographic:", image: data.image_url },
+        ]);
+      } else {
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Sorry, I couldn't create the infographic." },
+        ]);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Error creating infographic", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Error creating infographic." },
       ]);
       setLoading(false);
     }
@@ -146,6 +208,23 @@ export default function ChatBox({ token }) {
       } else {
         setCollectingViz(false);
         await completeVisualization(newAnswers);
+        setShowVisualize(true);
+      }
+      setLoading(false);
+      return;
+    }
+
+    if (collectingInfograph) {
+      const newAnswers = [...infographAnswers, trimmed];
+      setInfographAnswers(newAnswers);
+
+      const next = infographStep + 1;
+      if (next < infographQuestions.length) {
+        setInfographStep(next);
+        setChatHistory((prev) => [...prev, { sender: "bot", text: infographQuestions[next] }]);
+      } else {
+        setCollectingInfograph(false);
+        await completeInfograph(newAnswers);
         setShowVisualize(true);
       }
       setLoading(false);
@@ -305,6 +384,20 @@ export default function ChatBox({ token }) {
             }}
           >
             Visualize?
+          </button>
+          <button
+            onClick={openInfograph}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#800080",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Infograph It?
           </button>
           <button
             onClick={openSummary}

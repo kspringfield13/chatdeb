@@ -1,13 +1,27 @@
 from __future__ import annotations
 import os
+import uuid
+from pathlib import Path
+
+import pandas as pd
+import matplotlib.pyplot as plt
 from openai import OpenAI
-import requests
+from .db import get_engine
 
 
 def generate_context_questions(history: list[dict]) -> list[str]:
-    """Return up to 3 short context questions derived from chat history."""
+    """Return up to 3 short context questions derived from chat history.
+
+    The goal is to capture missing details required to build a useful chart.
+    When no conversation history is supplied a default set of questions is
+    returned.
+    """
     if not history:
-        return []
+        return [
+            "Which table or SQL query should I use as the data source?",
+            "What fields should go on the x- and y-axes?",
+            "What chart type would you like (bar, line, scatter, etc.)?",
+        ]
 
     messages = []
     for entry in history:
@@ -17,9 +31,12 @@ def generate_context_questions(history: list[dict]) -> list[str]:
 
     prompt = (
         "You are preparing to create a visualization for the user. "
-        "Based on the conversation so far, propose up to 3 concise questions that "
-        "will confirm the metrics and values the user wants to see. "
-        "Return them as a numbered list."
+        "Review the conversation and determine what additional details are needed "
+        "to construct an accurate chart. "
+        "Ask up to three short follow up questions covering: the data source or "
+        "SQL query, which fields/metrics map to the axes, any filters or time "
+        "ranges, and the desired chart type. "
+        "Return the questions as a numbered list."
     )
 
     try:
@@ -34,39 +51,76 @@ def generate_context_questions(history: list[dict]) -> list[str]:
         return lines[:3]
     except Exception as e:
         print("generate_context_questions error", e)
-        return []
+        return [
+            "Which table or SQL query should I use as the data source?",
+            "What fields should go on the x- and y-axes?",
+            "What chart type would you like (bar, line, scatter, etc.)?",
+        ]
 
 
-def create_superset_visual(answers: list[str]) -> str:
-    """Attempt to create a Superset chart and return its URL.
+def create_matplotlib_visual(answers: list[str]) -> str:
+    """Create a chart locally using matplotlib and return the image path.
 
-    This is a placeholder implementation that demonstrates how one could
-    call Superset's REST API. It expects SUPERSET_BASE_URL and
-    SUPERSET_API_KEY in the environment. If those variables are missing or
-    any request fails, the base URL is returned so the frontend can load
-    Superset manually.
+    ``answers`` is expected to contain at least four elements in the
+    following order:
+
+    1. An SQL query that returns the data for the chart.
+    2. The column to use for the x-axis.
+    3. The column or metric for the y-axis.
+    4. The desired chart type (``bar``, ``line``, ``scatter`` or ``pie``).
+
+    The function will execute the query against the DuckDB database,
+    generate the chart and save it under the ``charts`` directory.
+    The file path to the image is returned.  An empty string is returned on
+    failure.
     """
-    base_url = os.getenv("SUPERSET_BASE_URL", "")
-    api_key = os.getenv("SUPERSET_API_KEY")
-    if not base_url:
+
+    if len(answers) < 4:
         return ""
 
-    if not api_key:
-        return base_url
+    sql_query, x_col, y_col, chart_type = answers[:4]
 
     try:
-        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        payload = {
-            "slice_name": "KYDxBot Chart",
-            "viz_type": "table",
-            "params": {"metrics": answers},
-        }
-        resp = requests.post(f"{base_url.rstrip('/')}/api/v1/chart/", json=payload, headers=headers)
-        resp.raise_for_status()
-        chart_id = resp.json().get("id")
-        if chart_id:
-            return f"{base_url.rstrip('/')}/explore/?slice_id={chart_id}"
-    except Exception as e:
-        print("create_superset_visual error", e)
+        engine = get_engine()
+        df = pd.read_sql_query(sql_query, engine)
+    except Exception as e:  # noqa: BLE001
+        print("create_matplotlib_visual query error", e)
+        return ""
 
-    return base_url
+    if df.empty or x_col not in df.columns or y_col not in df.columns:
+        print("create_matplotlib_visual no data or invalid columns")
+        return ""
+
+    fig, ax = plt.subplots()
+    chart_type = chart_type.lower().strip()
+
+    try:
+        if chart_type == "line":
+            ax.plot(df[x_col], df[y_col])
+        elif chart_type == "scatter":
+            ax.scatter(df[x_col], df[y_col])
+        elif chart_type == "pie":
+            ax.pie(df[y_col], labels=df[x_col], autopct="%1.1f%%")
+        else:
+            ax.bar(df[x_col], df[y_col])
+    except Exception as e:  # noqa: BLE001
+        print("create_matplotlib_visual plot error", e)
+        return ""
+
+    ax.set_xlabel(x_col)
+    ax.set_ylabel(y_col)
+    ax.set_title(f"{y_col} vs {x_col}")
+    fig.tight_layout()
+
+    charts_dir = Path("charts")
+    charts_dir.mkdir(exist_ok=True)
+    file_path = charts_dir / f"chart_{uuid.uuid4().hex}.png"
+    try:
+        fig.savefig(file_path)
+    except Exception as e:  # noqa: BLE001
+        print("create_matplotlib_visual save error", e)
+        return ""
+    finally:
+        plt.close(fig)
+
+    return str(file_path)

@@ -505,7 +505,6 @@ def summarize_history() -> str:
         lines.append("\nContinue with these aggregates? Adjust logic if needed.")
 
     return "\n".join(lines)
-=======
     """
     If you have any global state to clear, do it here.
     (Currently, none is needed, but this stub satisfies the /clear_history endpoint.)

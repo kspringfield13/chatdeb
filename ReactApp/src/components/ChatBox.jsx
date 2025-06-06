@@ -14,9 +14,28 @@ export default function ChatBox() {
   const [vizAnswers, setVizAnswers] = useState([]);
   const [vizStep, setVizStep] = useState(0);
   const [collectingViz, setCollectingViz] = useState(false);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Fetch intro message on mount
+  useEffect(() => {
+    const fetchIntro = async () => {
+      try {
+        const res = await fetch("/intro");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.message) {
+          setChatHistory((prev) => [...prev, { sender: "bot", text: data.message }]);
+        }
+      } catch (e) {
+        console.error("intro fetch error", e);
+      }
+    };
+    fetchIntro();
+  }, []);
+
   const openVisualization = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/visualize/questions", {
         method: "POST",
@@ -33,13 +52,16 @@ export default function ChatBox() {
       setCollectingViz(true);
       setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
       setShowVisualize(false);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching context questions", err);
+      setLoading(false);
     }
   };
   
 
   const completeVisualization = async (answers) => {
+    setLoading(true);
     try {
       const res = await fetch("/visualize/complete", {
         method: "POST",
@@ -61,16 +83,19 @@ export default function ChatBox() {
           { sender: "bot", text: "Sorry, I couldn't create the chart." },
         ]);
       }
+      setLoading(false);
     } catch (err) {
       console.error("Error creating visualization", err);
       setChatHistory((prev) => [
         ...prev,
         { sender: "bot", text: "Error creating visualization." },
       ]);
+      setLoading(false);
     }
   };
 
   const openSummary = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/summarize", {
         method: "POST",
@@ -80,8 +105,10 @@ export default function ChatBox() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+      setLoading(false);
     } catch (err) {
       console.error("Error generating summary", err);
+      setLoading(false);
     }
   };
 
@@ -115,10 +142,12 @@ export default function ChatBox() {
         await completeVisualization(newAnswers);
         setShowVisualize(true);
       }
+      setLoading(false);
       return;
     }
 
     setShowVisualize(false);
+    setLoading(true);
 
     try {
       const res = await fetch("/chat", {
@@ -131,10 +160,12 @@ export default function ChatBox() {
       const data = await res.json();
       setChatHistory((prev) => [...prev, { sender: "bot", text: data.response }]);
       setShowVisualize(true);
+      setLoading(false);
     } catch (err) {
       console.error("Error calling API:", err);
       setChatHistory((prev) => [...prev, { sender: "bot", text: "Sorry, something went wrong." }]);
       setShowVisualize(true);
+      setLoading(false);
     }
   };
 
@@ -238,6 +269,12 @@ export default function ChatBox() {
         {/* Dummy div to scroll into view */}
         <div ref={messagesEndRef} />
       </div>
+
+      {loading && (
+        <div style={{ color: "#888", textAlign: "center", padding: "0.25rem" }}>
+          Processing...
+        </div>
+      )}
 
       {showVisualize && (
         <div

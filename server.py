@@ -11,7 +11,7 @@ package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
 dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-from .chatbot import handle_query, clear_conversation
+from .chatbot import handle_query, clear_conversation, summarize_conversation
 from .visualize import generate_context_questions, create_matplotlib_visual
 
 app = FastAPI(title="KYDxBot API")
@@ -56,6 +56,15 @@ class VizCompleteRequest(BaseModel):
 class VizCompleteResponse(BaseModel):
     chart_url: str | None
 
+
+class SummarizeRequest(BaseModel):
+    history: list[dict]
+    visuals: list[str] | None = None
+
+
+class SummarizeResponse(BaseModel):
+    summary: str
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     """
@@ -85,6 +94,15 @@ async def viz_complete(req: VizCompleteRequest):
     try:
         url = create_matplotlib_visual(req.answers)
         return VizCompleteResponse(chart_url=url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/summarize", response_model=SummarizeResponse)
+async def summarize(req: SummarizeRequest):
+    try:
+        text = summarize_conversation(req.history, req.visuals)
+        return SummarizeResponse(summary=text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

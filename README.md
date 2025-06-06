@@ -187,6 +187,13 @@ with `matplotlib`. Provide the SQL query along with x and y columns and a chart
 type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
 the file path is returned to the frontend.
 
+**Summarize Conversation**
+
+After chatting, click the new "Summarize?" button in the UI to get a short text
+recap of the questions asked, the answers returned and any charts that were
+generated.  The frontend posts your chat history to the `/summarize` endpoint
+which uses OpenAI to craft the summary.
+
 **Run the Tests**
 
 After installing dependencies, you can execute the small test suite with

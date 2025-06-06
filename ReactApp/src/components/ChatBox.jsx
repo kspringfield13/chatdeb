@@ -6,6 +6,10 @@ export default function ChatBox() {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [showVisualize, setShowVisualize] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [contextQuestions, setContextQuestions] = useState([]);
+  const [chartUrl, setChartUrl] = useState(null);
+  const [visuals, setVisuals] = useState([]);
   const [vizQuestions, setVizQuestions] = useState([]);
   const [vizAnswers, setVizAnswers] = useState([]);
   const [vizStep, setVizStep] = useState(0);
@@ -47,6 +51,9 @@ export default function ChatBox() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      setChartUrl(data.chart_url);
+      if (data.chart_url) {
+        setVisuals((prev) => [...prev, data.chart_url]);
       if (data.chart_url) {
         setChatHistory((prev) => [
           ...prev,
@@ -64,6 +71,21 @@ export default function ChatBox() {
         ...prev,
         { sender: "bot", text: "Error creating visualization." },
       ]);
+    }
+  };
+
+  const openSummary = async () => {
+    try {
+      const res = await fetch("/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, visuals }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+    } catch (err) {
+      console.error("Error generating summary", err);
     }
   };
 
@@ -229,6 +251,7 @@ export default function ChatBox() {
             textAlign: "left",
             borderTop: "1px solid #333",
             display: "flex",
+            justifyContent: "center",
             gap: "0.5rem",
           }}
         >
@@ -247,6 +270,11 @@ export default function ChatBox() {
             Visualize?
           </button>
           <button
+            onClick={openSummary}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#004080",
             onClick={openSummarize}
             style={{
               padding: "0.5rem 1rem",

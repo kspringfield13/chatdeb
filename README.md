@@ -196,9 +196,10 @@ under the `/charts` route so the React UI can load the images directly.
 
 **Table Previews**
 
-Multi-row query results are rendered as PNG files using `great-tables`. The
-HTML table is converted to an image with `imgkit` and saved in the same
-`charts/` directory. The path is returned with a `TABLE:` prefix.
+Multi-row query results are rendered as PNG files using `matplotlib`. Each
+table includes column headers and is saved with a transparent background so it
+blends seamlessly with the chat UI. The images are stored in the same
+`charts/` directory and the path is returned with a `TABLE:` prefix.
 
 **Summarize Conversation**
 

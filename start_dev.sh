@@ -1,28 +1,33 @@
 #!/usr/bin/env bash
-# start_dev.sh - Run backend and frontend for local development.
+# start_dev.sh — Run backend in new terminal, frontend in current shell
 
 set -e
 
-# Resolve the absolute path to the directory where this script lives
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$SCRIPT_DIR"  # assuming start_dev.sh is at root level of project
-
-# Move to project root
+PROJECT_ROOT="$SCRIPT_DIR"
 cd "$PROJECT_ROOT"
 
-# Activate Python virtual environment if it exists
 if [ -d "$PROJECT_ROOT/chatbot_env" ]; then
   source "$PROJECT_ROOT/chatbot_env/bin/activate"
 fi
 
-# Set PYTHONPATH to include project root
 export PYTHONPATH="$PROJECT_ROOT"
 
-# Start FastAPI backend
-uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload &
-BACKEND_PID=$!
+# Ensure kydxbot is a package
+touch "$PROJECT_ROOT/kydxbot/__init__.py"
 
-# Start React frontend
+# Construct the command to run in the new terminal
+SERVER_CMD="cd \"$PROJECT_ROOT\" && source chatbot_env/bin/activate && export PYTHONPATH=\"$PROJECT_ROOT\" && uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
+
+# Launch backend in new Terminal window
+osascript <<EOF
+tell application "Terminal"
+    activate
+    do script "$SERVER_CMD"
+end tell
+EOF
+
+# Launch React frontend in current terminal
 FRONTEND_DIR="$PROJECT_ROOT/ReactApp"
 if [ -d "$FRONTEND_DIR" ]; then
   cd "$FRONTEND_DIR"
@@ -30,6 +35,3 @@ if [ -d "$FRONTEND_DIR" ]; then
 else
   echo "❌ ReactApp directory not found at $FRONTEND_DIR"
 fi
-
-# Clean up backend process when frontend exits
-kill $BACKEND_PID

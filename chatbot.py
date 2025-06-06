@@ -281,28 +281,42 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
 def format_zero_rows() -> str:
     return "No records found."
 
+def _format_generic_row(row: Tuple) -> str:
+    """Format an arbitrary tuple of values safely."""
+    parts = []
+    for val in row:
+        if isinstance(val, int):
+            parts.append(str(val))
+        elif isinstance(val, float):
+            parts.append(f"{val:,.2f}")
+        else:
+            try:
+                num = float(val)
+                parts.append(f"{num:,.2f}")
+            except Exception:
+                parts.append(str(val))
+    return " — ".join(parts)
+
+
 def format_single_row(row: Tuple) -> str:
     """
-    row is (user_id:int, first_name:str, last_name:str, total_amount_spent:float).
-    We ignore user_id and just show “First Last — value.”
+    Format a single SQL result row for display.
+
+    When ``row`` matches the expected customer or product shapes it is formatted
+    using those conventions.  Otherwise the values are joined generically which
+    avoids type-related formatting errors.
     """
-    if len(row) == 4:
+
+    if len(row) == 4 and isinstance(row[3], (int, float)):
         # Customer format
         _, first, last, total = row
         return f"{first} {last} — {total:,.2f}"
-    elif len(row) == 3:
+    if len(row) == 3 and isinstance(row[2], (int, float)):
         # Product format
         name, category, sales = row
         return f"{name} ({category}) — {sales:,.2f}"
-    else:
-        # Fallback: join all values (format floats as currency)
-        parts = []
-        for val in row:
-            if isinstance(val, (float, int)):
-                parts.append(f"{val:,.2f}")
-            else:
-                parts.append(str(val))
-        return " — ".join(parts)
+
+    return _format_generic_row(row)
 
 def format_numbered_list(rows: List[Tuple]) -> str:
     """

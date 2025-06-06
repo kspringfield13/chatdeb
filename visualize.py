@@ -134,8 +134,19 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     return str(file_path)
 
 
-def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
-    """Create a table image from a list of rows and return the path."""
+def create_table_visual(
+    rows: list[tuple],
+    limit: int | None = None,
+    headers: list[str] | None = None,
+) -> str:
+    """Create a table image from ``rows`` and return the path.
+
+    ``rows`` is a list of tuples representing table rows. Optional
+    ``headers`` may be provided to label the columns. When ``headers`` is
+    omitted or does not match the number of columns, generic labels are used.
+    The resulting PNG has a transparent background and subtle styling so it
+    can be displayed over any UI theme.
+    """
 
     if not rows:
         return ""
@@ -143,7 +154,10 @@ def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
     display_rows = rows[:limit] if limit is not None else rows
 
     df = pd.DataFrame(display_rows)
-    df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
+    if headers and len(headers) == df.shape[1]:
+        df.columns = headers
+    else:
+        df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
 
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
@@ -151,10 +165,30 @@ def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
 
     try:
         fig, ax = plt.subplots()
+        fig.patch.set_alpha(0.0)
         ax.axis("off")
-        ax.table(cellText=df.values, colLabels=df.columns, loc="center")
+        ax.set_frame_on(False)
+        ax.patch.set_alpha(0.0)
+
+        table = ax.table(
+            cellText=df.values,
+            colLabels=df.columns,
+            cellLoc="center",
+            loc="center",
+        )
+        table.auto_set_font_size(False)
+        table.set_fontsize(10)
+        table.scale(1, 1.4)
+
+        for (row, col), cell in table.get_celld().items():
+            cell.set_edgecolor("#cccccc")
+            cell.set_linewidth(0.5)
+            cell.set_facecolor("none")
+            if row == 0:
+                cell.set_text_props(weight="bold")
+
         fig.tight_layout()
-        fig.savefig(file_path, bbox_inches="tight")
+        fig.savefig(file_path, bbox_inches="tight", transparent=True)
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""

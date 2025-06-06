@@ -73,7 +73,7 @@ cd kydxbot
 
 ```bash
 # (1) Create a venv in a folder named "chatbot_env" using python version 3.11
-py -3.11 -m venv chatbot_env
+python -m venv chatbot_env
 
 # (2) Activate it
 source chatbot_env/bin/activate

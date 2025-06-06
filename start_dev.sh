@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start_dev.sh — Run backend in new terminal, frontend in current shell
+# start_dev.sh — launch backend and frontend in separate Terminal windows
 
 set -e
 
@@ -13,26 +13,19 @@ fi
 
 export PYTHONPATH="$PROJECT_ROOT"
 
-# Safely escape the command string for AppleScript
-SERVER_CMD="cd $PROJECT_ROOT; source chatbot_env/bin/activate; export PYTHONPATH=$PROJECT_ROOT; uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
+# Commands to run in the spawned terminals
+BACKEND_CMD="cd '$PROJECT_ROOT' && source chatbot_env/bin/activate && export PYTHONPATH='$PROJECT_ROOT' && uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
+FRONTEND_CMD="cd '$PROJECT_ROOT/ReactApp' && npm run dev"
 
-# Launch backend in new Terminal window
+# Open two new Terminal windows running backend and frontend
 osascript <<EOF
 tell application "Terminal"
     activate
-    do script "bash -c '$SERVER_CMD'"
+    do script "bash -c '$BACKEND_CMD'"
+    do script "bash -c '$FRONTEND_CMD'"
 end tell
 EOF
 
-# Launch React frontend in current terminal and open browser to app
-FRONTEND_DIR="$PROJECT_ROOT/ReactApp"
-if [ -d "$FRONTEND_DIR" ]; then
-  cd "$FRONTEND_DIR"
-  npm run dev &
-  NPM_PID=$!
-  sleep 2
-  open http://localhost:5173
-  wait $NPM_PID
-else
-  echo "❌ ReactApp directory not found at $FRONTEND_DIR"
-fi
+# Open the chatbot UI in the default browser
+sleep 2
+open http://localhost:5173

@@ -203,3 +203,12 @@ pytest -q
 ```
 These tests only cover helper functions and will run even if you don't have a
 `.env` file configured.
+
+### Troubleshooting Data Questions
+
+If the bot asks you to provide data when you already loaded the sample CSVs,
+double‑check that you ran `python data_ingest/load_data.py` and that your `.env`
+contains valid OpenAI and Pinecone keys. Including keywords like *sales*,
+*revenue* or *orders* in your question helps the chatbot route it through the
+DuckDB SQL agent so it can use the existing data without prompting for an
+upload.

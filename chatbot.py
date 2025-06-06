@@ -4,7 +4,6 @@ import os, datetime
 import numpy as np
 from .db import get_engine
 from .pinecone_utils import get_embedding, index
-from .langchain_sql import query_via_sqlagent
 from sqlalchemy import text
 from typing import List, Tuple
 import re, math, json
@@ -377,6 +376,7 @@ def handle_query(query_text: str) -> str:
 
     if is_data_question(q):
         try:
+            from .langchain_sql import query_via_sqlagent
             rows = query_via_sqlagent(q)
             n = len(rows)
 

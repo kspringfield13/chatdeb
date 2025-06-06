@@ -12,7 +12,7 @@ dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
 from .chatbot import handle_query, clear_conversation
-from .visualize import generate_context_questions, create_superset_visual
+from .visualize import generate_context_questions, create_matplotlib_visual
 
 app = FastAPI(title="KYDxBot API")
 
@@ -83,7 +83,7 @@ async def viz_questions(req: VizQuestionsRequest):
 @app.post("/visualize/complete", response_model=VizCompleteResponse)
 async def viz_complete(req: VizCompleteRequest):
     try:
-        url = create_superset_visual(req.answers)
+        url = create_matplotlib_visual(req.answers)
         return VizCompleteResponse(chart_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

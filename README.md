@@ -180,6 +180,13 @@ duckdb data.db
 SELECT * FROM customers LIMIT 5;
 ```
 
+**Generate Local Visualizations**
+
+The `/visualize/complete` endpoint now returns a path to a PNG file created
+with `matplotlib`. Provide the SQL query along with x and y columns and a chart
+type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
+the file path is returned to the frontend.
+
 **Run the Tests**
 
 After installing dependencies, you can execute the small test suite with

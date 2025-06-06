@@ -69,6 +69,7 @@ MarkupSafe==3.0.2
 marshmallow==3.26.1
 mashumaro==3.14
 matplotlib-inline==0.1.7
+matplotlib==3.9.0
 mdurl==0.1.2
 more-itertools==10.7.0
 msgpack==1.1.0

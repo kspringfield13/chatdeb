@@ -19,6 +19,7 @@ from .chatbot import (
     get_intro_message,
 )
 from .visualize import generate_context_questions, create_matplotlib_visual
+from .infograph import generate_infograph_questions, create_infographic
 
 app = FastAPI(title="KYDxBot API")
 
@@ -68,6 +69,23 @@ class VizCompleteResponse(BaseModel):
     chart_url: str | None
 
 
+class InfographQuestionsRequest(BaseModel):
+    history: list[dict]
+
+
+class InfographQuestionsResponse(BaseModel):
+    questions: list[str]
+
+
+class InfographCompleteRequest(BaseModel):
+    history: list[dict]
+    answers: list[str]
+
+
+class InfographCompleteResponse(BaseModel):
+    image_url: str | None
+
+
 class SummarizeRequest(BaseModel):
     history: list[dict]
     visuals: list[str] | None = None
@@ -115,6 +133,24 @@ async def viz_complete(req: VizCompleteRequest):
     try:
         url = create_matplotlib_visual(req.answers)
         return VizCompleteResponse(chart_url=url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/infograph/questions", response_model=InfographQuestionsResponse)
+async def infograph_questions(req: InfographQuestionsRequest):
+    try:
+        qs = generate_infograph_questions(req.history)
+        return InfographQuestionsResponse(questions=qs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/infograph/complete", response_model=InfographCompleteResponse)
+async def infograph_complete(req: InfographCompleteRequest):
+    try:
+        url = create_infographic(req.answers)
+        return InfographCompleteResponse(image_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

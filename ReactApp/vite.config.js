@@ -30,6 +30,16 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      "/infograph/questions": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
+      "/infograph/complete": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
       "/summarize": {
         target: "http://localhost:8000",
         changeOrigin: true,

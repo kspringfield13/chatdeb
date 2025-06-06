@@ -232,19 +232,6 @@ export default function ChatBox({ token }) {
     }
   };
 
-  const fetchSummary = async () => {
-    try {
-      const res = await fetch("/summarize", { method: "GET" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setChatHistory((prev) => [
-        ...prev,
-        { sender: "bot", text: data.summary },
-      ]);
-    } catch (err) {
-      console.error("Error fetching summary:", err);
-    }
-  };
 
   return (
     <>
@@ -353,8 +340,9 @@ export default function ChatBox({ token }) {
             textAlign: "left",
             borderTop: "1px solid #333",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             gap: "0.5rem",
+            paddingLeft: "1rem",
           }}
         >
           <button
@@ -419,22 +407,6 @@ export default function ChatBox({ token }) {
             if (e.key === "Enter") sendQuery();
           }}
         />
-
-        {/* — Summarize */}
-        <button
-          onClick={fetchSummary}
-          style={{
-            backgroundColor: "#4caf50",
-            border: "none",
-            padding: "0.75rem 1rem",
-            borderRadius: 20,
-            color: "#fff",
-            fontSize: "0.9rem",
-            cursor: "pointer",
-          }}
-        >
-          Summarize?
-        </button>
 
         {/* — Send */}
         <button

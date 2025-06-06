@@ -46,7 +46,27 @@ except Exception:
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-def call_openai_fallback(user_question: str) -> str:
+
+def load_recent_history(limit: int = 3) -> list[dict]:
+    """Return the last ``limit`` conversation entries.
+
+    Each entry contains ``query_text`` and ``retrieved_response``.  If the
+    history file is missing or invalid an empty list is returned.
+    """
+
+    path = Path("chatbot_responses.json")
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text())
+        if not isinstance(data, list):
+            return []
+        return data[-limit:]
+    except Exception:
+        return []
+
+
+def call_openai_fallback(user_question: str, history: list[dict] | None = None) -> str:
     """
     If SQL or Pinecone fails, fall back to a direct OpenAI completion
     using the classic completions.create(...) endpoint.
@@ -58,12 +78,19 @@ def call_openai_fallback(user_question: str) -> str:
         if METADATA_SUMMARY:
             system_msg += "\nHere is data the user provided:\n" + METADATA_SUMMARY
 
+        messages = [{"role": "system", "content": system_msg}]
+        if history:
+            for entry in history:
+                q = entry.get("query_text", "")
+                a = entry.get("retrieved_response", "")
+                messages.append({"role": "user", "content": q})
+                messages.append({"role": "assistant", "content": a})
+
+        messages.append({"role": "user", "content": user_question})
+
         completion = client.chat.completions.create(
             model="gpt-4.1",
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": user_question},
-            ],
+            messages=messages,
         )
 
         # Extract the text portion of the first choice
@@ -447,7 +474,8 @@ def handle_query(query_text: str) -> str:
         except Exception as e:
             # Any error in SQLAgent / formatting → open AI fallback
             print("⚠️ Data‐centric error:", e)
-            reply = call_openai_fallback(q)
+            history = load_recent_history()
+            reply = call_openai_fallback(q, history)
             _save_to_history(q, reply, confidence=None)
             return reply
         
@@ -458,7 +486,8 @@ def handle_query(query_text: str) -> str:
     except Exception as e:
         # Any error in semantic‐search → open AI fallback
         print("⚠️ Semantic‐search error:", e)
-        reply = call_openai_fallback(q)
+        history = load_recent_history()
+        reply = call_openai_fallback(q, history)
         _save_to_history(q, reply, confidence=None)
         return reply
 

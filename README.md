@@ -193,6 +193,12 @@ with `matplotlib`. Provide the SQL query along with x and y columns and a chart
 type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
 the file path is returned to the frontend.
 
+**Table Previews**
+
+Multi-row query results are now rendered as images using `matplotlib` with a
+light shaded style. These PNG files are saved in the same `charts/` directory
+and returned with a `TABLE:` prefix.
+
 **Summarize Conversation**
 
 After chatting, click the "Summarize?" button to receive a concise bullet style

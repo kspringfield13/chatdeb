@@ -8,7 +8,8 @@ def is_data_question(query_text: str) -> bool:
         "invoices", "inventory", "expenses", "transactions", "employees",
         "payroll", "income", "metrics",
         # Treat generic references to the data as data questions as well
-        "database", "duckdb", "dataset", "datasets", "db",
-        "loaded data", "imported data", "shared data", "the data",
+        "database", "duckdb", "dataset", "datasets", "db", "my db", "my database", "my data"
+        "loaded data", "uploaded data", "imported data", "shared data", "the data", 
+        "my datasets", "my dataset", "this data", "the tables", "my tables"
     ]
     return any(kw in q for kw in keywords)

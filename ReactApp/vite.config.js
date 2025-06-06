@@ -18,6 +18,18 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      // proxy /visualize/questions → http://localhost:8000/visualize/questions
+      "/visualize/questions": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
+      // proxy /visualize/complete → http://localhost:8000/visualize/complete
+      "/visualize/complete": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
     }
   }
 });

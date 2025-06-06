@@ -484,8 +484,8 @@ def summarize_conversation(history: list[dict], visuals: list[str] | None = None
         messages.append({"role": "assistant", "content": desc})
 
     system_prompt = (
-        "Summarize the conversation so far. Focus on the questions asked, "
-        "the answers provided and briefly mention any charts referenced."
+        "Provide a concise bullet-point recap of the conversation. "
+        "Highlight any data mentioned and reference charts or visuals that were created."
     )
 
     try:

@@ -195,10 +195,11 @@ the file path is returned to the frontend.
 
 **Summarize Conversation**
 
-After chatting, click the new "Summarize?" button in the UI to get a short text
-recap of the questions asked, the answers returned and any charts that were
-generated.  The frontend posts your chat history to the `/summarize` endpoint
-which uses OpenAI to craft the summary.
+After chatting, click the "Summarize?" button to receive a concise bullet style
+recap. While the summary is being generated, "Processing..." appears at the
+bottom of the chat. The frontend posts your chat history to the `/summarize`
+endpoint which uses OpenAI to craft the summary based on the questions, answers
+and any visuals created.
 
 **Run the Tests**
 

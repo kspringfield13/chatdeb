@@ -1,14 +1,16 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
+import VisualModal from "./VisualModal";
 
-export default function ChatBox({ token }) {
+export default function ChatBox() {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [showVisualize, setShowVisualize] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const messagesEndRef = useRef(null);
 
   const openVisualization = () => {
-    window.open("", "_blank");
+    setShowModal(true);
   };
 
   // Whenever chatHistory changes, scroll to bottom
@@ -61,6 +63,7 @@ export default function ChatBox({ token }) {
   };
 
   return (
+    <>
     <div
       style={{
         height: "85vh",
@@ -262,5 +265,7 @@ export default function ChatBox({ token }) {
         </button>
       </div>
     </div>
+    {showModal && <VisualModal onClose={() => setShowModal(false)} />}
+    </>
   );
 }

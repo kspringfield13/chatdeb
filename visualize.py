@@ -199,10 +199,10 @@ def create_table_visual(
 
     try:
         fig, ax = plt.subplots()
-        fig.patch.set_alpha(0.0)
+        fig.patch.set_facecolor("#1f1f1f")
         ax.axis("off")
         ax.set_frame_on(False)
-        ax.patch.set_alpha(0.0)
+        ax.patch.set_facecolor("#1f1f1f")
 
         table = ax.table(
             cellText=df.values,
@@ -211,7 +211,7 @@ def create_table_visual(
             loc="center",
         )
         table.auto_set_font_size(False)
-        table.set_fontsize(11)
+        table.set_fontsize(14)
         table.scale(1, 1.4)
         table.auto_set_column_width(col=list(range(len(df.columns))))
 
@@ -222,11 +222,11 @@ def create_table_visual(
                 cell.set_facecolor("#333333")
                 cell.set_text_props(weight="bold", color="white")
             else:
-                cell.set_facecolor("none")
+                cell.set_facecolor("#1f1f1f")
                 cell.set_text_props(color="#e0e0e0")
 
         fig.tight_layout()
-        fig.savefig(file_path, bbox_inches="tight", transparent=True)
+        fig.savefig(file_path, bbox_inches="tight")
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""

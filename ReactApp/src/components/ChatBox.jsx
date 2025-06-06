@@ -1,5 +1,6 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
+import ImageModal from "./ImageModal";
 // Visualization questions are now asked through the chat flow
 
 export default function ChatBox({ token }) {
@@ -20,6 +21,7 @@ export default function ChatBox({ token }) {
   const [collectingInfograph, setCollectingInfograph] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [imageModalSrc, setImageModalSrc] = useState(null);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -340,7 +342,45 @@ export default function ChatBox({ token }) {
             }}
           >
             {msg.image ? (
-              <img src={msg.image} alt="chart" style={{ maxWidth: "80%", borderRadius: 8 }} />
+              <div style={{ position: "relative", maxWidth: "80%" }}>
+                <img
+                  src={msg.image}
+                  alt="chart"
+                  style={{ maxWidth: "100%", borderRadius: 8, backgroundColor: "#1f1f1f" }}
+                />
+                <button
+                  onClick={() => setImageModalSrc(msg.image)}
+                  style={{
+                    position: "absolute",
+                    top: "0.25rem",
+                    right: "0.25rem",
+                    background: "rgba(0,0,0,0.6)",
+                    border: "none",
+                    borderRadius: "50%",
+                    color: "#fff",
+                    cursor: "pointer",
+                    padding: "0.25rem",
+                  }}
+                  aria-label="Expand"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h6v6" />
+                    <path d="M21 3l-9 9" />
+                    <path d="M9 21H3v-6" />
+                    <path d="M3 21l9-9" />
+                  </svg>
+                </button>
+              </div>
             ) : (
               <div
                 style={{
@@ -374,15 +414,14 @@ export default function ChatBox({ token }) {
           }}
           style={{
             position: "absolute",
-            bottom: "4.5rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "rgba(255,255,255,0.2)",
+            bottom: "6rem",
+            right: "0.75rem",
+            backgroundColor: "transparent",
             border: "none",
             borderRadius: "50%",
             padding: "0.5rem",
             cursor: "pointer",
-            opacity: 0.8,
+            opacity: 0.6,
           }}
         >
           <svg
@@ -538,6 +577,9 @@ export default function ChatBox({ token }) {
         onSubmit={completeVisualization}
         chartUrl={chartUrl}
       />
+    )}
+    {imageModalSrc && (
+      <ImageModal src={imageModalSrc} onClose={() => setImageModalSrc(null)} />
     )}
     </>
   );

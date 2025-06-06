@@ -18,11 +18,6 @@ fi
 # Set PYTHONPATH to include project root
 export PYTHONPATH="$PROJECT_ROOT"
 
-# Ensure the kydxbot directory is a package
-if [ ! -f "$PROJECT_ROOT/kydxbot/__init__.py" ]; then
-  touch "$PROJECT_ROOT/kydxbot/__init__.py"
-fi
-
 # Start FastAPI backend
 uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!

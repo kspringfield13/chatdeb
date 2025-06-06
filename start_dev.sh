@@ -6,21 +6,24 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Activate virtual env if it exists
 if [ -d "chatbot_env" ]; then
-  # shellcheck disable=SC1091
   source chatbot_env/bin/activate
 fi
 
-# Ensure PYTHONPATH includes current directory so `kydxbot.server` is resolvable
+# Ensure PYTHONPATH includes the current directory (project root)
 export PYTHONPATH="$SCRIPT_DIR"
 
-# Start backend via uvicorn using kydxbot.server:app
+# Double check: this must exist for `kydxbot` to be importable
+touch kydxbot/__init__.py
+
+# Start backend
 uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 
-# Run frontend
-cd kydxbot/ReactApp
+# Start frontend
+cd ReactApp
 npm run dev
 
-# Kill backend when frontend stops
+# Kill backend when frontend exits
 kill $BACKEND_PID

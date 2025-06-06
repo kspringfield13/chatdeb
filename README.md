@@ -191,7 +191,9 @@ SELECT * FROM customers LIMIT 5;
 The `/visualize/complete` endpoint now returns a path to a PNG file created
 with `matplotlib`. Provide the SQL query along with x and y columns and a chart
 type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
-the file path is returned to the frontend.
+the file path is returned to the frontend. The FastAPI app now serves this
+directory under the `/charts` route so the React UI can load the images
+directly.
 
 **Table Previews**
 

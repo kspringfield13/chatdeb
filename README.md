@@ -143,30 +143,30 @@ dbt build
 python pinecone_utils.py
 ```
 
-**Start the Backend Server**
+**Start the App (Development Helper Script)**
 
-* The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
-* You need to run the command from one level above the kydxbot/ directory
-* Activate your virtual environment (if you haven’t already)
+There is a small helper script `start_dev.sh` in the repository root that
+launches both the FastAPI backend and the React frontend. Run it from the
+project root:
 
 ```bash
-cd /path/to/your/project_root
+./start_dev.sh
+```
+
+The script activates `chatbot_env`, starts `uvicorn` in the background and then
+executes `npm run dev` inside `ReactApp`. Press `Ctrl+C` to stop the UI and the
+backend will shut down automatically.
+
+If you prefer to run the servers manually you can still use the commands below
+in separate terminals:
+
+```bash
+# terminal 1
 source chatbot_env/bin/activate
-```
-
-```bash
-cd ..
 uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload
-```
 
-**Launch the Frontend App**
-
-* Inside this repo there should be a folder named ReactApp
-* From a new terminal
-
-```bash
+# terminal 2
 cd ReactApp
-npm install
 npm run dev
 ```
 

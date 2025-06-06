@@ -109,6 +109,20 @@ export default function ChatBox({ token }) {
     }
   };
 
+  const fetchSummary = async () => {
+    try {
+      const res = await fetch("/summarize", { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: data.summary },
+      ]);
+    } catch (err) {
+      console.error("Error fetching summary:", err);
+    }
+  };
+
   return (
     <div
       style={{
@@ -252,6 +266,22 @@ export default function ChatBox({ token }) {
           }}
         />
 
+        {/* — Summarize */}
+        <button
+          onClick={fetchSummary}
+          style={{
+            backgroundColor: "#4caf50",
+            border: "none",
+            padding: "0.75rem 1rem",
+            borderRadius: 20,
+            color: "#fff",
+            fontSize: "0.9rem",
+            cursor: "pointer",
+          }}
+        >
+          Summarize?
+        </button>
+
         {/* — Send */}
         <button
           onClick={sendQuery}
@@ -267,8 +297,8 @@ export default function ChatBox({ token }) {
             alignItems: "center",
             justifyContent: "center",
           }}
-        >
-          {/* Inline SVG for a paper-plane icon */}
+          >
+            {/* Inline SVG for a paper-plane icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"

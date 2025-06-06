@@ -11,7 +11,7 @@ package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
 dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-from .chatbot import handle_query, clear_conversation
+from .chatbot import handle_query, clear_conversation, summarize_history
 
 app = FastAPI(title="KYDxBot API")
 
@@ -60,6 +60,17 @@ async def clear_history():
     """
     clear_conversation()
     return {"status": "cleared"}
+
+
+class SummaryResponse(BaseModel):
+    summary: str
+
+
+@app.get("/summarize", response_model=SummaryResponse)
+async def summarize():
+    """Return a short summary of recent chat activity and data."""
+    text = summarize_history()
+    return SummaryResponse(summary=text)
 
 # If you want to run via "python server.py"
 if __name__ == "__main__":

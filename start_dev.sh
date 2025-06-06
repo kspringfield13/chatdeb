@@ -11,10 +11,11 @@ if [ -d "chatbot_env" ]; then
   source chatbot_env/bin/activate
 fi
 
-# Run the FastAPI backend. We invoke the module relative to this
-# directory so the import works regardless of where the script is run
-# from.
-uvicorn server:app --host 0.0.0.0 --port 8000 --reload &
+# Run the FastAPI backend. We invoke the app via its package path so
+# that Python treats it as part of the "kydxbot" package. This allows
+# relative imports like "from .chatbot import ..." in server.py to
+# resolve correctly regardless of where the script is launched from.
+uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 
 cd ReactApp

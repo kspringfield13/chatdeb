@@ -447,6 +447,65 @@ def handle_query(query_text: str) -> str:
         return reply
 
 def clear_conversation():
+    """Reset any conversation state (currently no-op)."""
+    pass
+
+
+def _aggregate_metrics() -> dict:
+    """Build simple aggregate metrics using DuckDB."""
+    try:
+        import duckdb
+    except Exception:
+        return {}
+
+    db_path = Path("data/data.db")
+    if not db_path.exists():
+        return {}
+
+    con = duckdb.connect(str(db_path))
+    metrics = {}
+    try:
+        metrics["customer_count"] = con.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
+        metrics["product_count"] = con.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+        metrics["total_sales"] = con.execute("SELECT SUM(sales_amount) FROM products").fetchone()[0] or 0
+    except Exception:
+        return {}
+    finally:
+        con.close()
+    return metrics
+
+
+def summarize_history() -> str:
+    """Return a text summary of recent chat history and data aggregates."""
+
+    history_path = Path("chatbot_responses.json")
+    if history_path.exists():
+        try:
+            data = json.loads(history_path.read_text())
+        except Exception:
+            data = []
+    else:
+        data = []
+
+    last_entries = data[-5:]
+    lines = ["Recent conversation:"]
+    for entry in last_entries:
+        q = entry.get("query_text", "").strip()
+        r = entry.get("retrieved_response", "").strip()
+        lines.append(f"- Q: {q}\n  A: {r}")
+
+    metrics = _aggregate_metrics()
+    if metrics:
+        lines.append("\nData overview (edit logic if needed):")
+        for k, v in metrics.items():
+            if isinstance(v, float):
+                lines.append(f"- {k.replace('_', ' ').title()}: {v:,.2f}")
+            else:
+                lines.append(f"- {k.replace('_', ' ').title()}: {v}")
+        lines.append("\nContinue with these aggregates? Adjust logic if needed.")
+
+    return "\n".join(lines)
+=======
     """
     If you have any global state to clear, do it here.
     (Currently, none is needed, but this stub satisfies the /clear_history endpoint.)

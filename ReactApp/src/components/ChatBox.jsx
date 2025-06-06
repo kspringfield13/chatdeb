@@ -59,8 +59,7 @@ function renderMarkdownTable(text, sender) {
   );
 }
 
-
-export default function ChatBox() {
+export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [showVisualize, setShowVisualize] = useState(false);
@@ -230,6 +229,20 @@ export default function ChatBox() {
       setChatHistory((prev) => [...prev, { sender: "bot", text: "Sorry, something went wrong." }]);
       setShowVisualize(true);
       setLoading(false);
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const res = await fetch("/summarize", { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: data.summary },
+      ]);
+    } catch (err) {
+      console.error("Error fetching summary:", err);
     }
   };
 
@@ -407,6 +420,22 @@ export default function ChatBox() {
           }}
         />
 
+        {/* — Summarize */}
+        <button
+          onClick={fetchSummary}
+          style={{
+            backgroundColor: "#4caf50",
+            border: "none",
+            padding: "0.75rem 1rem",
+            borderRadius: 20,
+            color: "#fff",
+            fontSize: "0.9rem",
+            cursor: "pointer",
+          }}
+        >
+          Summarize?
+        </button>
+
         {/* — Send */}
         <button
           onClick={sendQuery}
@@ -422,8 +451,8 @@ export default function ChatBox() {
             alignItems: "center",
             justifyContent: "center",
           }}
-        >
-          {/* Inline SVG for a paper-plane icon */}
+          >
+            {/* Inline SVG for a paper-plane icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"

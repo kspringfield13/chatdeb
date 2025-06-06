@@ -32,7 +32,7 @@ export default function ChatBox() {
     console.log("Summarize clicked");
   };
 
-  const handleCompleteVisualization = async (answers) => {
+  const completeVisualization = async (answers) => {
     try {
       const res = await fetch("/visualize/complete", {
         method: "POST",
@@ -319,7 +319,7 @@ export default function ChatBox() {
       <VisualModal
         onClose={() => setShowModal(false)}
         questions={contextQuestions}
-        onSubmit={handleCompleteVisualization}
+        onSubmit={completeVisualization}
         chartUrl={chartUrl}
       />
     )}

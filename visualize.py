@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from beautifultable import BeautifulTable
+from PIL import Image, ImageDraw, ImageFont
 from openai import OpenAI
 from .db import get_engine
 
@@ -135,53 +137,45 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
 
 def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
-    """Create a table image with matplotlib and return the file path.
-
-    ``rows`` should be a list of tuples representing table rows.  A
-    subset of rows can be displayed using ``limit``.  The table is styled
-    with a light background to make it more pleasant.
-    """
+    """Create a table image using ``beautifultable`` and return the path."""
 
     if not rows:
         return ""
 
     display_rows = rows[:limit] if limit is not None else rows
 
-    df = pd.DataFrame(display_rows)
-    df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
+    table = BeautifulTable()
+    for row in display_rows:
+        table.rows.append(row)
 
-    fig, ax = plt.subplots()
-    ax.axis("off")
+    headers = [f"Col {i + 1}" for i in range(len(display_rows[0]))]
+    table.columns.header = headers
+    table.set_style(BeautifulTable.STYLE_COMPACT)
 
-    tbl = ax.table(
-        cellText=df.values,
-        colLabels=df.columns,
-        cellLoc="center",
-        loc="center",
-    )
-    tbl.auto_set_font_size(False)
-    tbl.set_fontsize(10)
+    table_str = str(table)
 
-    header_color = "#dae8f6"
-    cell_color = "#f2f6fc"
-    for (row, _), cell in tbl.get_celld().items():
-        if row == 0:
-            cell.set_facecolor(header_color)
-            cell.set_text_props(weight="bold")
-        else:
-            cell.set_facecolor(cell_color)
+    font = ImageFont.load_default()
+    tmp_img = Image.new("RGB", (1, 1))
+    tmp_draw = ImageDraw.Draw(tmp_img)
+    line_height = tmp_draw.textbbox((0, 0), "A", font=font)[3]
+    lines = table_str.splitlines()
+    width = max(tmp_draw.textbbox((0, 0), line, font=font)[2] for line in lines) + 20
+    height = line_height * len(lines) + 20
 
-    fig.tight_layout()
+    img = Image.new("RGB", (width, height), color="white")
+    draw = ImageDraw.Draw(img)
+    y = 10
+    for line in lines:
+        draw.text((10, y), line, font=font, fill="black")
+        y += line_height
 
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
     try:
-        fig.savefig(file_path, bbox_inches="tight")
+        img.save(file_path)
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""
-    finally:
-        plt.close(fig)
 
     return str(file_path)

@@ -188,18 +188,17 @@ SELECT * FROM customers LIMIT 5;
 
 **Generate Local Visualizations**
 
-The `/visualize/complete` endpoint now returns a path to a PNG file created
-with `matplotlib`. Provide the SQL query along with x and y columns and a chart
-type (bar, line, scatter or pie). The image is saved in the `charts/` folder and
-the file path is returned to the frontend. The FastAPI app now serves this
-directory under the `/charts` route so the React UI can load the images
-directly.
+The `/visualize/complete` endpoint returns a path to a PNG chart created with
+`matplotlib`. Provide the SQL query along with x and y columns and a chart type
+(bar, line, scatter or pie). The image is saved in the `charts/` folder and the
+file path is returned to the frontend. The FastAPI app serves this directory
+under the `/charts` route so the React UI can load the images directly.
 
 **Table Previews**
 
-Multi-row query results are now rendered as images using `matplotlib` with a
-light shaded style. These PNG files are saved in the same `charts/` directory
-and returned with a `TABLE:` prefix.
+Multi-row query results are rendered as PNG files using `beautifultable`. The
+table text is drawn to an image and saved in the same `charts/` directory. The
+path is returned with a `TABLE:` prefix.
 
 **Summarize Conversation**
 

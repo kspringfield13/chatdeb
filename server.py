@@ -12,6 +12,7 @@ dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
 from .chatbot import handle_query, clear_conversation
+from .visualize import generate_context_questions, create_superset_visual
 
 app = FastAPI(title="KYDxBot API")
 
@@ -38,6 +39,23 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
 
+
+class VizQuestionsRequest(BaseModel):
+    history: list[dict]
+
+
+class VizQuestionsResponse(BaseModel):
+    questions: list[str]
+
+
+class VizCompleteRequest(BaseModel):
+    history: list[dict]
+    answers: list[str]
+
+
+class VizCompleteResponse(BaseModel):
+    chart_url: str | None
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     """
@@ -51,6 +69,24 @@ async def chat_endpoint(request: ChatRequest):
 
     response_text = handle_query(user_query)
     return ChatResponse(response=response_text)
+
+
+@app.post("/visualize/questions", response_model=VizQuestionsResponse)
+async def viz_questions(req: VizQuestionsRequest):
+    try:
+        qs = generate_context_questions(req.history)
+        return VizQuestionsResponse(questions=qs)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/visualize/complete", response_model=VizCompleteResponse)
+async def viz_complete(req: VizCompleteRequest):
+    try:
+        url = create_superset_visual(req.answers)
+        return VizCompleteResponse(chart_url=url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/clear_history")

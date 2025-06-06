@@ -7,10 +7,40 @@ export default function ChatBox() {
   const [chatHistory, setChatHistory] = useState([]);
   const [showVisualize, setShowVisualize] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [contextQuestions, setContextQuestions] = useState([]);
+  const [chartUrl, setChartUrl] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const openVisualization = () => {
-    setShowModal(true);
+  const openVisualization = async () => {
+    try {
+      const res = await fetch("/visualize/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setContextQuestions(data.questions || []);
+      setChartUrl(null);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Error fetching context questions", err);
+    }
+  };
+
+  const handleCompleteVisualization = async (answers) => {
+    try {
+      const res = await fetch("/visualize/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory, answers }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setChartUrl(data.chart_url);
+    } catch (err) {
+      console.error("Error creating visualization", err);
+    }
   };
 
   // Whenever chatHistory changes, scroll to bottom
@@ -194,7 +224,7 @@ export default function ChatBox() {
               fontSize: "0.95rem",
             }}
           >
-            Visualize
+            Visualize?
           </button>
         </div>
       )}
@@ -265,7 +295,14 @@ export default function ChatBox() {
         </button>
       </div>
     </div>
-    {showModal && <VisualModal onClose={() => setShowModal(false)} />}
+    {showModal && (
+      <VisualModal
+        onClose={() => setShowModal(false)}
+        questions={contextQuestions}
+        onSubmit={handleCompleteVisualization}
+        chartUrl={chartUrl}
+      />
+    )}
     </>
   );
 }

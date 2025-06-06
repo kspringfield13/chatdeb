@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 
-export default function VisualModal({ onClose }) {
+export default function VisualModal({ onClose, questions = [], onSubmit, chartUrl }) {
+  const [answers, setAnswers] = useState(() => questions.map(() => ""));
+
+  const handleChange = (idx, value) => {
+    setAnswers((prev) => prev.map((a, i) => (i === idx ? value : a)));
+  };
+
+  const submit = () => {
+    if (onSubmit) onSubmit(answers);
+  };
+
   return (
     <div
       style={{
@@ -44,14 +54,43 @@ export default function VisualModal({ onClose }) {
         >
           ×
         </button>
-        <h3 style={{ marginTop: 0 }}>Visualization</h3>
-        <svg width="200" height="200" viewBox="0 0 32 32" style={{ margin: "0 auto" }}>
-          <circle r="16" cx="16" cy="16" fill="#555" />
-          <path d="M16 16 L16 0 A16 16 0 0 1 31.9 18 z" fill="#4e79a7" />
-          <path d="M16 16 L31.9 18 A16 16 0 0 1 14 32 z" fill="#f28e2b" />
-          <path d="M16 16 L14 32 A16 16 0 0 1 0 16 z" fill="#76b7b2" />
-        </svg>
-        <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>Pie Chart Placeholder</p>
+        {!chartUrl ? (
+          <>
+            <h3 style={{ marginTop: 0 }}>Confirm Details</h3>
+            {questions.map((q, idx) => (
+              <div key={idx} style={{ margin: "0.5rem 0" }}>
+                <div style={{ marginBottom: "0.25rem" }}>{q}</div>
+                <input
+                  type="text"
+                  value={answers[idx]}
+                  onChange={(e) => handleChange(idx, e.target.value)}
+                  style={{ width: "100%", padding: "0.5rem" }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={submit}
+              style={{
+                marginTop: "1rem",
+                padding: "0.5rem 1rem",
+                borderRadius: 20,
+                backgroundColor: "#004080",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.95rem",
+              }}
+            >
+              Submit
+            </button>
+          </>
+        ) : (
+          <iframe
+            title="Superset"
+            src={chartUrl}
+            style={{ width: "100%", height: "400px", border: "none" }}
+          />
+        )}
       </div>
     </div>
   );

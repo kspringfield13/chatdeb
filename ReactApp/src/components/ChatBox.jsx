@@ -4,7 +4,12 @@ import React, { useState, useRef, useEffect } from "react";
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const [showVisualize, setShowVisualize] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const openVisualization = () => {
+    window.open("", "_blank");
+  };
 
   // Whenever chatHistory changes, scroll to bottom
   useEffect(() => {
@@ -22,6 +27,7 @@ export default function ChatBox({ token }) {
       ...prev,
       { sender: "user", text: trimmed },
     ]);
+    setShowVisualize(false);
 
     // 2) Clear input immediately
     setQuery("");
@@ -43,12 +49,14 @@ export default function ChatBox({ token }) {
         ...prev,
         { sender: "bot", text: data.response },
       ]);
+      setShowVisualize(true);
     } catch (err) {
       console.error("Error calling API:", err);
       setChatHistory((prev) => [
         ...prev,
         { sender: "bot", text: "Sorry, something went wrong." },
       ]);
+      setShowVisualize(true);
     }
   };
 
@@ -161,6 +169,32 @@ export default function ChatBox({ token }) {
         {/* Dummy div to scroll into view */}
         <div ref={messagesEndRef} />
       </div>
+
+      {showVisualize && (
+        <div
+          style={{
+            backgroundColor: "#1f1f1f",
+            padding: "0.5rem 0",
+            textAlign: "center",
+            borderTop: "1px solid #333",
+          }}
+        >
+          <button
+            onClick={openVisualization}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#004080",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            Visualize
+          </button>
+        </div>
+      )}
 
       {/* === 3) Input bar pinned at bottom === */}
       <div

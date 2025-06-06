@@ -27,42 +27,58 @@ PINECONE_API_KEY     = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
 PINECONE_INDEX_NAME  = os.getenv("PINECONE_INDEX_NAME")
 
-if not OPENAI_API_KEY or not PINECONE_API_KEY or not PINECONE_ENVIRONMENT:
+TESTING = os.getenv("KYDXBOT_TESTING") == "1"
+
+if not TESTING and (not OPENAI_API_KEY or not PINECONE_API_KEY or not PINECONE_ENVIRONMENT):
     raise ValueError("Make sure OPENAI_API_KEY, PINECONE_API_KEY, and PINECONE_ENVIRONMENT are set in .env")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2) Create a Pinecone client instance
+# 2) Create a Pinecone client instance (skip when testing)
 # ─────────────────────────────────────────────────────────────────────────────
-pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
+if not TESTING:
+    pc = Pinecone(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
-# 1) Pull just the “name” fields out of list_indexes()
-existing_indexes = [ idx_info["name"] for idx_info in pc.list_indexes() ]
+    # 1) Pull just the “name” fields out of list_indexes()
+    existing_indexes = [idx_info["name"] for idx_info in pc.list_indexes()]
 
-if PINECONE_INDEX_NAME not in existing_indexes:
-    parts = PINECONE_ENVIRONMENT.split("-")
-    if len(parts) == 2:
-        region, cloud = parts[0], parts[1]
+    if PINECONE_INDEX_NAME not in existing_indexes:
+        parts = PINECONE_ENVIRONMENT.split("-")
+        if len(parts) == 2:
+            region, cloud = parts[0], parts[1]
+        else:
+            region, cloud = parts[0], "gcp"
+
+        spec = ServerlessSpec(cloud=cloud, region=region)
+        print(
+            f"Creating index '{PINECONE_INDEX_NAME}' (cloud={cloud}, region={region})…"
+        )
+        pc.create_index(
+            name=PINECONE_INDEX_NAME,
+            dimension=1536,
+            metric="cosine",
+            spec=spec,
+        )
     else:
-        region, cloud = parts[0], "gcp"
+        print(f"Index '{PINECONE_INDEX_NAME}' already exists; skipping creation.")
 
-    spec = ServerlessSpec(cloud=cloud, region=region)
-    print(f"Creating index '{PINECONE_INDEX_NAME}' (cloud={cloud}, region={region})…")
-    pc.create_index(
-        name=PINECONE_INDEX_NAME,
-        dimension=1536,
-        metric="cosine",
-        spec=spec
-    )
+    # 2) Now grab the index handle
+    index = pc.Index(PINECONE_INDEX_NAME)
 else:
-    print(f"Index '{PINECONE_INDEX_NAME}' already exists; skipping creation.")
+    class _DummyIndex:
+        def __getattr__(self, name):
+            def _dummy(*a, **k):
+                return None
 
-# 2) Now grab the index handle
-index = pc.Index(PINECONE_INDEX_NAME)
+            return _dummy
+
+    index = _DummyIndex()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3) Helper to get an OpenAI embedding for a given text (updated for openai>=1.0.0)
 # ─────────────────────────────────────────────────────────────────────────────
 def get_embedding(text: str, model: str = "text-embedding-ada-002") -> np.ndarray:
+    if TESTING:
+        return np.zeros(1536)
     openai.api_key = OPENAI_API_KEY
     resp = openai.embeddings.create(model=model, input=[text])
     return np.array(resp.data[0].embedding)

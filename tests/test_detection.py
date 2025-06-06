@@ -5,7 +5,10 @@ from kydxbot.detection import is_data_question
     "How many orders did we ship last month?",
     "Show me the top 10 customers by revenue.",
     "What's the average order value?",
-    "List employees with more than 5 sales this quarter."
+    "List employees with more than 5 sales this quarter.",
+    "Show me the database schema.",
+    "What datasets are loaded?",
+    "Analyze the duckdb data."
 ])
 def test_positive(q):
     assert is_data_question(q)

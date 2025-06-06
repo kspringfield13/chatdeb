@@ -13,14 +13,14 @@ fi
 
 export PYTHONPATH="$PROJECT_ROOT"
 
-# Construct the command to run in the new terminal
-SERVER_CMD="cd \"$PROJECT_ROOT\" && source chatbot_env/bin/activate && export PYTHONPATH=\"$PROJECT_ROOT\" && uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
+# Safely escape the command string for AppleScript
+SERVER_CMD="cd $PROJECT_ROOT; source chatbot_env/bin/activate; export PYTHONPATH=$PROJECT_ROOT; uvicorn kydxbot.server:app --host 0.0.0.0 --port 8000 --reload"
 
 # Launch backend in new Terminal window
 osascript <<EOF
 tell application "Terminal"
     activate
-    do script "$SERVER_CMD"
+    do script "bash -c '$SERVER_CMD'"
 end tell
 EOF
 

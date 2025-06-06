@@ -30,6 +30,22 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      "/summarize": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
+      "/intro": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
+      // serve chart and table images from FastAPI
+      "/charts": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
     }
   }
 });

@@ -2,6 +2,7 @@ import os
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 from dotenv import load_dotenv
@@ -20,6 +21,11 @@ from .chatbot import (
 from .visualize import generate_context_questions, create_matplotlib_visual
 
 app = FastAPI(title="KYDxBot API")
+
+# Serve generated chart and table images
+charts_dir = Path("charts")
+charts_dir.mkdir(exist_ok=True)
+app.mount("/charts", StaticFiles(directory=str(charts_dir)), name="charts")
 
 # 1) Define which origins are allowed to talk to this API.
 #    If you’re in development, you might allow just localhost:3000.

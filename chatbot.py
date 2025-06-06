@@ -319,7 +319,7 @@ def format_markdown_table(
     rows: list[tuple],
     limit: int | None = None,
 ) -> str:
-    """Return a ``TABLE:`` prefixed path to a table image generated with ``beautifultable``."""
+    """Return a ``TABLE:`` prefixed path to a table image generated with ``great_tables``."""
 
     from .visualize import create_table_visual
 

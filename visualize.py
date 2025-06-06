@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from beautifultable import BeautifulTable
-from PIL import Image, ImageDraw, ImageFont
+import great_tables as gt
+import imgkit
 from openai import OpenAI
 from .db import get_engine
 
@@ -137,43 +137,30 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
 
 def create_table_visual(rows: list[tuple], limit: int | None = None) -> str:
-    """Create a table image using ``beautifultable`` and return the path."""
+    """Create a table image using ``great_tables`` and return the path."""
 
     if not rows:
         return ""
 
     display_rows = rows[:limit] if limit is not None else rows
 
-    table = BeautifulTable()
-    for row in display_rows:
-        table.rows.append(row)
+    df = pd.DataFrame(display_rows)
+    df.columns = [f"Col {i + 1}" for i in range(df.shape[1])]
 
-    headers = [f"Col {i + 1}" for i in range(len(display_rows[0]))]
-    table.columns.header = headers
-    table.set_style(BeautifulTable.STYLE_COMPACT)
-
-    table_str = str(table)
-
-    font = ImageFont.load_default()
-    tmp_img = Image.new("RGB", (1, 1))
-    tmp_draw = ImageDraw.Draw(tmp_img)
-    line_height = tmp_draw.textbbox((0, 0), "A", font=font)[3]
-    lines = table_str.splitlines()
-    width = max(tmp_draw.textbbox((0, 0), line, font=font)[2] for line in lines) + 20
-    height = line_height * len(lines) + 20
-
-    img = Image.new("RGB", (width, height), color="white")
-    draw = ImageDraw.Draw(img)
-    y = 10
-    for line in lines:
-        draw.text((10, y), line, font=font, fill="black")
-        y += line_height
+    try:
+        table = gt.GT(df)
+        html = table.as_raw_html()
+    except Exception as e:  # noqa: BLE001
+        print("create_table_visual render error", e)
+        return ""
 
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
+
     try:
-        img.save(file_path)
+        config = imgkit.config(wkhtmltoimage="/usr/bin/wkhtmltoimage")
+        imgkit.from_string(html, str(file_path), config=config)
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""

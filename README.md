@@ -196,9 +196,9 @@ under the `/charts` route so the React UI can load the images directly.
 
 **Table Previews**
 
-Multi-row query results are rendered as PNG files using `beautifultable`. The
-table text is drawn to an image and saved in the same `charts/` directory. The
-path is returned with a `TABLE:` prefix.
+Multi-row query results are rendered as PNG files using `great-tables`. The
+HTML table is converted to an image with `imgkit` and saved in the same
+`charts/` directory. The path is returned with a `TABLE:` prefix.
 
 **Summarize Conversation**
 

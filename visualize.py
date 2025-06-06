@@ -9,16 +9,22 @@ from openai import OpenAI
 from .db import get_engine
 
 
+INTRO = (
+    "To create your visualization I'll need a bit more information."
+)
+
+
 def generate_context_questions(history: list[dict]) -> list[str]:
     """Return up to 3 short context questions derived from chat history.
 
     The goal is to capture missing details required to build a useful chart.
     When no conversation history is supplied a default set of questions is
-    returned.
+    returned.  The first question always includes a short statement requesting
+    more info so the user understands why we are asking.
     """
     if not history:
         return [
-            "Which table or SQL query should I use as the data source?",
+            f"{INTRO} Which table or SQL query should I use as the data source?",
             "What fields should go on the x- and y-axes?",
             "What chart type would you like (bar, line, scatter, etc.)?",
         ]
@@ -48,11 +54,13 @@ def generate_context_questions(history: list[dict]) -> list[str]:
         text = completion.choices[0].message.content.strip()
         # Split lines and remove bullets/numbers
         lines = [line.lstrip("- ").lstrip("0123456789. ").strip() for line in text.splitlines() if line.strip()]
+        if lines:
+            lines[0] = f"{INTRO} {lines[0]}"
         return lines[:3]
     except Exception as e:
         print("generate_context_questions error", e)
         return [
-            "Which table or SQL query should I use as the data source?",
+            f"{INTRO} Which table or SQL query should I use as the data source?",
             "What fields should go on the x- and y-axes?",
             "What chart type would you like (bar, line, scatter, etc.)?",
         ]

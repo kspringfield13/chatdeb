@@ -5,23 +5,25 @@ import "./App.css"; // keep if you have any global styles
 export default function App() {
 
   return (
-    <div
+    <div 
       style={{
-        padding: "2rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "right",
-        position: "relative",
+        position: "relative" 
       }}
     >
       <img
         src="/logo.png"
         alt="KYDxBot logo"
-        style={{ height: "75px", alignSelf: "flex-start" }}
+        style={{
+          height: "60px",
+          position: "absolute",
+          top: "1rem",
+          left: "1rem"
+        }}
       />
-      <div>
-        <ChatBox />
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {/* other flex items */}
       </div>
+          <ChatBox />
     </div>
   );
 }

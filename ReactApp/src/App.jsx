@@ -17,7 +17,7 @@ export default function App() {
       <img
         src="/logo.png"
         alt="KYDxBot logo"
-        style={{ padding: "2rem", height: "66px", alignSelf: "flex-start" }}
+        style={{ padding: "1rem", height: "50px", alignSelf: "flex-start" }}
       />
       <div>
         <ChatBox />

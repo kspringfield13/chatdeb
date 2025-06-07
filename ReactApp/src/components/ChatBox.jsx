@@ -301,18 +301,13 @@ export default function ChatBox({ token }) {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between", // logo left, title right
+          justifyContent: "center",
           alignItems: "center",
           padding: "0.25rem 1rem", // very small vertical padding
           backgroundColor: "#212121",
           borderBottom: "1px solid #333",
         }}
       >
-        <img
-          src="/logo.png"
-          alt="KYDxBot logo"
-          style={{ height: "40px" }}
-        />
         <h2
           style={{
             margin: 0,

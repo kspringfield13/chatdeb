@@ -301,7 +301,7 @@ export default function ChatBox({ token }) {
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "right",
           alignItems: "center",
           padding: "0.25rem 1rem", // very small vertical padding
           backgroundColor: "#212121",

@@ -175,6 +175,10 @@ npm install
 npm run dev
 ```
 
+To display a custom logo in the chat UI, place a `logo.png` file in
+`ReactApp/public/`. When present it will appear in the top left corner of the
+application.
+
 
 **Query the DuckDB database manually via CLI:**
 

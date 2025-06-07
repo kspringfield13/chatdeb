@@ -10,14 +10,14 @@ export default function App() {
         padding: "2rem",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "right",
         position: "relative",
       }}
     >
       <img
         src="/logo.png"
         alt="KYDxBot logo"
-        style={{ height: "60px", alignSelf: "flex-start" }}
+        style={{ height: "50px", alignSelf: "flex-start" }}
       />
       <div>
         <ChatBox />

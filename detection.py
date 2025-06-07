@@ -1,5 +1,10 @@
+from __future__ import annotations
+
+from .preloaded_questions import is_similar
+
+
 def is_data_question(query_text: str) -> bool:
-    """Lightweight helper used by tests. Checks if query hints at needing data."""
+    """Return ``True`` if ``query_text`` looks like a data analysis request."""
     q = query_text.lower()
     keywords = [
         "average", "sum(", "count(", "how many", "what is", "list",
@@ -7,12 +12,18 @@ def is_data_question(query_text: str) -> bool:
         "sales", "customers", "products", "revenue", "orders",
         "invoices", "inventory", "expenses", "transactions", "employees",
         "payroll", "income", "metrics",
-        # Treat generic references to the data as data questions as well
-        "database", "duckdb", "dataset", "datasets", "db", "my db", "my database", "my data"
-        "loaded data", "uploaded data", "imported data", "shared data", "the data", 
-        "my datasets", "my dataset", "this data", "the tables", "my tables"
+        "database", "duckdb", "dataset", "datasets", "db", "my db", "my database", "my data",
+        "loaded data", "uploaded data", "imported data", "shared data", "the data",
+        "my datasets", "my dataset", "this data", "the tables", "my tables",
     ]
-    return any(kw in q for kw in keywords)
+
+    if any(kw in q for kw in keywords):
+        return True
+
+    try:
+        return is_similar(query_text)
+    except Exception:
+        return False
 
 
 def is_db_path_question(query_text: str) -> bool:

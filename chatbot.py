@@ -4,6 +4,7 @@ import os, datetime
 import numpy as np
 from .db import get_engine
 from .pinecone_utils import get_embedding, index
+from .preloaded_questions import is_similar
 from sqlalchemy import text
 from typing import List, Tuple
 import re, math, json
@@ -140,7 +141,13 @@ def is_data_question(query_text: str) -> bool:
         "database", "duckdb", "dataset", "datasets", "db",
         "loaded data", "imported data", "shared data", "the data",
     ]
-    return any(kw in q for kw in data_keywords)
+    if any(kw in q for kw in data_keywords):
+        return True
+
+    try:
+        return is_similar(query_text)
+    except Exception:
+        return False
 
 
 def is_db_path_question(query_text: str) -> bool:

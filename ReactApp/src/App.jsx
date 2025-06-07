@@ -20,7 +20,7 @@ export default function App() {
           left: "1rem"
         }}
       />
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", flexDirection: "row" }}>
         {/* other flex items */}
       </div>
           <ChatBox />

@@ -23,7 +23,6 @@ export default function App() {
           flexDirection: "row",
           alignItems: "left",
           position: "relative",
-          height: "65px", 
         }}
       />
       <div>

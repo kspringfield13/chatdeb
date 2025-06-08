@@ -62,16 +62,19 @@ export default function ChatBox() {
       setVizStep(0);
       setCollectingViz(true);
 
-      const intro = "To help you visualize this data, could you please clarify the following:";
-      if (qs[0] && qs[0].startsWith(intro)) {
-        const first = qs[0].slice(intro.length).trim();
-        setChatHistory((prev) => [
-          ...prev,
-          { sender: "bot", text: intro },
-          ...(first ? [{ sender: "bot", text: first }] : []),
-        ]);
-      } else {
-        setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
+      const intro = "To create a visualization for you, I need some more details:";
+      let firstMsg = qs[0] || "";
+
+      setChatHistory((prev) => [...prev, { sender: "bot", text: intro }]);
+
+      if (firstMsg.startsWith(intro)) {
+        firstMsg = firstMsg.slice(intro.length).trim();
+      }
+
+      if (firstMsg) {
+        setTimeout(() => {
+          setChatHistory((prev) => [...prev, { sender: "bot", text: firstMsg }]);
+        }, 300);
       }
       setShowVisualize(false);
       setLoading(false);

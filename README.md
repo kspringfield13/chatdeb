@@ -214,6 +214,10 @@ FastAPI app serves this directory under the `/charts` route so the React UI can
 load the images directly. Invalid queries or parameters result in descriptive
 errors returned by the API.
 
+When you click the "Visualize?" button in the UI, the bot will prompt you with
+four short questions asking for (1) the data source or SQL query, (2) the
+x-axis field, (3) the y-axis field and (4) the chart type.
+
 **Table Previews**
 
 Multi-row query results are rendered as PNG files using `matplotlib`. Each

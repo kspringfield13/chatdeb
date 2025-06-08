@@ -49,7 +49,7 @@ INTRO = "To create your visualization I'll need a bit more information."
 
 
 def generate_context_questions(history: list[dict]) -> list[str]:
-    """Return up to 3 short context questions derived from chat history.
+    """Return up to 4 short context questions derived from chat history.
 
     The goal is to capture missing details required to build a useful chart.
     When no conversation history is supplied a default set of questions is
@@ -59,7 +59,8 @@ def generate_context_questions(history: list[dict]) -> list[str]:
     if not history:
         return [
             f"{INTRO} Which table or SQL query should I use as the data source?",
-            "What fields should go on the x- and y-axes?",
+            "Which column should be used for the x-axis?",
+            "Which column or metric goes on the y-axis?",
             "What chart type would you like (bar, line, scatter, etc.)?",
         ]
 
@@ -73,10 +74,9 @@ def generate_context_questions(history: list[dict]) -> list[str]:
         "You are preparing to create a visualization for the user. "
         "Review the conversation and determine what additional details are needed "
         "to construct an accurate chart. "
-        "Ask up to three short follow up questions covering: the data source or "
-        "SQL query, which fields/metrics map to the axes, any filters or time "
-        "ranges, and the desired chart type. "
-        "Return the questions as a numbered list."
+        "Ask exactly four short follow up questions in this order: the data source "
+        "or SQL query, the x-axis field, the y-axis field, and the desired chart "
+        "type. Return the questions as a numbered list."
     )
 
     try:
@@ -94,12 +94,13 @@ def generate_context_questions(history: list[dict]) -> list[str]:
         ]
         if lines:
             lines[0] = f"{INTRO} {lines[0]}"
-        return lines[:3]
+        return lines[:4]
     except Exception as e:
         print("generate_context_questions error", e)
         return [
             f"{INTRO} Which table or SQL query should I use as the data source?",
-            "What fields should go on the x- and y-axes?",
+            "Which column should be used for the x-axis?",
+            "Which column or metric goes on the y-axis?",
             "What chart type would you like (bar, line, scatter, etc.)?",
         ]
 

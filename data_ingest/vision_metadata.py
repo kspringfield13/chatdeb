@@ -55,7 +55,7 @@ def analyze_file(path: Path) -> dict:
     }
     try:
         resp = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=[message],
         )
         summary = resp.choices[0].message.content.strip()

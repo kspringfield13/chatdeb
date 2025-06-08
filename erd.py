@@ -72,6 +72,8 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     plt.figure(figsize=(8, 6), facecolor="#1f1f1f")
     ax = plt.gca()
     ax.set_facecolor("#1f1f1f")
+    ax.set_axis_off()
+    ax.grid(False)
 
     labels = {t: t[:20] for t in G.nodes()}
     nx.draw_networkx_nodes(

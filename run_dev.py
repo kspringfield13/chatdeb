@@ -52,7 +52,12 @@ def start_frontend() -> subprocess.Popen:
 
 def main() -> None:
     env = os.environ.copy()
-    env.setdefault("PYTHONPATH", str(ROOT))
+    # Ensure our project package is importable by adding the repo's parent
+    # directory to PYTHONPATH. This mirrors running uvicorn from one level above
+    # the package so "kydxbot.*" modules resolve correctly.
+    parent = ROOT.parent
+    current = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(parent) + (os.pathsep + current if current else "")
     ensure_venv()
     ensure_node()
     backend = start_backend(env)

@@ -58,7 +58,18 @@ export default function ChatBox({ token }) {
       setVizAnswers([]);
       setVizStep(0);
       setCollectingViz(true);
-      setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
+
+      const intro = "To create your visualization I'll need a bit more information.";
+      if (qs[0] && qs[0].startsWith(intro)) {
+        const first = qs[0].slice(intro.length).trim();
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: intro },
+          ...(first ? [{ sender: "bot", text: first }] : []),
+        ]);
+      } else {
+        setChatHistory((prev) => [...prev, { sender: "bot", text: qs[0] }]);
+      }
       setShowVisualize(false);
       setLoading(false);
     } catch (err) {

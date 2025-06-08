@@ -213,6 +213,9 @@ export default function ChatBox() {
           { sender: "bot", text: "Here is the ER diagram:", image: data.erd_url },
         ]);
       }
+      if (data.erd_desc) {
+        setChatHistory((prev) => [...prev, { sender: "bot", text: data.erd_desc }]);
+      }
     } catch (err) {
       console.error("Error getting data overview", err);
       setChatHistory((prev) => [

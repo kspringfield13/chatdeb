@@ -1,8 +1,10 @@
 import uuid
+import base64
 from pathlib import Path
 import duckdb
 import networkx as nx
 import matplotlib.pyplot as plt
+from openai import OpenAI
 from .chart_style import set_default_style
 from .db import DUCKDB_PATH
 
@@ -57,3 +59,33 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     plt.savefig(outfile)
     plt.close()
     return str(outfile)
+
+
+def describe_erd(image_path: str) -> str:
+    """Return a short text description of the ER diagram using OpenAI Vision."""
+    try:
+        with open(image_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        image_url = f"data:image/png;base64,{b64}"
+
+        client = OpenAI()
+        msg = {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "Describe the key tables and relationships shown in this ER diagram."
+                    ),
+                },
+                {"type": "image_url", "image_url": {"url": image_url}},
+            ],
+        }
+        resp = client.chat.completions.create(
+            model="gpt-4-vision-preview",
+            messages=[msg],
+        )
+        return resp.choices[0].message.content.strip()
+    except Exception as exc:  # noqa: BLE001
+        print("vision ERD error", exc)
+        return ""

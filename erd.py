@@ -4,7 +4,11 @@ from pathlib import Path
 import duckdb
 import networkx as nx
 import matplotlib.pyplot as plt
-from openai import OpenAI
+try:  # OpenAI is optional for ERD descriptions
+    from openai import OpenAI
+except Exception:  # pragma: no cover - optional dep may be missing
+    OpenAI = None
+
 from .chart_style import set_default_style
 from .db import DUCKDB_PATH
 
@@ -62,7 +66,13 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
 
 
 def describe_erd(image_path: str) -> str:
-    """Return a short text description of the ER diagram using OpenAI Vision."""
+    """Return a short text description of the ER diagram using OpenAI Vision.
+
+    If the OpenAI dependency or API credentials are missing, an empty string is
+    returned instead of raising an error.
+    """
+    if OpenAI is None:
+        return ""
     try:
         with open(image_path, "rb") as f:
             b64 = base64.b64encode(f.read()).decode()

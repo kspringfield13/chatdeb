@@ -13,14 +13,17 @@ from .chart_style import set_default_style
 from .db import DUCKDB_PATH
 
 set_default_style()
-OUTPUT_DIR = Path(__file__).resolve().parent / "charts"
+# Save ER diagrams in the same ``charts`` folder used by other modules so the
+# FastAPI server can serve them under the ``/charts`` route.
+OUTPUT_DIR = Path("charts")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
-    """Return a short textual summary of tables in the DuckDB database."""
+    """Return a human readable summary of the tables in the DuckDB database."""
     con = duckdb.connect(db_path)
     tables = sorted(row[0] for row in con.execute("SHOW TABLES").fetchall())
-    lines = []
+
+    details = []
     for tbl in tables:
         cols = [row[0] for row in con.execute(f"DESCRIBE {tbl}").fetchall()]
         cols = sorted(cols)
@@ -28,9 +31,18 @@ def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
             count = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
         except Exception:
             count = "?"
-        lines.append(f"{tbl}: {count} rows, cols: {', '.join(cols[:5])}")
+        sample_cols = ", ".join(cols[:5])
+        details.append(
+            f"The '{tbl}' table contains {count} rows and columns such as {sample_cols}."
+        )
+
     con.close()
-    return "\n".join(lines)
+
+    if not tables:
+        return "The database is empty." 
+
+    intro = f"The database contains {len(tables)} tables: {', '.join(tables)}."
+    return " ".join([intro] + details)
 
 
 def generate_erd(db_path: str = DUCKDB_PATH) -> str:

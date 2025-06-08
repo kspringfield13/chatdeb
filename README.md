@@ -155,6 +155,19 @@ source chatbot_env/bin/activate
 pip install -r requirements.txt
 ```
 
+**Start Everything with One Command**
+
+After installing the dependencies you can launch both the backend and the React
+frontend together:
+
+```bash
+python run_dev.py
+```
+
+This helper script creates the virtual environment if needed, installs Node
+packages and starts the two servers. When you exit the React process the backend
+is stopped automatically.
+
 **Start the Backend Server**
 * The FastAPI (or similar) backend serves the chatbot API (semantic search, OpenAI calls, etc.)
 * You need to run the command from one level above the kydxbot/ directory

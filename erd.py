@@ -108,7 +108,7 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
             base = Image.open(outfile).convert("RGBA")
             mark = Image.open(WATERMARK_PATH).convert("RGBA")
             # scale watermark to 20% of image width
-            max_width = int(base.width * 0.2)
+            max_width = int(base.width * 0.1)
             ratio = max_width / mark.width
             mark = mark.resize((max_width, int(mark.height * ratio)), Image.LANCZOS)
             x = base.width - mark.width - 10

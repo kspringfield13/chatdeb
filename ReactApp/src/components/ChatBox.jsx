@@ -1,6 +1,95 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
 
+// Parse a simple pipe separated table ("| a | b |\n| c | d |") into
+// an array of rows, each being an array of strings.
+// Used to convert plain text tables from the backend into real HTML.
+function parsePipeTable(text) {
+  const lines = text
+    .trim()
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.includes("|"));
+
+  const rows = lines.map((line) =>
+    line
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((c) => c.trim())
+  );
+
+  return rows;
+}
+
+// Component to render a table with optional expand/collapse capability.
+function TableMessage({ text }) {
+  const [expanded, setExpanded] = useState(false);
+  const rows = parsePipeTable(text);
+
+  // Only treat it as a table if we have more than one row or cell
+  const valid = rows.length > 0 && rows[0].length > 1;
+  if (!valid) {
+    return <div>{text}</div>;
+  }
+
+  return (
+    <div
+      onClick={() => setExpanded((v) => !v)}
+      style={{
+        backgroundColor: "#3a3a3a",
+        color: "#fff",
+        padding: "0.75rem 1rem",
+        borderRadius: 6,
+        maxWidth: expanded ? "100%" : "80%",
+        overflowX: "auto",
+        fontSize: "0.9rem",
+        cursor: "pointer",
+      }}
+    >
+      <table
+        style={{
+          borderCollapse: "collapse",
+          width: "100%",
+          tableLayout: "auto",
+        }}
+      >
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td
+                  key={j}
+                  style={{
+                    border: "1px solid #666",
+                    padding: "4px 8px",
+                    maxWidth: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={cell}
+                >
+                  {cell.length > 50 ? cell.slice(0, 50) + "…" : cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div
+        style={{
+          textAlign: "right",
+          fontSize: "0.75rem",
+          marginTop: "0.25rem",
+          color: "#bbb",
+        }}
+      >
+        {expanded ? "Click to collapse" : "Click to expand"}
+      </div>
+    </div>
+  );
+}
+
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
@@ -119,8 +208,10 @@ export default function ChatBox({ token }) {
              *         inside a <div> with white-space: pre-wrap.
              * Case C: otherwise, render as a normal single-line bubble.
              */}
-            {msg.text.includes("\n") ? (
-              // ── Case B: Any multiline (e.g. numbered list) ────────────────────
+            {msg.text.includes("|") && msg.text.includes("\n") ? (
+              <TableMessage text={msg.text} />
+            ) : msg.text.includes("\n") ? (
+              // ── Case B: Any multiline (e.g. numbered list) ──────
               <div
                 style={{
                   backgroundColor:
@@ -132,13 +223,13 @@ export default function ChatBox({ token }) {
                   lineHeight: 1.4,
                   fontSize: "0.95rem",
                   textAlign: "left",
-                  whiteSpace: "pre-wrap", // preserve all newline breaks
+                  whiteSpace: "pre-wrap",
                 }}
               >
                 {msg.text}
               </div>
             ) : (
-              // ── Case C: Single‐line text ───────────────────────────────────────
+              // ── Case C: Single‐line text ────────────
               <div
                 style={{
                   backgroundColor:

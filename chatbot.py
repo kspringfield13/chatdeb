@@ -3,7 +3,6 @@
 import os, datetime
 import numpy as np
 from .db import get_engine
-from .pinecone_utils import get_embedding, index
 from .langchain_sql import query_via_sqlagent
 from sqlalchemy import text
 from typing import List, Tuple
@@ -94,6 +93,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     5) Return a plain‐text summary (one line per match)
     """
     # ── 1) Compute the embedding vector for query_text ─────────────────────────────
+    from .pinecone_utils import get_embedding, index
+
     q_emb = get_embedding(query_text)
     
     if hasattr(q_emb, "tolist"):

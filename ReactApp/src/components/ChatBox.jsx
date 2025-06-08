@@ -22,6 +22,7 @@ export default function ChatBox() {
   const [loading, setLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [imageModalSrc, setImageModalSrc] = useState(null);
+  const [erdModalSrc, setErdModalSrc] = useState(null);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
@@ -208,10 +209,12 @@ export default function ChatBox() {
         setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
       }
       if (data.erd_url) {
+        setVisuals((prev) => [...prev, data.erd_url]);
         setChatHistory((prev) => [
           ...prev,
-          { sender: "bot", text: "Here is the ER diagram:", image: data.erd_url },
+          { sender: "bot", text: "Here is the ER diagram:" },
         ]);
+        setErdModalSrc(data.erd_url);
       }
       if (data.erd_desc) {
         setChatHistory((prev) => [...prev, { sender: "bot", text: data.erd_desc }]);
@@ -642,6 +645,9 @@ export default function ChatBox() {
     )}
     {imageModalSrc && (
       <ImageModal src={imageModalSrc} onClose={() => setImageModalSrc(null)} />
+    )}
+    {erdModalSrc && (
+      <ImageModal src={erdModalSrc} onClose={() => setErdModalSrc(null)} />
     )}
     </>
   );

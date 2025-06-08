@@ -19,10 +19,11 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
     """Return a short textual summary of tables in the DuckDB database."""
     con = duckdb.connect(db_path)
-    tables = [row[0] for row in con.execute("SHOW TABLES").fetchall()]
+    tables = sorted(row[0] for row in con.execute("SHOW TABLES").fetchall())
     lines = []
     for tbl in tables:
         cols = [row[0] for row in con.execute(f"DESCRIBE {tbl}").fetchall()]
+        cols = sorted(cols)
         try:
             count = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
         except Exception:
@@ -35,10 +36,11 @@ def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
 def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     """Create a basic ER diagram from table relationships."""
     con = duckdb.connect(db_path)
-    tables = [row[0] for row in con.execute("SHOW TABLES").fetchall()]
+    tables = sorted(row[0] for row in con.execute("SHOW TABLES").fetchall())
     edges = []
     for tbl in tables:
         cols = [row[0] for row in con.execute(f"DESCRIBE {tbl}").fetchall()]
+        cols = sorted(cols)
         for col in cols:
             if col.endswith("_id"):
                 ref = col[:-3]

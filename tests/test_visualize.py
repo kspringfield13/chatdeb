@@ -9,6 +9,11 @@ def test_default_intro_included():
     assert qs[0].startswith("To create your visualization"), qs[0]
 
 
+def test_generate_context_questions_length():
+    qs = generate_context_questions([])
+    assert len(qs) == 4
+
+
 def test_infer_headers_typing():
     rows = [
         (123, "abc", "2024-01-01"),

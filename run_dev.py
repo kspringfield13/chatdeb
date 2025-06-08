@@ -23,6 +23,8 @@ def ensure_venv() -> Path:
     """Create the Python virtual environment if it doesn't exist."""
     if not VENV.exists():
         subprocess.check_call([sys.executable, "-m", "venv", str(VENV)])
+    pip = VENV / "bin" / "pip"
+    subprocess.check_call([str(pip), "install", "-r", "requirements.txt"])
     return VENV
 
 

@@ -45,7 +45,7 @@ def infer_headers(rows: list[tuple]) -> list[str]:
     return headers
 
 
-INTRO = "To help you visualize this data, could you please clarify the following:"
+INTRO = "To create a visualization for you, I need some more details:"
 
 
 def generate_context_questions(history: list[dict]) -> list[str]:

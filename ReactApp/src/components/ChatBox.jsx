@@ -40,6 +40,7 @@ export default function ChatBox({ token }) {
       }
     };
     fetchIntro();
+    setShowVisualize(true);
   }, []);
 
   const openVisualization = async () => {
@@ -188,6 +189,34 @@ export default function ChatBox({ token }) {
       setChatHistory((prev) => [
         ...prev,
         { sender: "bot", text: "Sorry, I couldn't generate a summary." },
+      ]);
+    } finally {
+      setLoading(false);
+      setShowVisualize(true);
+    }
+  };
+
+  const openMyData = async () => {
+    setShowVisualize(false);
+    setLoading(true);
+    try {
+      const res = await fetch("/my_data");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.summary) {
+        setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+      }
+      if (data.erd_url) {
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: "bot", text: "Here is the ER diagram:", image: data.erd_url },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error getting data overview", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Sorry, I couldn't summarize the data." },
       ]);
     } finally {
       setLoading(false);
@@ -470,6 +499,20 @@ export default function ChatBox({ token }) {
             paddingLeft: "1rem",
           }}
         >
+          <button
+            onClick={openMyData}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: 20,
+              backgroundColor: "#00FFE1",
+              color: "#000",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.95rem",
+            }}
+          >
+            My Data?
+          </button>
           <button
             onClick={openVisualization}
             style={{

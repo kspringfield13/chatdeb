@@ -45,6 +45,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      "/my_data": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false
+      },
       "/intro": {
         target: "http://localhost:8000",
         changeOrigin: true,

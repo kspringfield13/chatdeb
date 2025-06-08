@@ -180,6 +180,7 @@ def create_table_visual(
     rows: list[tuple],
     limit: int | None = None,
     headers: list[str] | None = None,
+    cell_char_limit: int = 20,
 ) -> str:
     """Create a table image from ``rows`` and return the path.
 
@@ -195,7 +196,11 @@ def create_table_visual(
 
     display_rows = rows[:limit] if limit is not None else rows
 
-    df = pd.DataFrame(display_rows)
+    def _truncate(x: object) -> str:
+        s = str(x)
+        return s if len(s) <= cell_char_limit else s[: cell_char_limit - 1] + "\u2026"
+
+    df = pd.DataFrame(display_rows).applymap(_truncate)
 
     if headers and len(headers) == df.shape[1]:
         df.columns = headers

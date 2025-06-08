@@ -10,6 +10,8 @@ from typing import List, Tuple
 import re, math, json
 from openai import OpenAI
 from pathlib import Path
+from io import StringIO
+import pandas as pd
 
 VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
 
@@ -67,6 +69,57 @@ def load_recent_history(limit: int = 3) -> list[dict]:
         return []
 
 
+def _extract_markdown_table(text: str) -> tuple[list[str], list[list[str]]] | None:
+    """Return headers and rows if ``text`` contains a Markdown-style table."""
+
+    lines = [ln for ln in text.splitlines() if "|" in ln]
+    if len(lines) < 2:
+        return None
+
+    rows = [
+        [cell.strip() for cell in ln.strip().strip("|").split("|")] for ln in lines
+    ]
+
+    if len(rows) >= 2 and all(re.fullmatch(r":?-+:?", c) for c in rows[1]):
+        rows.pop(1)
+
+    if len(rows) < 2:
+        return None
+
+    header = rows[0]
+    body = rows[1:]
+    if any(len(r) != len(header) for r in body):
+        return None
+
+    return header, body
+
+
+def _maybe_convert_text_table(text: str) -> str:
+    """Convert any Markdown table in ``text`` to an image path."""
+
+    if text.startswith("TABLE:"):
+        return text
+
+    parsed = _extract_markdown_table(text)
+    if not parsed:
+        return text
+
+    headers, rows = parsed
+    if len(rows) * len(headers) <= 1:
+        return text
+
+    try:
+        from .visualize import create_table_visual
+
+        path = create_table_visual([tuple(r) for r in rows], headers=headers)
+        if path:
+            return f"TABLE:{path}"
+    except Exception as e:  # noqa: BLE001
+        print("markdown table conversion error", e)
+
+    return text
+
+
 def call_openai_fallback(user_question: str, history: list[dict] | None = None) -> str:
     """
     If SQL or Pinecone fails, fall back to a direct OpenAI completion
@@ -96,6 +149,7 @@ def call_openai_fallback(user_question: str, history: list[dict] | None = None) 
 
         # Extract the text portion of the first choice
         reply = completion.choices[0].message.content.strip()
+        reply = _maybe_convert_text_table(reply)
         return reply
 
     except Exception as e:
@@ -449,6 +503,7 @@ def handle_query(query_text: str) -> str:
             "The sample data is already loaded in memory. "
             "Would you like to use this DuckDB data?"
         )
+        reply = _maybe_convert_text_table(reply)
         _save_to_history(q, reply, confidence=None)
         return reply
 
@@ -460,21 +515,24 @@ def handle_query(query_text: str) -> str:
 
             if n == 0:
                 reply = format_zero_rows()
+                reply = _maybe_convert_text_table(reply)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             if n == 1:
                 reply = format_single_row(rows[0])
+                reply = _maybe_convert_text_table(reply)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             if 2 <= n <= 5:
                 body = format_numbered_list(rows)
-                reply = body
+                reply = _maybe_convert_text_table(body)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             reply = format_markdown_table(rows, limit=None)
+            reply = _maybe_convert_text_table(reply)
             _save_to_history(q, reply, confidence=None)
             return reply
 
@@ -483,11 +541,13 @@ def handle_query(query_text: str) -> str:
             print("⚠️ Data‐centric error:", e)
             history = load_recent_history()
             reply = call_openai_fallback(q, history)
+            reply = _maybe_convert_text_table(reply)
             _save_to_history(q, reply, confidence=None)
             return reply
         
     try:
         reply = handle_semantic_search(q, top_k=3)
+        reply = _maybe_convert_text_table(reply)
         _save_to_history(q, reply, confidence=None)
         return reply
     except Exception as e:
@@ -495,6 +555,7 @@ def handle_query(query_text: str) -> str:
         print("⚠️ Semantic‐search error:", e)
         history = load_recent_history()
         reply = call_openai_fallback(q, history)
+        reply = _maybe_convert_text_table(reply)
         _save_to_history(q, reply, confidence=None)
         return reply
 

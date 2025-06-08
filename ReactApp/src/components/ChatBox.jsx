@@ -3,12 +3,12 @@ import React, { useState, useRef, useEffect } from "react";
 import ImageModal from "./ImageModal";
 // Visualization questions are now asked through the chat flow
 
-export default function ChatBox({ token }) {
+export default function ChatBox() {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [showVisualize, setShowVisualize] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [contextQuestions, setContextQuestions] = useState([]);
+  const [contextQuestions] = useState([]);
   const [chartUrl, setChartUrl] = useState(null);
   const [visuals, setVisuals] = useState([]);
   const [vizQuestions, setVizQuestions] = useState([]);
@@ -24,6 +24,7 @@ export default function ChatBox({ token }) {
   const [imageModalSrc, setImageModalSrc] = useState(null);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
+  const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
 
   // Fetch intro message on mount
   useEffect(() => {
@@ -513,48 +514,52 @@ export default function ChatBox({ token }) {
           >
             My Data?
           </button>
-          <button
-            onClick={openVisualization}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: 20,
-              backgroundColor: "#004080",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-            }}
-          >
-            Visualize?
-          </button>
-          <button
-            onClick={openInfograph}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: 20,
-              backgroundColor: "#800080",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-            }}
-          >
-            Infograph It?
-          </button>
-          <button
-            onClick={openSummary}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: 20,
-              backgroundColor: "#008000",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "0.95rem",
-            }}
-          >
-            Summarize?
-          </button>
+          {hasUserPrompt && (
+            <>
+              <button
+                onClick={openVisualization}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: 20,
+                  backgroundColor: "#004080",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                }}
+              >
+                Visualize?
+              </button>
+              <button
+                onClick={openInfograph}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: 20,
+                  backgroundColor: "#800080",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                }}
+              >
+                Infograph It?
+              </button>
+              <button
+                onClick={openSummary}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: 20,
+                  backgroundColor: "#008000",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.95rem",
+                }}
+              >
+                Summarize?
+              </button>
+            </>
+          )}
         </div>
       )}
 

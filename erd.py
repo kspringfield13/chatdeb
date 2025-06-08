@@ -72,18 +72,25 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     plt.figure(figsize=(8, 6), facecolor="#1f1f1f")
     ax = plt.gca()
     ax.set_facecolor("#1f1f1f")
-    nx.draw(
+
+    labels = {t: t[:20] for t in G.nodes()}
+    nx.draw_networkx_nodes(
         G,
         pos,
-        with_labels=True,
         node_color="#333333",
         edgecolors="white",
         node_size=1500,
+        alpha=0.1,
+    )
+    nx.draw_networkx_labels(
+        G,
+        pos,
+        labels=labels,
         font_size=8,
         font_color="white",
         font_weight="bold",
-        edge_color="white",
     )
+    nx.draw_networkx_edges(G, pos, edge_color="white")
     OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()

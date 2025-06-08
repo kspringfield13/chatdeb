@@ -140,6 +140,8 @@ async def viz_complete(req: VizCompleteRequest):
     try:
         url = create_matplotlib_visual(req.answers)
         return VizCompleteResponse(chart_url=url)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

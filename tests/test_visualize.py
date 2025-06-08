@@ -1,6 +1,12 @@
 import os
 import re
-from ..visualize import generate_context_questions, infer_headers, create_table_visual
+import pytest
+from ..visualize import (
+    generate_context_questions,
+    infer_headers,
+    create_table_visual,
+    create_matplotlib_visual,
+)
 
 
 def test_default_intro_included():
@@ -59,3 +65,9 @@ def test_generate_context_questions_fallback(monkeypatch):
     qs = generate_context_questions([{"sender": "user", "text": "Hello"}])
     assert qs[0].startswith("To create a visualization for you")
     assert len(qs) == 4
+
+
+def test_create_matplotlib_visual_invalid_sql(monkeypatch):
+    with pytest.raises(ValueError) as exc:
+        create_matplotlib_visual(["table", "x", "y", "bar"])
+    assert "SELECT" in str(exc.value)

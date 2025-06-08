@@ -45,7 +45,7 @@ def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
 
 
 def generate_erd(db_path: str = DUCKDB_PATH) -> str:
-    """Create a basic ER diagram from table relationships."""
+    """Create a visually appealing ER diagram from table relationships."""
     con = duckdb.connect(db_path)
     tables = sorted(row[0] for row in con.execute("SHOW TABLES").fetchall())
     edges = []
@@ -55,9 +55,8 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
         for col in cols:
             if col.endswith("_id"):
                 ref = col[:-3]
-                # naive match to other table
                 for t in tables:
-                    if t == ref or t.rstrip('s') == ref:
+                    if t == ref or t.rstrip("s") == ref:
                         edges.append((tbl, t))
                         break
     con.close()
@@ -69,32 +68,49 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
         G.add_edge(a, b)
 
     pos = nx.spring_layout(G, k=1)
-    plt.figure(figsize=(8, 6), facecolor="#1f1f1f")
+
+    plt.figure(figsize=(10, 7), facecolor="#1f1f1f")
     ax = plt.gca()
     ax.set_facecolor("#1f1f1f")
+    ax.set_axis_off()  # remove grid, ticks, and axis
 
     labels = {t: t[:20] for t in G.nodes()}
+
     nx.draw_networkx_nodes(
         G,
         pos,
-        node_color="#333333",
-        edgecolors="white",
-        node_size=1500,
-        alpha=0.1,
+        node_color="#2b2b2b",
+        edgecolors="#ffffff",
+        node_size=1800,
+        linewidths=1.5,
+        alpha=0.9,
     )
+
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edge_color="#888888",
+        arrows=True,
+        arrowstyle="->",
+        arrowsize=15,
+        width=1.2,
+    )
+
     nx.draw_networkx_labels(
         G,
         pos,
         labels=labels,
-        font_size=8,
-        font_color="white",
+        font_size=10,
+        font_color="#ffffff",
+        font_family="sans-serif",
         font_weight="bold",
     )
-    nx.draw_networkx_edges(G, pos, edge_color="white")
+
+    plt.title("Entity Relationship Diagram", fontsize=12, color="white", pad=20)
     OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
-    plt.tight_layout()
-    plt.savefig(outfile, facecolor="#1f1f1f")
+    plt.tight_layout(pad=3)
+    plt.savefig(outfile, facecolor="#1f1f1f", dpi=300)
     plt.close()
     return str(outfile)
 

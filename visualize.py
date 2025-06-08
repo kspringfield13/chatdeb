@@ -201,7 +201,10 @@ def create_table_visual(
         s = str(x)
         return s if len(s) <= cell_char_limit else s[: cell_char_limit - 1] + "\u2026"
 
-    df = pd.DataFrame(display_rows).applymap(_truncate)
+    # ``applymap`` is deprecated so use ``DataFrame.map`` for element-wise
+    # transformation across the entire DataFrame. This avoids the FutureWarning
+    # seen in tests and is slightly faster.
+    df = pd.DataFrame(display_rows).map(_truncate)
 
     if headers and len(headers) == df.shape[1]:
         df.columns = headers

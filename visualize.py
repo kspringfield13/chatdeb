@@ -130,7 +130,10 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
     sql_query, x_col, y_col, chart_type = answers[:4]
     if not sql_query.strip().lower().startswith("select"):
-        raise ValueError("Query must be a SELECT statement")
+        raise ValueError(
+            "Query must be a SELECT statement. For example: "
+            "SELECT * FROM your_table"
+        )
 
     try:
         engine = get_engine()

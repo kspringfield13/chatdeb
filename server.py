@@ -20,6 +20,7 @@ from .chatbot import (
 )
 from .visualize import generate_context_questions, create_matplotlib_visual
 from .infograph import generate_infograph_questions, create_infographic
+from .erd import generate_erd, get_data_summary
 
 app = FastAPI(title="KYDxBot API")
 
@@ -95,6 +96,11 @@ class SummarizeResponse(BaseModel):
     summary: str
 
 
+class MyDataResponse(BaseModel):
+    summary: str
+    erd_url: str | None = None
+
+
 class IntroResponse(BaseModel):
     message: str
 
@@ -160,6 +166,17 @@ async def summarize(req: SummarizeRequest):
     try:
         text = summarize_conversation(req.history, req.visuals)
         return SummarizeResponse(summary=text)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/my_data", response_model=MyDataResponse)
+async def my_data():
+    """Return a brief summary of the DuckDB data and an ER diagram image."""
+    try:
+        summary = get_data_summary()
+        url = generate_erd()
+        return MyDataResponse(summary=summary, erd_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

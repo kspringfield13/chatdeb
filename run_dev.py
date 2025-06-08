@@ -12,6 +12,13 @@ ROOT = Path(__file__).resolve().parent
 VENV = ROOT / "chatbot_env"
 
 
+def venv_bin(executable: str) -> Path:
+    """Return the path to an executable inside the virtual env."""
+    folder = "Scripts" if os.name == "nt" else "bin"
+    exe = executable + (".exe" if os.name == "nt" else "")
+    return VENV / folder / exe
+
+
 def ensure_venv() -> Path:
     """Create the Python virtual environment if it doesn't exist."""
     if not VENV.exists():
@@ -23,12 +30,13 @@ def ensure_node() -> None:
     """Install Node dependencies if needed."""
     react_dir = ROOT / "ReactApp"
     if not (react_dir / "node_modules").exists():
-        subprocess.check_call(["npm", "install"], cwd=react_dir)
+        npm = "npm.cmd" if os.name == "nt" else "npm"
+        subprocess.check_call([npm, "install"], cwd=react_dir)
 
 
 def start_backend(env: dict[str, str]) -> subprocess.Popen:
     """Start the FastAPI backend using uvicorn."""
-    python = str(VENV / "bin" / "python")
+    python = str(venv_bin("python"))
     return subprocess.Popen(
         [python, "-m", "uvicorn", "kydxbot.server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"],
         env=env,
@@ -38,7 +46,8 @@ def start_backend(env: dict[str, str]) -> subprocess.Popen:
 def start_frontend() -> subprocess.Popen:
     """Run the React development server."""
     react_dir = ROOT / "ReactApp"
-    return subprocess.Popen(["npm", "run", "dev"], cwd=react_dir)
+    npm = "npm.cmd" if os.name == "nt" else "npm"
+    return subprocess.Popen([npm, "run", "dev"], cwd=react_dir)
 
 
 def main() -> None:

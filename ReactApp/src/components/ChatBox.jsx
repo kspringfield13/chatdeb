@@ -23,6 +23,7 @@ export default function ChatBox() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [imageModalSrc, setImageModalSrc] = useState(null);
   const [erdModalSrc, setErdModalSrc] = useState(null);
+  const [isErdOpen, setIsErdOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
@@ -218,6 +219,7 @@ export default function ChatBox() {
           { sender: "bot", text: "Here is the ER diagram:" },
         ]);
         setErdModalSrc(data.erd_url);
+        setIsErdOpen(true);
       }
       if (data.erd_desc) {
         setChatHistory((prev) => [...prev, { sender: "bot", text: data.erd_desc }]);
@@ -649,8 +651,26 @@ export default function ChatBox() {
     {imageModalSrc && (
       <ImageModal src={imageModalSrc} onClose={() => setImageModalSrc(null)} />
     )}
-    {erdModalSrc && (
-      <ImageModal src={erdModalSrc} onClose={() => setErdModalSrc(null)} />
+    {erdModalSrc && isErdOpen && (
+      <ImageModal src={erdModalSrc} onClose={() => setIsErdOpen(false)} />
+    )}
+    {erdModalSrc && !isErdOpen && (
+      <button
+        onClick={() => setIsErdOpen(true)}
+        style={{
+          position: "absolute",
+          bottom: "5rem",
+          right: "1rem",
+          padding: "0.5rem 1rem",
+          borderRadius: 20,
+          backgroundColor: "#00FFE1",
+          color: "#000",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        View ERD
+      </button>
     )}
     </>
   );

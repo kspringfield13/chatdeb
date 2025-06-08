@@ -7,6 +7,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from openai import OpenAI
 from .db import get_engine
+from .chart_style import set_default_style
+
+set_default_style()
 
 
 def infer_headers(rows: list[tuple]) -> list[str]:
@@ -42,9 +45,7 @@ def infer_headers(rows: list[tuple]) -> list[str]:
     return headers
 
 
-INTRO = (
-    "To create your visualization I'll need a bit more information."
-)
+INTRO = "To create your visualization I'll need a bit more information."
 
 
 def generate_context_questions(history: list[dict]) -> list[str]:
@@ -86,7 +87,11 @@ def generate_context_questions(history: list[dict]) -> list[str]:
         )
         text = completion.choices[0].message.content.strip()
         # Split lines and remove bullets/numbers
-        lines = [line.lstrip("- ").lstrip("0123456789. ").strip() for line in text.splitlines() if line.strip()]
+        lines = [
+            line.lstrip("- ").lstrip("0123456789. ").strip()
+            for line in text.splitlines()
+            if line.strip()
+        ]
         if lines:
             lines[0] = f"{INTRO} {lines[0]}"
         return lines[:3]
@@ -112,25 +117,29 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
     The function will execute the query against the DuckDB database,
     generate the chart and save it under the ``charts`` directory.
-    The file path to the image is returned.  An empty string is returned on
-    failure.
+    The file path to the image is returned.  ``ValueError`` is raised if the
+    query fails or the provided parameters are invalid.
     """
 
     if len(answers) < 4:
-        return ""
+        raise ValueError(
+            "Four answers are required: SQL, x column, y column and chart type"
+        )
 
     sql_query, x_col, y_col, chart_type = answers[:4]
+    if not sql_query.strip().lower().startswith("select"):
+        raise ValueError("Query must be a SELECT statement")
 
     try:
         engine = get_engine()
         df = pd.read_sql_query(sql_query, engine)
     except Exception as e:  # noqa: BLE001
-        print("create_matplotlib_visual query error", e)
-        return ""
+        raise ValueError(f"Query failed: {e}") from e
 
-    if df.empty or x_col not in df.columns or y_col not in df.columns:
-        print("create_matplotlib_visual no data or invalid columns")
-        return ""
+    if df.empty:
+        raise ValueError("Query returned no data")
+    if x_col not in df.columns or y_col not in df.columns:
+        raise ValueError("Invalid column names for x or y axis")
 
     fig, ax = plt.subplots()
     chart_type = chart_type.lower().strip()
@@ -142,11 +151,12 @@ def create_matplotlib_visual(answers: list[str]) -> str:
             ax.scatter(df[x_col], df[y_col])
         elif chart_type == "pie":
             ax.pie(df[y_col], labels=df[x_col], autopct="%1.1f%%")
-        else:
+        elif chart_type == "bar":
             ax.bar(df[x_col], df[y_col])
+        else:
+            raise ValueError(f"Unsupported chart type '{chart_type}'")
     except Exception as e:  # noqa: BLE001
-        print("create_matplotlib_visual plot error", e)
-        return ""
+        raise ValueError(f"Plotting failed: {e}") from e
 
     ax.set_xlabel(x_col)
     ax.set_ylabel(y_col)
@@ -159,8 +169,7 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     try:
         fig.savefig(file_path)
     except Exception as e:  # noqa: BLE001
-        print("create_matplotlib_visual save error", e)
-        return ""
+        raise ValueError(f"Saving chart failed: {e}") from e
     finally:
         plt.close(fig)
 

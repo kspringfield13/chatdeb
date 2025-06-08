@@ -69,12 +69,25 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
         G.add_edge(a, b)
 
     pos = nx.spring_layout(G, k=1)
-    plt.figure(figsize=(8, 6))
-    nx.draw(G, pos, with_labels=True, node_color="#00FFE1", edgecolors="black", node_size=1500, font_size=8)
+    plt.figure(figsize=(8, 6), facecolor="#1f1f1f")
+    ax = plt.gca()
+    ax.set_facecolor("#1f1f1f")
+    nx.draw(
+        G,
+        pos,
+        with_labels=True,
+        node_color="#333333",
+        edgecolors="white",
+        node_size=1500,
+        font_size=8,
+        font_color="white",
+        font_weight="bold",
+        edge_color="white",
+    )
     OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()
-    plt.savefig(outfile)
+    plt.savefig(outfile, facecolor="#1f1f1f")
     plt.close()
     return str(outfile)
 

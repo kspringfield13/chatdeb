@@ -30,10 +30,26 @@ export default function ImageModal({ src, onClose }) {
             fontSize: "1.25rem",
             cursor: "pointer",
           }}
-          aria-label="Close"
+          aria-label="Minimize"
         >
           ×
         </button>
+        <a
+          href={src}
+          download
+          style={{
+            position: "absolute",
+            top: "0.5rem",
+            left: "0.5rem",
+            background: "transparent",
+            border: "none",
+            color: "#fff",
+            fontSize: "1rem",
+            textDecoration: "underline",
+          }}
+        >
+          Download
+        </a>
         <img
           src={src}
           alt="table"

@@ -1,10 +1,36 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
 
+// Fetch summary + ERD image from backend
+async function fetchMyData() {
+  const res = await fetch("/my_data");
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 export default function ChatBox({ token }) {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const messagesEndRef = useRef(null);
+
+  const pills = [
+    {
+      label: "My Data?",
+      color: "#00FFE1",
+      action: async () => {
+        try {
+          const data = await fetchMyData();
+          setChatHistory((prev) => [
+            ...prev,
+            { sender: "user", text: "My Data?" },
+            { sender: "bot", text: data.summary, image: data.erd_image_base64 },
+          ]);
+        } catch (err) {
+          console.error("Error fetching My Data:", err);
+        }
+      },
+    },
+  ];
 
   // Whenever chatHistory changes, scroll to bottom
   useEffect(() => {
@@ -12,6 +38,12 @@ export default function ChatBox({ token }) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatHistory]);
+
+  // Trigger My Data on first load
+  useEffect(() => {
+    pills[0].action();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sendQuery = async () => {
     const trimmed = query.trim();
@@ -92,6 +124,35 @@ export default function ChatBox({ token }) {
         </h2>
       </div>
 
+      {/* Quick action pills */}
+      <div
+        style={{
+          display: "flex",
+          gap: "0.5rem",
+          padding: "0.5rem",
+          backgroundColor: "#1f1f1f",
+          borderBottom: "1px solid #333",
+        }}
+      >
+        {pills.map((p) => (
+          <button
+            key={p.label}
+            onClick={p.action}
+            style={{
+              backgroundColor: p.color,
+              border: "none",
+              padding: "0.25rem 0.75rem",
+              borderRadius: 20,
+              color: "#000",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       {/* === 2) Message list: flex:1, scrollable === */}
       <div
         style={{
@@ -106,8 +167,8 @@ export default function ChatBox({ token }) {
             key={idx}
             style={{
               display: "flex",
-              justifyContent:
-                msg.sender === "user" ? "flex-end" : "flex-start",
+              flexDirection: "column",
+              alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
               marginBottom: "0.75rem",
             }}
           >
@@ -119,41 +180,40 @@ export default function ChatBox({ token }) {
              *         inside a <div> with white-space: pre-wrap.
              * Case C: otherwise, render as a normal single-line bubble.
              */}
-            {msg.text.includes("\n") ? (
-              // ── Case B: Any multiline (e.g. numbered list) ────────────────────
-              <div
+        {chatHistory.map((msg, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: msg.sender === "user" ? "flex-end" : "flex-start",
+              marginBottom: "0.75rem",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: msg.sender === "user" ? "#004080" : "#3a3a3a",
+                color: "#fff",
+                padding: "0.75rem 1rem",
+                borderRadius: 20,
+                maxWidth: "80%",
+                lineHeight: 1.4,
+                fontSize: "0.95rem",
+                textAlign: "left",
+                whiteSpace: msg.text && msg.text.includes("\\n") ? "pre-wrap" : "normal",
+              }}
+            >
+              {msg.text}
+            </div>
+            {msg.image && (
+              <img
+                src={`data:image/png;base64,${msg.image}`}
                 style={{
-                  backgroundColor:
-                    msg.sender === "user" ? "#004080" : "#3a3a3a",
-                  color: "#fff",
-                  padding: "0.75rem 1rem",
-                  borderRadius: 20,
                   maxWidth: "80%",
-                  lineHeight: 1.4,
-                  fontSize: "0.95rem",
-                  textAlign: "left",
-                  whiteSpace: "pre-wrap", // preserve all newline breaks
+                  marginTop: "0.5rem",
+                  borderRadius: 8,
                 }}
-              >
-                {msg.text}
-              </div>
-            ) : (
-              // ── Case C: Single‐line text ───────────────────────────────────────
-              <div
-                style={{
-                  backgroundColor:
-                    msg.sender === "user" ? "#004080" : "#3a3a3a",
-                  color: "#fff",
-                  padding: "0.75rem 1rem",
-                  borderRadius: 20,
-                  maxWidth: "80%",
-                  lineHeight: 1.4,
-                  fontSize: "0.95rem",
-                  textAlign: "left",
-                }}
-              >
-                {msg.text}
-              </div>
+              />
             )}
           </div>
         ))}

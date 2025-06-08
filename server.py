@@ -7,11 +7,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load .env from the “kydxbot” package directory
-package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
+package_dir = Path(__file__).parent  # this is C:\Users\kspri\Dev\kydxbot
 dotenv_path = package_dir / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
 from .chatbot import handle_query, clear_conversation
+from .data_summary import summarize_duckdb, erd_as_base64
 
 app = FastAPI(title="KYDxBot API")
 
@@ -25,18 +26,26 @@ origins = [
 # 2) Add middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,            # ← which domains can send requests
-    allow_credentials=True,           # allow cookies, Authorization headers, etc.
-    allow_methods=["*"],              # allow all HTTP methods: GET, POST, etc.
-    allow_headers=["*"],              # allow all headers like Content-Type
+    allow_origins=origins,  # ← which domains can send requests
+    allow_credentials=True,  # allow cookies, Authorization headers, etc.
+    allow_methods=["*"],  # allow all HTTP methods: GET, POST, etc.
+    allow_headers=["*"],  # allow all headers like Content-Type
 )
+
 
 # (Then your existing endpoint definitions come below)
 class ChatRequest(BaseModel):
     query: str
 
+
 class ChatResponse(BaseModel):
     response: str
+
+
+class MyDataResponse(BaseModel):
+    summary: str
+    erd_image_base64: str
+
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
@@ -53,6 +62,13 @@ async def chat_endpoint(request: ChatRequest):
     return ChatResponse(response=response_text)
 
 
+@app.get("/my_data", response_model=MyDataResponse)
+async def my_data_endpoint():
+    summary = summarize_duckdb()
+    img = erd_as_base64()
+    return MyDataResponse(summary=summary, erd_image_base64=img)
+
+
 @app.post("/clear_history")
 async def clear_history():
     """
@@ -60,6 +76,7 @@ async def clear_history():
     """
     clear_conversation()
     return {"status": "cleared"}
+
 
 # If you want to run via "python server.py"
 if __name__ == "__main__":

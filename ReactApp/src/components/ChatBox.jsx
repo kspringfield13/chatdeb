@@ -24,6 +24,7 @@ export default function ChatBox() {
   const [imageModalSrc, setImageModalSrc] = useState(null);
   const [erdModalSrc, setErdModalSrc] = useState(null);
   const [isErdOpen, setIsErdOpen] = useState(false);
+  const [myDataClicked, setMyDataClicked] = useState(false);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
@@ -233,6 +234,19 @@ export default function ChatBox() {
     } finally {
       setLoading(false);
       setShowVisualize(true);
+    }
+  };
+
+  const handleMyDataClick = async () => {
+    if (!myDataClicked) {
+      setMyDataClicked(true);
+      await openMyData();
+    } else {
+      if (erdModalSrc) {
+        setIsErdOpen(true);
+      } else {
+        await openMyData();
+      }
     }
   };
 
@@ -512,7 +526,7 @@ export default function ChatBox() {
           }}
         >
           <button
-            onClick={openMyData}
+            onClick={handleMyDataClick}
             style={{
               padding: "0.5rem 1rem",
               borderRadius: 20,
@@ -521,9 +535,10 @@ export default function ChatBox() {
               border: "none",
               cursor: "pointer",
               fontSize: "0.95rem",
+              opacity: myDataClicked ? 0.6 : 1,
             }}
           >
-            My Data?
+            {myDataClicked ? "View My Data?" : "My Data?"}
           </button>
           {hasUserPrompt && (
             <>
@@ -653,24 +668,6 @@ export default function ChatBox() {
     )}
     {erdModalSrc && isErdOpen && (
       <ImageModal src={erdModalSrc} onClose={() => setIsErdOpen(false)} />
-    )}
-    {erdModalSrc && !isErdOpen && (
-      <button
-        onClick={() => setIsErdOpen(true)}
-        style={{
-          position: "absolute",
-          bottom: "5rem",
-          right: "1rem",
-          padding: "0.5rem 1rem",
-          borderRadius: 20,
-          backgroundColor: "#00FFE1",
-          color: "#000",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        View ERD
-      </button>
     )}
     </>
   );

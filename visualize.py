@@ -92,17 +92,18 @@ def generate_context_questions(history: list[dict]) -> list[str]:
             for line in text.splitlines()
             if line.strip()
         ]
-        if lines:
+        if len(lines) == 4 and all(q.endswith("?") for q in lines):
             lines[0] = f"{INTRO} {lines[0]}"
-        return lines[:4]
-    except Exception as e:
+            return lines
+    except Exception as e:  # noqa: BLE001
         print("generate_context_questions error", e)
-        return [
-            f"{INTRO} Which table or SQL query should I use as the data source?",
-            "Which column should be used for the x-axis?",
-            "Which column or metric goes on the y-axis?",
-            "What chart type would you like (bar, line, scatter, etc.)?",
-        ]
+
+    return [
+        f"{INTRO} Which table or SQL query should I use as the data source?",
+        "Which column should be used for the x-axis?",
+        "Which column or metric goes on the y-axis?",
+        "What chart type would you like (bar, line, scatter, etc.)?",
+    ]
 
 
 def create_matplotlib_visual(answers: list[str]) -> str:

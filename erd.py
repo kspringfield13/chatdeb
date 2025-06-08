@@ -16,7 +16,6 @@ set_default_style()
 # Save ER diagrams in the same ``charts`` folder used by other modules so the
 # FastAPI server can serve them under the ``/charts`` route.
 OUTPUT_DIR = Path("charts")
-OUTPUT_DIR.mkdir(exist_ok=True)
 
 def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
     """Return a human readable summary of the tables in the DuckDB database."""
@@ -72,6 +71,7 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     pos = nx.spring_layout(G, k=1)
     plt.figure(figsize=(8, 6))
     nx.draw(G, pos, with_labels=True, node_color="#00FFE1", edgecolors="black", node_size=1500, font_size=8)
+    OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()
     plt.savefig(outfile)
@@ -106,7 +106,7 @@ def describe_erd(image_path: str) -> str:
             ],
         }
         resp = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=[msg],
         )
         return resp.choices[0].message.content.strip()

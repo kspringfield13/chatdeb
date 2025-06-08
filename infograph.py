@@ -17,12 +17,15 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 def bar_chart(ax, data, labels, title="Bar Chart"):
     ax.bar(labels, data, color="skyblue")
     ax.set_title(title, fontsize=10)
+    # Set ticks explicitly before applying labels to avoid matplotlib warnings
+    ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, fontsize=8)
 
 
 def line_chart(ax, data, labels, title="Line Chart"):
     ax.plot(labels, data, marker="o", color="coral")
     ax.set_title(title, fontsize=10)
+    ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, fontsize=8)
 
 

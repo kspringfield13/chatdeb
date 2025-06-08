@@ -62,7 +62,7 @@ export default function ChatBox() {
       setVizStep(0);
       setCollectingViz(true);
 
-      const intro = "To create your visualization I'll need a bit more information.";
+      const intro = "To help you visualize this data, could you please clarify the following:";
       if (qs[0] && qs[0].startsWith(intro)) {
         const first = qs[0].slice(intro.length).trim();
         setChatHistory((prev) => [

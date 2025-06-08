@@ -6,7 +6,7 @@ from ..visualize import generate_context_questions, infer_headers, create_table_
 def test_default_intro_included():
     qs = generate_context_questions([])
     assert qs, "No questions returned"
-    assert qs[0].startswith("To create your visualization"), qs[0]
+    assert qs[0].startswith("To help you visualize this data"), qs[0]
 
 
 def test_generate_context_questions_length():

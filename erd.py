@@ -4,6 +4,7 @@ from pathlib import Path
 import duckdb
 import networkx as nx
 import matplotlib.pyplot as plt
+from PIL import Image
 try:  # OpenAI is optional for ERD descriptions
     from openai import OpenAI
 except Exception:  # pragma: no cover - optional dep may be missing
@@ -16,6 +17,8 @@ set_default_style()
 # Save ER diagrams in the same ``charts`` folder used by other modules so the
 # FastAPI server can serve them under the ``/charts`` route.
 OUTPUT_DIR = Path("charts")
+# Watermark lives next to the logo in ReactApp/public
+WATERMARK_PATH = Path(__file__).resolve().parent / "ReactApp" / "public" / "watermark.png"
 
 def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
     """Return a human readable summary of the tables in the DuckDB database."""
@@ -98,6 +101,23 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     plt.tight_layout()
     plt.savefig(outfile, facecolor="#1f1f1f")
     plt.close()
+
+    # Add optional watermark in bottom-right corner
+    if WATERMARK_PATH.exists():
+        try:
+            base = Image.open(outfile).convert("RGBA")
+            mark = Image.open(WATERMARK_PATH).convert("RGBA")
+            # scale watermark to 20% of image width
+            max_width = int(base.width * 0.2)
+            ratio = max_width / mark.width
+            mark = mark.resize((max_width, int(mark.height * ratio)), Image.LANCZOS)
+            x = base.width - mark.width - 10
+            y = base.height - mark.height - 10
+            base.alpha_composite(mark, dest=(x, y))
+            base.save(outfile)
+        except Exception:  # noqa: BLE001
+            pass
+
     return str(outfile)
 
 

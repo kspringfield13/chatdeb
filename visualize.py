@@ -235,7 +235,7 @@ def create_table_visual(
         )
         table.auto_set_font_size(False)
         table.set_fontsize(10)
-        table.scale(1, 1.2)
+        table.scale(1, 0.8)
         table.auto_set_column_width(col=list(range(len(df.columns))))
 
         for (row, col), cell in table.get_celld().items():

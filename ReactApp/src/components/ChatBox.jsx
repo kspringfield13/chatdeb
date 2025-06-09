@@ -278,10 +278,7 @@ export default function ChatBox() {
         setErdModalSrc(data.erd_url);
         setIsErdOpen(true);
       }
-      if (data.erd_desc) {
-        newMsgs.push({ sender: "bot", text: data.erd_desc });
-      }
-
+      // Removed verbose ER diagram description
       try {
         const historyPayload = [...chatHistory, ...newMsgs];
         const visualsPayload = data.erd_url ? [...visuals, data.erd_url] : visuals;

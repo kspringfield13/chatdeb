@@ -34,6 +34,10 @@ def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
             count = "?"
         info.append((tbl, count))
 
+    # Sort tables by row count descending when all counts are numeric
+    if all(isinstance(c, (int, float)) for _, c in info):
+        info.sort(key=lambda x: x[1], reverse=True)
+
     con.close()
 
     if not info:
@@ -41,8 +45,8 @@ def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
 
     header = "| Tables | Rows |"
     divider = "|---|---|"
-    rows = [f"| {name} | {rows} |" for name, rows in info]
-    return "\n".join([header, divider, *rows])
+    row_lines = [f"| {name} | {rows} |" for name, rows in info]
+    return "\n".join([header, divider, *row_lines])
 
 
 def generate_erd(db_path: str = DUCKDB_PATH) -> str:

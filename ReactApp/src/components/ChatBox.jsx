@@ -518,11 +518,21 @@ export default function ChatBox() {
             }}
           >
             {msg.image ? (
-              <div style={{ position: "relative", maxWidth: "80%" }}>
+              <div
+                style={{
+                  position: "relative",
+                  maxWidth: "80%",
+                  overflowX: msg.image.includes("/table_") ? "auto" : "visible",
+                }}
+              >
                 <img
                   src={msg.image}
-                  alt="chart"
-                  style={{ maxWidth: "100%", borderRadius: 8, backgroundColor: "#1f1f1f" }}
+                  alt={msg.image.includes("/table_") ? "table" : "chart"}
+                  style={{
+                    maxWidth: msg.image.includes("/table_") ? "none" : "100%",
+                    borderRadius: 8,
+                    backgroundColor: "#1f1f1f",
+                  }}
                 />
                 <button
                   onClick={() => setImageModalSrc(msg.image)}

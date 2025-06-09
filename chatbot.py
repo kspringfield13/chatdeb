@@ -13,6 +13,8 @@ from pathlib import Path
 from io import StringIO
 import pandas as pd
 
+
+
 VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
 
 def _load_metadata() -> dict:
@@ -37,17 +39,7 @@ def _metadata_summary(meta: dict) -> str:
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
 
-try:
-    from dotenv import load_dotenv
-    package_dir = Path(__file__).parent
-    dotenv_file = package_dir / ".env"
-    load_dotenv(dotenv_path=dotenv_file)
-except Exception:
-    # If python-dotenv isn't installed or .env is missing,
-    # continue without loading environment variables
-    load_dotenv = lambda *a, **kw: None
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 def load_recent_history(limit: int = 3) -> list[dict]:

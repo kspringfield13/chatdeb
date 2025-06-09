@@ -12,11 +12,12 @@ except Exception:  # pragma: no cover - optional dep may be missing
 
 from .chart_style import set_default_style
 from .db import DUCKDB_PATH
+from .config import CHARTS_DIR
 
 set_default_style()
 # Save ER diagrams in the same ``charts`` folder used by other modules so the
 # FastAPI server can serve them under the ``/charts`` route.
-OUTPUT_DIR = Path("charts")
+OUTPUT_DIR = CHARTS_DIR
 # Watermark lives next to the logo in ReactApp/public
 WATERMARK_PATH = Path(__file__).resolve().parent / "ReactApp" / "public" / "watermark.png"
 
@@ -94,7 +95,6 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     )
     nx.draw_networkx_edges(G, pos, edge_color="white", alpha=0.1, style="dotted", width=0.5)
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()
     plt.savefig(outfile, facecolor="#1f1f1f")

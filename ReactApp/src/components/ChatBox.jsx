@@ -469,7 +469,7 @@ export default function ChatBox() {
         <img
           src="/logo.png"
           alt="KYDxBot logo"
-          style={{ height: "30px" }}
+          style={{ height: "45px" }}
         />
       </div>
 

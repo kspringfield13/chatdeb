@@ -653,9 +653,9 @@ export default function ChatBox() {
               opacity: myDataClicked ? 0.6 : 1,
               fontWeight: "bold",
             }}
-            title="My Data?"
+            title="My Data"
           >
-            {!hidePillText && (myDataClicked ? "View My Data?" : "My Data?")}
+            {!hidePillText && (myDataClicked ? "View My Data" : "My Data")}
           </button>
           {hasUserPrompt && (
             <>

@@ -20,11 +20,18 @@ def venv_bin(executable: str) -> Path:
 
 
 def ensure_venv() -> Path:
-    """Create the Python virtual environment if it doesn't exist."""
+    """Create the Python virtual environment if it doesn't exist, and install requirements."""
     if not VENV.exists():
         subprocess.check_call([sys.executable, "-m", "venv", str(VENV)])
-    pip = VENV / "bin" / "pip"
-    subprocess.check_call([str(pip), "install", "-r", "requirements.txt"])
+
+    # Try Unix‑style pip first, then fall back to Windows
+    try:
+        pip = VENV / "bin" / "pip"
+        subprocess.check_call([str(pip), "install", "-r", "requirements.txt"])
+    except FileNotFoundError:
+        pip = VENV / "Scripts" / "pip.exe"
+        subprocess.check_call([str(pip), "install", "-r", "requirements.txt"])
+
     return VENV
 
 

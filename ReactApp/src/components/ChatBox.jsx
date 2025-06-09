@@ -274,7 +274,7 @@ export default function ChatBox() {
         await loadImage(data.erd_url);
         await wait(1000);
         setVisuals((prev) => [...prev, data.erd_url]);
-        newMsgs.push({ sender: "bot", text: "Here is the ER diagram:" });
+        newMsgs.push({ sender: "bot", text: "Here is the ER diagram:", image: data.erd_url });
         setErdModalSrc(data.erd_url);
         setIsErdOpen(true);
       }

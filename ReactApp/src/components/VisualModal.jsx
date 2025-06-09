@@ -1,7 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function VisualModal({ onClose, questions = [], onSubmit, chartUrl }) {
   const [answers, setAnswers] = useState(() => questions.map(() => ""));
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const hidePillText = windowWidth < 360;
+  const pillFontSize = windowWidth < 500 ? "0.75rem" : "0.95rem";
+  const pillPadding = hidePillText ? "0.5rem" : "0.5rem 1rem";
+  const basePillStyle = {
+    marginTop: "1rem",
+    padding: pillPadding,
+    borderRadius: 20,
+    backgroundColor: "#004080",
+    color: "#fff",
+    border: "none",
+    cursor: "pointer",
+    fontSize: pillFontSize,
+    whiteSpace: "nowrap",
+  };
 
   const handleChange = (idx, value) => {
     setAnswers((prev) => prev.map((a, i) => (i === idx ? value : a)));
@@ -68,20 +90,8 @@ export default function VisualModal({ onClose, questions = [], onSubmit, chartUr
                 />
               </div>
             ))}
-            <button
-              onClick={submit}
-              style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1rem",
-                borderRadius: 20,
-                backgroundColor: "#004080",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "0.95rem",
-              }}
-            >
-              Submit
+            <button onClick={submit} style={basePillStyle} title="Submit">
+              {!hidePillText && "Submit"}
             </button>
           </>
         ) : (

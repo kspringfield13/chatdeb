@@ -1,6 +1,7 @@
 // src/components/ChatBox.jsx
 import React, { useState, useRef, useEffect } from "react";
 import ImageModal from "./ImageModal";
+import VideoModal from "./VideoModal";
 // Visualization questions are now asked through the chat flow
 
 export default function ChatBox() {
@@ -26,6 +27,8 @@ export default function ChatBox() {
   const [isErdOpen, setIsErdOpen] = useState(false);
   const [myDataClicked, setMyDataClicked] = useState(false);
   const [showDirectorsCut, setShowDirectorsCut] = useState(false);
+  const [directorsCutUrl, setDirectorsCutUrl] = useState(null);
+  const [isDirectorsCutOpen, setIsDirectorsCutOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
@@ -259,6 +262,39 @@ export default function ChatBox() {
     }
   };
 
+  const openDirectorsCut = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/directors_cut", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ history: chatHistory }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.video_url) {
+        setDirectorsCutUrl(data.video_url);
+        setIsDirectorsCutOpen(true);
+      }
+    } catch (err) {
+      console.error("Error creating directors cut", err);
+      setChatHistory((prev) => [
+        ...prev,
+        { sender: "bot", text: "Error creating video." },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDirectorsCutClick = async () => {
+    if (directorsCutUrl) {
+      setIsDirectorsCutOpen(true);
+    } else {
+      await openDirectorsCut();
+    }
+  };
+
   const handleMyDataClick = async () => {
     if (!myDataClicked) {
       setMyDataClicked(true);
@@ -351,6 +387,7 @@ export default function ChatBox() {
           { sender: "bot", text: "Here is your table:", image: img },
         ]);
         setShowDirectorsCut(true);
+        setDirectorsCutUrl(null);
       } else {
         setChatHistory((prev) => [
           ...prev,
@@ -599,6 +636,7 @@ export default function ChatBox() {
               </button>
               {showDirectorsCut && (
                 <button
+                  onClick={handleDirectorsCutClick}
                   style={{
                     ...basePillStyle,
                     backgroundColor: "#000",
@@ -696,6 +734,9 @@ export default function ChatBox() {
     )}
     {erdModalSrc && isErdOpen && (
       <ImageModal src={erdModalSrc} onClose={() => setIsErdOpen(false)} />
+    )}
+    {directorsCutUrl && isDirectorsCutOpen && (
+      <VideoModal src={directorsCutUrl} onClose={() => setIsDirectorsCutOpen(false)} />
     )}
     </>
   );

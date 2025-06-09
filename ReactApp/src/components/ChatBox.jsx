@@ -603,6 +603,8 @@ export default function ChatBox() {
                     ...basePillStyle,
                     backgroundColor: "#000",
                     color: "#fff",
+                    border: "2px solid gold",
+                    boxShadow: "0 0 6px gold",
                     marginLeft: "auto",
                   }}
                   title="Director's Cut"

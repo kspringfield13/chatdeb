@@ -90,7 +90,11 @@ def _maybe_convert_text_table(text: str) -> str:
     """Convert any Markdown table in ``text`` to an image path."""
 
     if text.startswith("TABLE:"):
-        return text
+        path = text[len("TABLE:"):]
+        from pathlib import Path
+        # Normalize any absolute path to the filename so the frontend can
+        # request it from the ``/charts`` static route.
+        return f"TABLE:/charts/{Path(path).name}"
 
     # If a ``TABLE:`` prefix appears later in the string, extract the path
     # so the frontend can display the image correctly.
@@ -107,11 +111,16 @@ def _maybe_convert_text_table(text: str) -> str:
         return text
 
     try:
+        from pathlib import Path
         from .visualize import create_table_visual
 
         path = create_table_visual([tuple(r) for r in rows], headers=headers)
         if path:
-            return f"TABLE:{path}"
+            # ``create_table_visual`` returns an absolute path. Convert to a
+            # URL-friendly relative location so the frontend can fetch the
+            # image from the ``/charts`` static route.
+            fname = Path(path).name
+            return f"TABLE:/charts/{fname}"
     except Exception as e:  # noqa: BLE001
         print("markdown table conversion error", e)
 
@@ -461,7 +470,9 @@ def format_markdown_table(
     if not path:
         return "_No data returned._"
 
-    return f"TABLE:{path}"
+    from pathlib import Path
+    fname = Path(path).name
+    return f"TABLE:/charts/{fname}"
     
 def _save_to_history(query: str, response: str, confidence: float | None):
     """

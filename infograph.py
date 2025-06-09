@@ -6,6 +6,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from PIL import Image
+try:  # optional dependency
+    from openai import OpenAI
+except Exception:  # pragma: no cover - optional dep may be missing
+    OpenAI = None
+import base64
+import io
 from .chart_style import set_default_style
 from .erd import WATERMARK_PATH
 from .config import CHARTS_DIR
@@ -14,6 +20,55 @@ set_default_style()
 import numpy as np
 
 OUTPUT_DIR = CHARTS_DIR
+
+
+def _describe_chart(ax: plt.Axes) -> str:
+    """Return a short description of the given chart using OpenAI Vision."""
+    if OpenAI is None:
+        return ""
+    try:
+        buf = io.BytesIO()
+        ax.figure.canvas.draw()
+        bbox = ax.get_tightbbox(ax.figure.canvas.get_renderer()).transformed(
+            ax.figure.dpi_scale_trans.inverted()
+        )
+        ax.figure.savefig(buf, format="png", bbox_inches=bbox)
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        image_url = f"data:image/png;base64,{b64}"
+        client = OpenAI()
+        message = {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Provide a concise description of this chart."},
+                {"type": "image_url", "image_url": {"url": image_url}},
+            ],
+        }
+        resp = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[message],
+        )
+        return resp.choices[0].message.content.strip()[:500]
+    except Exception as exc:  # noqa: BLE001
+        print("vision description error", exc)
+        return ""
+
+
+def _add_description(ax: plt.Axes) -> None:
+    """Run vision description and add it below the chart."""
+    desc = _describe_chart(ax)
+    if desc:
+        ax.text(
+            0.5,
+            -0.15,
+            desc,
+            ha="center",
+            va="top",
+            fontsize=8,
+            fontname="Arial",
+            color="white",
+            wrap=True,
+            transform=ax.transAxes,
+        )
 
 
 def bar_chart(ax, data, labels, title="Bar Chart"):
@@ -26,6 +81,7 @@ def bar_chart(ax, data, labels, title="Bar Chart"):
     ax.tick_params(axis='both', which='both', length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
+    _add_description(ax)
 
 
 def line_chart(ax, data, labels, title="Line Chart"):
@@ -37,11 +93,13 @@ def line_chart(ax, data, labels, title="Line Chart"):
     ax.tick_params(axis='both', which='both', length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
+    _add_description(ax)
 
 
 def pie_chart(ax, data, labels, title="Pie Chart"):
     ax.pie(data, labels=labels, autopct="%1.1f%%", textprops={"fontsize": 8})
     ax.set_title(title, fontsize=10, color="white")
+    _add_description(ax)
 
 
 def scatter_chart(ax, x, y, title="Scatter Chart"):
@@ -53,6 +111,7 @@ def scatter_chart(ax, x, y, title="Scatter Chart"):
     ax.tick_params(axis='both', which='both', length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
+    _add_description(ax)
 
 
 def histogram_chart(ax, data, bins=5, title="Histogram"):
@@ -62,6 +121,7 @@ def histogram_chart(ax, data, bins=5, title="Histogram"):
     ax.tick_params(axis='both', which='both', length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
+    _add_description(ax)
 
 
 def render_table(ax, table_data, col_labels, title="Data Table"):

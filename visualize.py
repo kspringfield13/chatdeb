@@ -132,8 +132,7 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     sql_query, x_col, y_col, chart_type = answers[:4]
     if not sql_query.strip().lower().startswith("select"):
         raise ValueError(
-            "Query must be a SELECT statement. For example: "
-            "SELECT * FROM your_table"
+            "Query must be a SELECT statement. For example: " "SELECT * FROM your_table"
         )
 
     try:
@@ -173,7 +172,7 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     charts_dir.mkdir(exist_ok=True)
     file_path = charts_dir / f"chart_{uuid.uuid4().hex}.png"
     try:
-        fig.savefig(file_path)
+        fig.savefig(file_path, dpi=300, facecolor="#1f1f1f")
     except Exception as e:  # noqa: BLE001
         raise ValueError(f"Saving chart failed: {e}") from e
     finally:
@@ -250,7 +249,7 @@ def create_table_visual(
                 cell.set_text_props(color="#e0e0e0")
 
         fig.tight_layout()
-        fig.savefig(file_path, bbox_inches="tight")
+        fig.savefig(file_path, bbox_inches="tight", dpi=300, facecolor="#1f1f1f")
         try:
             df.to_csv(text_path, index=False)
         except Exception as e:
@@ -279,8 +278,8 @@ def _refine_answers_with_llm(
         "You are a data assistant. Given the conversation and the user's initial "
         "answers, produce a valid SQL SELECT query, an x column, a y column and "
         "a chart type. If information is missing or invalid, make reasonable "
-        "assumptions. Respond with JSON in the form {\"sql\":..., \"x\":..., "
-        "\"y\":..., \"type\":...}."
+        'assumptions. Respond with JSON in the form {"sql":..., "x":..., '
+        '"y":..., "type":...}.'
     )
 
     messages = [{"role": "system", "content": system}]

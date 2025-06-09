@@ -2,15 +2,8 @@
 
 import os, ast
 from pathlib import Path
-try:
-    from dotenv import load_dotenv
-    package_dir = Path(__file__).parent
-    dotenv_file = package_dir / ".env"
-    load_dotenv(dotenv_path=dotenv_file)
-except Exception:
-    # If python-dotenv isn't installed or .env is missing,
-    # continue without loading environment variables
-    load_dotenv = lambda *a, **kw: None
+
+from .config import OPENAI_API_KEY, require_env
 
 # 1) LangChain imports
 from langchain_openai import ChatOpenAI
@@ -33,9 +26,7 @@ db = SQLDatabase(
     ],
 )
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("Please set OPENAI_API_KEY in your .env")
+require_env("OPENAI_API_KEY")
 
 # 4) Create an OpenAI LLM wrapper (we’ll use gpt-3.5-turbo with temperature=0 for SQL generation)
 llm = ChatOpenAI(

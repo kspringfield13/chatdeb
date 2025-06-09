@@ -8,12 +8,12 @@ from matplotlib.gridspec import GridSpec
 from PIL import Image
 from .chart_style import set_default_style
 from .erd import WATERMARK_PATH
+from .config import CHARTS_DIR
 
 set_default_style()
 import numpy as np
 
-OUTPUT_DIR = Path("charts")
-OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR = CHARTS_DIR
 
 
 def bar_chart(ax, data, labels, title="Bar Chart"):

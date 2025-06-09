@@ -6,31 +6,19 @@ import duckdb
 import pandas as pd
 import openai
 from pinecone import Pinecone, ServerlessSpec
-from dotenv import load_dotenv
-from pathlib import Path
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 1) Load environment variables
-# ─────────────────────────────────────────────────────────────────────────────
-try:
-    from dotenv import load_dotenv
-    package_dir = Path(__file__).parent
-    dotenv_file = package_dir / ".env"
-    load_dotenv(dotenv_path=dotenv_file)
-except Exception:
-    # If python-dotenv isn't installed or .env is missing,
-    # continue without loading environment variables
-    load_dotenv = lambda *a, **kw: None
+from .config import (
+    OPENAI_API_KEY,
+    PINECONE_API_KEY,
+    PINECONE_ENVIRONMENT,
+    PINECONE_INDEX_NAME,
+    is_testing,
+    require_env,
+)
 
-OPENAI_API_KEY       = os.getenv("OPENAI_API_KEY")
-PINECONE_API_KEY     = os.getenv("PINECONE_API_KEY")
-PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT")
-PINECONE_INDEX_NAME  = os.getenv("PINECONE_INDEX_NAME")
+TESTING = is_testing()
 
-TESTING = os.getenv("KYDXBOT_TESTING") == "1"
-
-if not TESTING and (not OPENAI_API_KEY or not PINECONE_API_KEY or not PINECONE_ENVIRONMENT):
-    raise ValueError("Make sure OPENAI_API_KEY, PINECONE_API_KEY, and PINECONE_ENVIRONMENT are set in .env")
+require_env("OPENAI_API_KEY", "PINECONE_API_KEY", "PINECONE_ENVIRONMENT")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 2) Create a Pinecone client instance (skip when testing)

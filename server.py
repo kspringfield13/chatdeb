@@ -34,8 +34,9 @@ app.mount("/charts", StaticFiles(directory=str(CHARTS_DIR)), name="charts")
 # 1) Define which origins are allowed to talk to this API.
 #    If you’re in development, you might allow just localhost:3000.
 origins = [
-    "http://localhost:3000",
-    # You could also add "http://127.0.0.1:3000" or any deployed domain later.
+    "http://localhost:3000",  # if you ever ran on 3000
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",  # optional, sometimes helpful
 ]
 
 # 2) Add middleware configuration

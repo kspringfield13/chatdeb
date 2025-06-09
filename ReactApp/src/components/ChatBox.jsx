@@ -466,17 +466,11 @@ export default function ChatBox() {
           borderBottom: "1px solid #333",
         }}
       >
-        <h2
-          style={{
-            margin: 0,
-            color: "#ffffff",
-            fontFamily: "'Montserrat', sans-serif", // use Montserrat
-            fontSize: "1rem", // smaller, modern size
-            fontWeight: 600, // semi‐bold
-          }}
-        >
-          KYDxBot
-        </h2>
+        <img
+          src="/logo.png"
+          alt="KYDxBot logo"
+          style={{ height: "30px" }}
+        />
       </div>
 
       {/* === 2) Message list: flex:1, scrollable === */}

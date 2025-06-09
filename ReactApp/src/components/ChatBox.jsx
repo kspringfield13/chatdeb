@@ -34,6 +34,15 @@ export default function ChatBox() {
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
 
+  const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+  const loadImage = (url) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = reject;
+      img.src = url;
+    });
+
   // Track window width for responsive pill buttons
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -255,6 +264,8 @@ export default function ChatBox() {
         newMsgs.push({ sender: "bot", text: data.summary });
       }
       if (data.erd_url) {
+        await loadImage(data.erd_url);
+        await wait(1000);
         setVisuals((prev) => [...prev, data.erd_url]);
         newMsgs.push({ sender: "bot", text: "Here is the ER diagram:" });
         setErdModalSrc(data.erd_url);

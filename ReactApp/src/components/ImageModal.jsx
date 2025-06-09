@@ -28,8 +28,8 @@ export default function ImageModal({ src, onClose }) {
         height: "100%",
         backgroundColor: "rgba(0,0,0,0.6)",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: "left",
+        alignItems: "left",
         zIndex: 1000,
       }}
     >

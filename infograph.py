@@ -17,18 +17,26 @@ OUTPUT_DIR = CHARTS_DIR
 
 
 def bar_chart(ax, data, labels, title="Bar Chart"):
-    ax.bar(labels, data, color="skyblue")
+    ax.bar(labels, data, color="royalblue")
     ax.set_title(title, fontsize=10, color="white")
     # Set ticks explicitly before applying labels to avoid matplotlib warnings
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, fontsize=8)
+    ax.grid(False)
+    ax.tick_params(axis='both', which='both', length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
 
 def line_chart(ax, data, labels, title="Line Chart"):
-    ax.plot(labels, data, marker="o", color="coral")
+    ax.plot(labels, data, marker="o", color="orange")
     ax.set_title(title, fontsize=10, color="white")
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=45, fontsize=8)
+    ax.grid(False)
+    ax.tick_params(axis='both', which='both', length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
 
 def pie_chart(ax, data, labels, title="Pie Chart"):
@@ -40,12 +48,20 @@ def scatter_chart(ax, x, y, title="Scatter Chart"):
     ax.scatter(x, y, color="seagreen")
     ax.set_title(title, fontsize=10, color="white")
     ax.set_xlabel("X", fontsize=8)
-    ax.set_ylabel("Y", fontsize=8)
+    ax.set_ylabel("Y", fontsize=8
+    ax.grid(False)
+    ax.tick_params(axis='both', which='both', length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
 
 def histogram_chart(ax, data, bins=5, title="Histogram"):
     ax.hist(data, bins=bins, color="orchid")
     ax.set_title(title, fontsize=10, color="white")
+    ax.grid(False)
+    ax.tick_params(axis='both', which='both', length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
 
 def render_table(ax, table_data, col_labels, title="Data Table"):

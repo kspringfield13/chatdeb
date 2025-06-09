@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function ImageModal({ src, onClose }) {
   if (!src) return null;
+
+  const [scale, setScale] = useState(1);
+  const zoomIn = () => setScale((s) => Math.min(s + 0.2, 3));
+  const zoomOut = () => setScale((s) => Math.max(s - 0.2, 0.5));
 
   const handleDownload = () => {
     const dl = (url) => {
@@ -38,7 +42,7 @@ export default function ImageModal({ src, onClose }) {
           position: "relative",
           maxWidth: "90%",
           maxHeight: "90%",
-          overflow: src.includes("/table_") ? "auto" : "hidden",
+          overflow: "auto",
         }}
       >
         <button
@@ -88,15 +92,53 @@ export default function ImageModal({ src, onClose }) {
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </button>
+        <button
+          onClick={zoomIn}
+          style={{
+            position: "absolute",
+            bottom: "0.5rem",
+            left: "0.5rem",
+            background: "rgba(0,0,0,0.6)",
+            border: "none",
+            color: "#fff",
+            cursor: "pointer",
+            padding: "0.25rem",
+            borderRadius: "4px",
+          }}
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+        <button
+          onClick={zoomOut}
+          style={{
+            position: "absolute",
+            bottom: "0.5rem",
+            left: "2.5rem",
+            background: "rgba(0,0,0,0.6)",
+            border: "none",
+            color: "#fff",
+            cursor: "pointer",
+            padding: "0.25rem",
+            borderRadius: "4px",
+          }}
+          aria-label="Zoom out"
+        >
+          −
+        </button>
         <img
           src={src}
           alt="table"
           style={{
             display: "block",
-            maxWidth: src.includes("/table_") ? "none" : "100%",
-            maxHeight: src.includes("/table_") ? "none" : "80vh",
+            maxWidth: "100%",
+            maxHeight: "80vh",
+            height: "auto",
+            objectFit: "contain",
             borderRadius: 8,
             backgroundColor: "#1f1f1f",
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
           }}
         />
       </div>

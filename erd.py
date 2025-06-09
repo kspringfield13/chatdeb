@@ -4,6 +4,7 @@ from pathlib import Path
 import duckdb
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch
 from PIL import Image
 try:  # OpenAI is optional for ERD descriptions
     from openai import OpenAI
@@ -79,23 +80,32 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     ax.grid(False)
 
     labels = {t: t[:20] for t in G.nodes()}
-    nx.draw_networkx_nodes(
-        G,
-        pos,
-        node_color="#333333",
-        edgecolors="white",
-        node_size=1500,
-        alpha=0.1,
-    )
-    nx.draw_networkx_labels(
-        G,
-        pos,
-        labels=labels,
-        font_size=8,
-        font_color="white",
-        font_weight="bold",
-    )
     nx.draw_networkx_edges(G, pos, edge_color="white", alpha=0.1, style="dotted", width=0.5)
+
+    box_width = 0.16
+    box_height = 0.08
+    for node, (x, y) in pos.items():
+        patch = FancyBboxPatch(
+            (x - box_width / 2, y - box_height / 2),
+            box_width,
+            box_height,
+            boxstyle="round,pad=0.02,rounding_size=0.02",
+            linewidth=1,
+            facecolor="#333333",
+            edgecolor="white",
+            alpha=0.9,
+        )
+        ax.add_patch(patch)
+        ax.text(
+            x,
+            y,
+            labels[node],
+            fontsize=8,
+            color="white",
+            weight="bold",
+            ha="center",
+            va="center",
+        )
     OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()

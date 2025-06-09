@@ -73,7 +73,7 @@ def render_table(ax, table_data, col_labels, title="Data Table"):
 
 def layout1(content, outfile):
     """Generate infographic layout 1 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#1f1f1f")
+    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
     gs = GridSpec(4, 2, figure=fig, height_ratios=[0.5, 2, 2, 2])
 
     fig.suptitle(content["title"], fontsize=16, y=0.95, color="white")
@@ -105,13 +105,13 @@ def layout1(content, outfile):
     )
 
     plt.tight_layout(rect=[0, 0, 1, 0.89])
-    fig.savefig(outfile, dpi=300, facecolor="#1f1f1f")
+    fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 
 
 def layout2(content, outfile):
     """Generate infographic layout 2 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#1f1f1f")
+    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
     gs = GridSpec(4, 2, figure=fig, height_ratios=[3, 2, 1, 2])
 
     fig.suptitle(content["title"], fontsize=16, y=0.98, color="white")
@@ -147,13 +147,13 @@ def layout2(content, outfile):
     scatter_chart(ax4, *content["charts"][3][:2], title=content["charts"][3][2])
 
     plt.tight_layout(rect=[0, 0, 1, 0.94])
-    fig.savefig(outfile, dpi=300, facecolor="#1f1f1f")
+    fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 
 
 def layout3(content, outfile):
     """Generate infographic layout 3 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#1f1f1f")
+    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
     gs = GridSpec(3, 3, figure=fig, height_ratios=[0.8, 2, 2])
 
     ax_title = fig.add_subplot(gs[0, 0:2])
@@ -207,7 +207,7 @@ def layout3(content, outfile):
     )
 
     plt.tight_layout(rect=[0, 0, 1, 0.93])
-    fig.savefig(outfile, dpi=300, facecolor="#1f1f1f")
+    fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 
 
@@ -264,7 +264,7 @@ def create_infographic(answers: list[str]) -> str:
         ax.axis("off")
         ax.imshow(plt.imread(img_path))
         fig.suptitle(content["title"], fontsize=16, color="white")
-        fig.savefig(outfile, dpi=300, bbox_inches="tight", facecolor="#1f1f1f")
+        fig.savefig(outfile, dpi=300, bbox_inches="tight", facecolor="#010203")
         plt.close(fig)
     else:
         random.choice(TEMPLATES)(content, outfile)

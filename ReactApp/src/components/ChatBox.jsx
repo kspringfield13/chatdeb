@@ -288,28 +288,14 @@ export default function ChatBox() {
         }
         newMsgs.push({ sender: "bot", text: parts.join(". ") + "." });
       }
-      try {
-        const historyPayload = [...chatHistory, ...newMsgs];
-        const visualsPayload = data.erd_url ? [...visuals, data.erd_url] : visuals;
-        const sumRes = await fetch("/summarize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ history: historyPayload, visuals: visualsPayload }),
-        });
-        if (sumRes.ok) {
-          const sumData = await sumRes.json();
-          newMsgs.push({ sender: "bot", text: sumData.summary });
-        }
-      } catch (err) {
-        console.error("Error generating summary", err);
-      }
+
 
       setChatHistory((prev) => [...prev, ...newMsgs]);
     } catch (err) {
       console.error("Error getting data overview", err);
       setChatHistory((prev) => [
         ...prev,
-        { sender: "bot", text: "Sorry, I couldn't summarize the data." },
+        { sender: "bot", text: "Sorry, I couldn't load your data." },
       ]);
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +22,7 @@ from .visualize import (
 from .infograph import generate_infograph_questions, create_infographic
 from .erd import generate_erd, get_data_summary, describe_erd
 from .directorscut import generate_directors_cut
+from .db import DUCKDB_PATH
 
 app = FastAPI(title="KYDxBot API")
 
@@ -99,6 +101,10 @@ class MyDataResponse(BaseModel):
     summary: str
     erd_url: str | None = None
     erd_desc: str | None = None
+
+
+class DBInfoResponse(BaseModel):
+    size: int
 
 
 class DirectorsCutRequest(BaseModel):
@@ -180,6 +186,17 @@ async def summarize(req: SummarizeRequest):
         return SummarizeResponse(summary=text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/db_info", response_model=DBInfoResponse)
+async def db_info():
+    """Return basic information about the DuckDB database."""
+    try:
+        size = os.path.getsize(DUCKDB_PATH)
+    except Exception as exc:  # noqa: BLE001
+        print("getsize error", exc)
+        size = 0
+    return DBInfoResponse(size=size)
 
 
 @app.get("/my_data", response_model=MyDataResponse)

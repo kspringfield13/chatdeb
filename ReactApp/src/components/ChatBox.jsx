@@ -74,6 +74,8 @@ export default function ChatBox() {
     flexShrink: 0,
   };
 
+  const DB_SIZE_LIMIT = 20 * 1024 * 1024; // ~20MB
+
   // Fetch intro message on mount
   useEffect(() => {
     const fetchIntro = async () => {
@@ -340,7 +342,28 @@ export default function ChatBox() {
   const handleMyDataClick = async () => {
     if (!myDataClicked) {
       setMyDataClicked(true);
+      let timeoutId = null;
+      try {
+        const infoRes = await fetch("/db_info");
+        if (infoRes.ok) {
+          const info = await infoRes.json();
+          if (info.size > DB_SIZE_LIMIT) {
+            timeoutId = setTimeout(() => {
+              setChatHistory((prev) => [
+                ...prev,
+                {
+                  sender: "bot",
+                  text: "Hang tight, you have a lot of data here. This will only take a second!",
+                },
+              ]);
+            }, 1000);
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching db info", e);
+      }
       await openMyData();
+      if (timeoutId) clearTimeout(timeoutId);
     } else {
       if (erdModalSrc) {
         setIsErdOpen(true);

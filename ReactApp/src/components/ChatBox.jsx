@@ -626,6 +626,7 @@ export default function ChatBox() {
               backgroundColor: "#00FFE1",
               color: "#000",
               opacity: myDataClicked ? 0.6 : 1,
+              fontWeight: "bold",
             }}
             title="My Data?"
           >

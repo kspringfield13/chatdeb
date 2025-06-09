@@ -188,14 +188,37 @@ async def summarize(req: SummarizeRequest):
 
 @app.get("/my_data", response_model=MyDataResponse)
 async def my_data():
-    """Return a brief summary of the DuckDB data and an ER diagram image."""
+    """Return a brief summary of the DuckDB data and an ER diagram image.
+
+    Any errors when generating the summary or diagram should not result in a
+    500 response so that the frontend can still display whatever information was
+    successfully gathered. This mirrors the more forgiving behaviour used by the
+    generic ``/summarize`` endpoint.
+    """
+
+    summary = ""
+    url = None
+    desc = None
+
     try:
         summary = get_data_summary()
+    except Exception as exc:  # noqa: BLE001
+        print("get_data_summary error", exc)
+
+    try:
         url = generate_erd()
-        desc = describe_erd(url)
-        return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:  # noqa: BLE001
+        print("generate_erd error", exc)
+        url = None
+
+    if url:
+        try:
+            desc = describe_erd(url)
+        except Exception as exc:  # noqa: BLE001
+            print("describe_erd error", exc)
+            desc = None
+
+    return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc)
 
 
 @app.post("/directors_cut", response_model=DirectorsCutResponse)

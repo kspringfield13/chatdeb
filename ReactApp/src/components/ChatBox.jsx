@@ -250,21 +250,37 @@ export default function ChatBox() {
       const res = await fetch("/my_data");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      const newMsgs = [];
       if (data.summary) {
-        setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+        newMsgs.push({ sender: "bot", text: data.summary });
       }
       if (data.erd_url) {
         setVisuals((prev) => [...prev, data.erd_url]);
-        setChatHistory((prev) => [
-          ...prev,
-          { sender: "bot", text: "Here is the ER diagram:" },
-        ]);
+        newMsgs.push({ sender: "bot", text: "Here is the ER diagram:" });
         setErdModalSrc(data.erd_url);
         setIsErdOpen(true);
       }
       if (data.erd_desc) {
-        setChatHistory((prev) => [...prev, { sender: "bot", text: data.erd_desc }]);
+        newMsgs.push({ sender: "bot", text: data.erd_desc });
       }
+
+      try {
+        const historyPayload = [...chatHistory, ...newMsgs];
+        const visualsPayload = data.erd_url ? [...visuals, data.erd_url] : visuals;
+        const sumRes = await fetch("/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ history: historyPayload, visuals: visualsPayload }),
+        });
+        if (sumRes.ok) {
+          const sumData = await sumRes.json();
+          newMsgs.push({ sender: "bot", text: sumData.summary });
+        }
+      } catch (err) {
+        console.error("Error generating summary", err);
+      }
+
+      setChatHistory((prev) => [...prev, ...newMsgs]);
     } catch (err) {
       console.error("Error getting data overview", err);
       setChatHistory((prev) => [

@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from pathlib import Path
 
 from .config import CHARTS_DIR
 
@@ -145,6 +146,7 @@ async def viz_questions(req: VizQuestionsRequest):
 async def viz_complete(req: VizCompleteRequest):
     try:
         url = create_visual_with_fallback(req.answers, req.history)
+        url = f"/charts/{Path(url).name}"
         return VizCompleteResponse(chart_url=url)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -165,6 +167,7 @@ async def infograph_questions(req: InfographQuestionsRequest):
 async def infograph_complete(req: InfographCompleteRequest):
     try:
         url = create_infographic(req.answers)
+        url = f"/charts/{Path(url).name}"
         return InfographCompleteResponse(image_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -210,6 +213,7 @@ async def my_data():
         except Exception as exc:  # noqa: BLE001
             print("describe_erd error", exc)
             desc = None
+        url = f"/charts/{Path(url).name}"
 
     return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc)
 
@@ -218,6 +222,7 @@ async def my_data():
 async def directors_cut(req: DirectorsCutRequest):
     try:
         url = generate_directors_cut(req.history)
+        url = f"/charts/{Path(url).name}"
         return DirectorsCutResponse(video_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

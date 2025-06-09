@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 import uuid
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -261,3 +262,67 @@ def create_table_visual(
         plt.close(fig)
 
     return str(file_path)
+
+
+def _refine_answers_with_llm(
+    answers: list[str], history: list[dict] | None = None
+) -> list[str]:
+    """Return improved visualization answers using OpenAI if available."""
+
+    try:
+        client = OpenAI()
+    except Exception as e:  # noqa: BLE001
+        print("refine answers openai error", e)
+        return answers
+
+    system = (
+        "You are a data assistant. Given the conversation and the user's initial "
+        "answers, produce a valid SQL SELECT query, an x column, a y column and "
+        "a chart type. If information is missing or invalid, make reasonable "
+        "assumptions. Respond with JSON in the form {\"sql\":..., \"x\":..., "
+        "\"y\":..., \"type\":...}."
+    )
+
+    messages = [{"role": "system", "content": system}]
+    if history:
+        for entry in history[-5:]:
+            role = "user" if entry.get("sender") == "user" else "assistant"
+            txt = entry.get("text", "")
+            messages.append({"role": role, "content": txt})
+
+    messages.append({"role": "user", "content": str(answers)})
+
+    try:
+        completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages,
+            temperature=0,
+        )
+        text = completion.choices[0].message.content.strip()
+        data = json.loads(text)
+        return [
+            data.get("sql", answers[0]),
+            data.get("x", answers[1]),
+            data.get("y", answers[2]),
+            data.get("type", answers[3]),
+        ]
+    except Exception as e:  # noqa: BLE001
+        print("refine answers parse error", e)
+        return answers
+
+
+def create_visual_with_fallback(
+    answers: list[str], history: list[dict] | None = None
+) -> str:
+    """Attempt to create a chart, retrying with LLM-refined answers."""
+
+    try:
+        return create_matplotlib_visual(answers)
+    except ValueError as e:
+        new_answers = _refine_answers_with_llm(answers, history)
+        if new_answers != answers:
+            try:
+                return create_matplotlib_visual(new_answers)
+            except Exception as e2:  # noqa: BLE001
+                print("fallback visualization error", e2)
+        raise e

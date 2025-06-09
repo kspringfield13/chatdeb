@@ -29,9 +29,30 @@ export default function ChatBox() {
   const [showDirectorsCut, setShowDirectorsCut] = useState(false);
   const [directorsCutUrl, setDirectorsCutUrl] = useState(null);
   const [isDirectorsCutOpen, setIsDirectorsCutOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
+
+  // Track window width for responsive pill buttons
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Derived styles for pill buttons based on screen width
+  const hidePillText = windowWidth < 360;
+  const pillFontSize = windowWidth < 500 ? "0.75rem" : "0.90rem";
+  const pillPadding = hidePillText ? "0.5rem" : "0.5rem 1rem";
+  const basePillStyle = {
+    padding: pillPadding,
+    borderRadius: 20,
+    border: "none",
+    cursor: "pointer",
+    fontSize: pillFontSize,
+    whiteSpace: "nowrap",
+  };
 
   // Fetch intro message on mount
   useEffect(() => {
@@ -569,77 +590,64 @@ export default function ChatBox() {
           <button
             onClick={handleMyDataClick}
             style={{
-              padding: "0.5rem 1rem",
-              borderRadius: 20,
+              ...basePillStyle,
               backgroundColor: "#00FFE1",
               color: "#000",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "0.95rem",
               opacity: myDataClicked ? 0.6 : 1,
             }}
+            title="My Data?"
           >
-            {myDataClicked ? "View My Data?" : "My Data?"}
+            {!hidePillText && (myDataClicked ? "View My Data?" : "My Data?")}
           </button>
           {hasUserPrompt && (
             <>
               <button
                 onClick={openVisualization}
                 style={{
-                  padding: "0.5rem 1rem",
-                  borderRadius: 20,
+                  ...basePillStyle,
                   backgroundColor: "#004080",
                   color: "#fff",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
                 }}
+                title="Visualize?"
               >
-                Visualize?
+                {!hidePillText && "Visualize?"}
               </button>
               <button
                 onClick={openInfograph}
                 style={{
-                  padding: "0.5rem 1rem",
-                  borderRadius: 20,
+                  ...basePillStyle,
                   backgroundColor: "#800080",
                   color: "#fff",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
                 }}
+                title="Infograph It?"
               >
-                Infograph It?
+                {!hidePillText && "Infograph It?"}
               </button>
               <button
                 onClick={openSummary}
                 style={{
-                  padding: "0.5rem 1rem",
-                  borderRadius: 20,
+                  ...basePillStyle,
                   backgroundColor: "#008000",
                   color: "#fff",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.95rem",
                 }}
+                title="Summarize?"
               >
-                Summarize?
+                {!hidePillText && "Summarize?"}
               </button>
               {showDirectorsCut && (
                 <button
                   onClick={handleDirectorsCutClick}
                   style={{
-                    padding: "0.5rem 1rem",
-                    borderRadius: 20,
+                    ...basePillStyle,
                     backgroundColor: "#000",
                     color: "#fff",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "0.95rem",
+                    border: "2px solid gold",
+                    boxShadow: "0 0 6px gold",
                     marginLeft: "auto",
                   }}
+                  title="Director's Cut"
                 >
-                  {"Director's Cut"}
+                  {!hidePillText && "Director's Cut"}
                 </button>
               )}
             </>

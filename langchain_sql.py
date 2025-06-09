@@ -2,6 +2,7 @@
 
 import os, ast
 from pathlib import Path
+import pandas as pd
 
 from .config import OPENAI_API_KEY, require_env
 
@@ -41,7 +42,8 @@ sql_chain = SQLDatabaseChain.from_llm(
     db=db,
     top_k=20,
     verbose=True,
-    return_direct=True
+    return_direct=True,
+    return_intermediate_steps=True,
 )
 
 
@@ -60,8 +62,8 @@ def _parse_rows(result_str: str) -> list[tuple]:
     except Exception as exc:
         raise ValueError(f"Unable to parse SQL result: {result_str}") from exc
 
-def query_via_sqlagent(user_question: str) -> list[tuple]:
-    """Return query results for ``user_question`` using the SQL agent.
+def query_via_sqlagent(user_question: str) -> tuple[list[str], list[tuple]]:
+    """Return column names and rows for ``user_question`` using the SQL agent.
 
     If the initial attempt fails, a second attempt is made with an
     appended ``LIMIT`` clause to reduce the data volume.  SQL statements
@@ -69,14 +71,38 @@ def query_via_sqlagent(user_question: str) -> list[tuple]:
     """
 
     try:
-        result_str = sql_chain.run(user_question)
-        return _parse_rows(result_str)
+        result = sql_chain.invoke({"query": user_question})
+        result_str = result["result"] if isinstance(result, dict) else result
+        sql_query = None
+        if isinstance(result, dict):
+            for step in result.get("intermediate_steps", []):
+                if isinstance(step, dict) and "sql_cmd" in step:
+                    sql_query = step["sql_cmd"]
+                    break
+
+        if sql_query:
+            df = pd.read_sql_query(sql_query, ENGINE)
+            rows = [tuple(r) for r in df.itertuples(index=False, name=None)]
+            return df.columns.tolist(), rows
+        return [], _parse_rows(result_str)
 
     except Exception:
         # Retry with a small LIMIT in case the generated query was invalid
         retry_q = f"{user_question.strip()} LIMIT 10"
         try:
-            result_str = sql_chain.run(retry_q)
-            return _parse_rows(result_str)
+            result = sql_chain.invoke({"query": retry_q})
+            result_str = result["result"] if isinstance(result, dict) else result
+            sql_query = None
+            if isinstance(result, dict):
+                for step in result.get("intermediate_steps", []):
+                    if isinstance(step, dict) and "sql_cmd" in step:
+                        sql_query = step["sql_cmd"]
+                        break
+
+            if sql_query:
+                df = pd.read_sql_query(sql_query, ENGINE)
+                rows = [tuple(r) for r in df.itertuples(index=False, name=None)]
+                return df.columns.tolist(), rows
+            return [], _parse_rows(result_str)
         except Exception as e:
             raise RuntimeError(f"SQLAgent error after retry: {e}") from e

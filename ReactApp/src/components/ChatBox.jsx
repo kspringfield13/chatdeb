@@ -25,6 +25,7 @@ export default function ChatBox() {
   const [erdModalSrc, setErdModalSrc] = useState(null);
   const [isErdOpen, setIsErdOpen] = useState(false);
   const [myDataClicked, setMyDataClicked] = useState(false);
+  const [showDirectorsCut, setShowDirectorsCut] = useState(false);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
   const hasUserPrompt = chatHistory.some((m) => m.sender === "user");
@@ -328,11 +329,13 @@ export default function ChatBox() {
           ...prev,
           { sender: "bot", text: "Here is your table:", image: img },
         ]);
+        setShowDirectorsCut(true);
       } else {
         setChatHistory((prev) => [
           ...prev,
           { sender: "bot", text: data.response },
         ]);
+        setShowDirectorsCut(false);
       }
       setShowVisualize(true);
       setLoading(false);
@@ -523,6 +526,7 @@ export default function ChatBox() {
             justifyContent: "flex-start",
             gap: "0.5rem",
             paddingLeft: "1rem",
+            paddingRight: "1rem",
           }}
         >
           <button
@@ -584,6 +588,22 @@ export default function ChatBox() {
               >
                 Summarize?
               </button>
+              {showDirectorsCut && (
+                <button
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: 20,
+                    backgroundColor: "#000",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "0.95rem",
+                    marginLeft: "auto",
+                  }}
+                >
+                  {"Director's Cut"}
+                </button>
+              )}
             </>
           )}
         </div>

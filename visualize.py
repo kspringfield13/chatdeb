@@ -224,7 +224,7 @@ def create_table_visual(
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         fig.patch.set_facecolor("#1f1f1f")
         ax.axis("off")
-        ax.set_frame_on(False)
+        ax.set_frame_on(True)
         ax.patch.set_facecolor("#1f1f1f")
 
         table = ax.table(
@@ -234,8 +234,8 @@ def create_table_visual(
             loc="center",
         )
         table.auto_set_font_size(False)
-        table.set_fontsize(10)
-        table.scale(1, 0.8)
+        table.set_fontsize(9)
+        table.scale(1, 1)
         table.auto_set_column_width(col=list(range(len(df.columns))))
 
         for (row, col), cell in table.get_celld().items():

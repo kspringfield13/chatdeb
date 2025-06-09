@@ -521,7 +521,7 @@ export default function ChatBox() {
               <div
                 style={{
                   position: "relative",
-                  maxWidth: "80%",
+                  maxWidth: "100%",
                   overflowX: msg.image.includes("/table_") ? "auto" : "visible",
                 }}
               >
@@ -529,6 +529,7 @@ export default function ChatBox() {
                   src={msg.image}
                   alt={msg.image.includes("/table_") ? "table" : "chart"}
                   style={{
+                    display: "block",
                     maxWidth: msg.image.includes("/table_") ? "none" : "100%",
                     borderRadius: 8,
                     backgroundColor: "#1f1f1f",

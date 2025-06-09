@@ -33,7 +33,14 @@ export default function ImageModal({ src, onClose }) {
         zIndex: 1000,
       }}
     >
-      <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
+      <div
+        style={{
+          position: "relative",
+          maxWidth: "90%",
+          maxHeight: "90%",
+          overflow: src.includes("/table_") ? "auto" : "hidden",
+        }}
+      >
         <button
           onClick={onClose}
           style={{
@@ -85,8 +92,9 @@ export default function ImageModal({ src, onClose }) {
           src={src}
           alt="table"
           style={{
-            maxWidth: "100%",
-            maxHeight: "80vh",
+            display: "block",
+            maxWidth: src.includes("/table_") ? "none" : "100%",
+            maxHeight: src.includes("/table_") ? "none" : "80vh",
             borderRadius: 8,
             backgroundColor: "#1f1f1f",
           }}

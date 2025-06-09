@@ -18,7 +18,11 @@ from .chatbot import (
     summarize_conversation,
     get_intro_message,
 )
-from .visualize import generate_context_questions, create_matplotlib_visual
+from .visualize import (
+    generate_context_questions,
+    create_matplotlib_visual,
+    create_visual_with_fallback,
+)
 from .infograph import generate_infograph_questions, create_infographic
 from .erd import generate_erd, get_data_summary, describe_erd
 from .directorscut import generate_directors_cut
@@ -147,7 +151,7 @@ async def viz_questions(req: VizQuestionsRequest):
 @app.post("/visualize/complete", response_model=VizCompleteResponse)
 async def viz_complete(req: VizCompleteRequest):
     try:
-        url = create_matplotlib_visual(req.answers)
+        url = create_visual_with_fallback(req.answers, req.history)
         return VizCompleteResponse(chart_url=url)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

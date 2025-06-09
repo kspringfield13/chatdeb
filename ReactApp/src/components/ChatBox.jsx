@@ -156,8 +156,12 @@ export default function ChatBox() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ history: chatHistory, answers }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      let data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = data.detail || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      data = data || {};
       setChartUrl(data.chart_url);
       if (data.chart_url) {
         setVisuals((prev) => [...prev, data.chart_url]);
@@ -176,7 +180,7 @@ export default function ChatBox() {
       console.error("Error creating visualization", err);
       setChatHistory((prev) => [
         ...prev,
-        { sender: "bot", text: "Error creating visualization." },
+        { sender: "bot", text: err.message || "Error creating visualization." },
       ]);
       setLoading(false);
     }

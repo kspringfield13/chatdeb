@@ -179,6 +179,11 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     return str(file_path)
 
 
+def _prettify_headers(headers: list[str]) -> list[str]:
+    """Return nicer header labels."""
+    return [h.replace("_", " ").title() for h in headers]
+
+
 def create_table_visual(
     rows: list[tuple],
     limit: int | None = None,
@@ -199,19 +204,26 @@ def create_table_visual(
 
     display_rows = rows[:limit] if limit is not None else rows
 
+    df = pd.DataFrame(display_rows)
+
+    if headers and len(headers) == df.shape[1]:
+        df.columns = _prettify_headers(headers)
+    else:
+        df.columns = infer_headers(display_rows)
+
+    is_numeric = [pd.api.types.is_numeric_dtype(df[col]) for col in df.columns]
+
+    for col, numeric in zip(df.columns, is_numeric):
+        if numeric:
+            df[col] = df[col].apply(
+                lambda x: f"{x:,.0f}" if isinstance(x, int) or (isinstance(x, float) and x.is_integer()) else f"{x:,.2f}"
+            )
+
     def _truncate(x: object) -> str:
         s = str(x)
         return s if len(s) <= cell_char_limit else s[: cell_char_limit - 1] + "\u2026"
 
-    # ``applymap`` is deprecated so use ``DataFrame.map`` for element-wise
-    # transformation across the entire DataFrame. This avoids the FutureWarning
-    # seen in tests and is slightly faster.
-    df = pd.DataFrame(display_rows).map(_truncate)
-
-    if headers and len(headers) == df.shape[1]:
-        df.columns = headers
-    else:
-        df.columns = infer_headers(display_rows)
+    df = df.astype(str).map(_truncate)
 
     charts_dir = CHARTS_DIR
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
@@ -247,6 +259,10 @@ def create_table_visual(
             else:
                 cell.set_facecolor("#1f1f1f")
                 cell.set_text_props(color="#e0e0e0")
+                if is_numeric[col]:
+                    cell.get_text().set_ha("right")
+                else:
+                    cell.get_text().set_ha("left")
 
         fig.tight_layout()
         fig.savefig(file_path, bbox_inches="tight", dpi=300, facecolor="#1f1f1f")

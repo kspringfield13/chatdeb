@@ -149,11 +149,11 @@ def render_table(ax, table_data, col_labels, title="Data Table"):
 
 def layout1(content, outfile):
     """Generate infographic layout 1 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
-    gs = GridSpec(4, 2, figure=fig, height_ratios=[0.5, 2, 2, 2])
+    fig = plt.figure(figsize=(8, 12), facecolor="#010203")
+    gs = GridSpec(4, 2, figure=fig, height_ratios=[0.3, 1.7, 1.7, 1.7])
 
-    fig.suptitle(content["title"], fontsize=16, y=0.95, color="white")
-    fig.text(0.5, 0.90, content["big_number"], ha="center", fontsize=14, color="white")
+    fig.suptitle(content["title"], fontsize=16, y=0.96, color="white")
+    fig.text(0.5, 0.92, content["big_number"], ha="center", fontsize=14, color="white")
 
     ax1 = fig.add_subplot(gs[1, 0])
     bar_chart(ax1, *content["charts"][0])
@@ -180,17 +180,17 @@ def layout1(content, outfile):
         ax_table, content["table_data"], content["table_cols"], title="Summary Table"
     )
 
-    plt.tight_layout(rect=[0, 0, 1, 0.89])
+    plt.tight_layout(rect=[0, 0.05, 1, 0.88])
     fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 
 
 def layout2(content, outfile):
     """Generate infographic layout 2 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
-    gs = GridSpec(4, 2, figure=fig, height_ratios=[3, 2, 1, 2])
+    fig = plt.figure(figsize=(8, 12), facecolor="#010203")
+    gs = GridSpec(4, 2, figure=fig, height_ratios=[2.5, 1.8, 0.8, 1.8])
 
-    fig.suptitle(content["title"], fontsize=16, y=0.98, color="white")
+    fig.suptitle(content["title"], fontsize=16, y=0.97, color="white")
 
     ax1 = fig.add_subplot(gs[0, :])
     bar_chart(ax1, *content["charts"][0])
@@ -222,15 +222,15 @@ def layout2(content, outfile):
     ax4 = fig.add_subplot(gs[3, :])
     scatter_chart(ax4, *content["charts"][3][:2], title=content["charts"][3][2])
 
-    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.tight_layout(rect=[0, 0.05, 1, 0.90])
     fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 
 
 def layout3(content, outfile):
     """Generate infographic layout 3 and save to ``outfile``."""
-    fig = plt.figure(figsize=(8, 10), facecolor="#010203")
-    gs = GridSpec(3, 3, figure=fig, height_ratios=[0.8, 2, 2])
+    fig = plt.figure(figsize=(8, 12), facecolor="#010203")
+    gs = GridSpec(3, 3, figure=fig, height_ratios=[0.5, 1.8, 1.8])
 
     ax_title = fig.add_subplot(gs[0, 0:2])
     ax_title.axis("off")
@@ -282,7 +282,7 @@ def layout3(content, outfile):
         ax_table, content["table_data"], content["table_cols"], title="Summary Table"
     )
 
-    plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.tight_layout(rect=[0, 0.05, 1, 0.88])
     fig.savefig(outfile, dpi=300, facecolor="#010203")
     plt.close(fig)
 

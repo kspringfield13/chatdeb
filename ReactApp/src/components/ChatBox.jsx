@@ -46,9 +46,9 @@ export default function ChatBox() {
   const hidePillText = windowWidth < BASE_WIDTH * 0.25;
   const pillFontSize =
     windowWidth < BASE_WIDTH * 0.35
-      ? "0.65rem"
+      ? "0.55rem"
       : windowWidth < BASE_WIDTH * 0.5
-      ? "0.75rem"
+      ? "0.70rem"
       : "0.90rem";
   const pillPadding = hidePillText
     ? "0.25rem"

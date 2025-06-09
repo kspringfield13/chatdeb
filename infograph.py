@@ -48,7 +48,7 @@ def scatter_chart(ax, x, y, title="Scatter Chart"):
     ax.scatter(x, y, color="seagreen")
     ax.set_title(title, fontsize=10, color="white")
     ax.set_xlabel("X", fontsize=8)
-    ax.set_ylabel("Y", fontsize=8
+    ax.set_ylabel("Y", fontsize=8)
     ax.grid(False)
     ax.tick_params(axis='both', which='both', length=0)
     for spine in ax.spines.values():

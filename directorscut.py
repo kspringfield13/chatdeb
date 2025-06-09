@@ -1,12 +1,19 @@
 import os
 import random
 import uuid
+import json
 from pathlib import Path
 
 import requests
-from moviepy import ImageClip, CompositeVideoClip
+from moviepy import (
+    ImageClip,
+    CompositeVideoClip,
+    VideoFileClip,
+    concatenate_videoclips,
+)
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+from openai import OpenAI
 
 
 PROMPTS = [
@@ -35,6 +42,39 @@ def _latest_table(history: list[dict]) -> str | None:
     return None
 
 
+def _generate_veo_prompts(table_text: str, context: str) -> tuple[str, str]:
+    """Return two short video prompts via OpenAI or fall back to defaults."""
+    try:
+        client = OpenAI()
+        system = (
+            "You craft concise prompts for a video generation model. "
+            "Using the provided table and context, write two separate prompts "
+            "(each under 50 words) that introduce and conclude a short data "
+            'story video. Respond with JSON like {"first":..., "second":...}.'
+        )
+        resp = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": system},
+                {
+                    "role": "user",
+                    "content": f"TABLE:\n{table_text}\nCONTEXT:\n{context}",
+                },
+            ],
+            temperature=0.7,
+        )
+        data = json.loads(resp.choices[0].message.content)
+        first, second = data.get("first"), data.get("second")
+        if isinstance(first, str) and isinstance(second, str):
+            return first, second
+    except Exception as e:  # noqa: BLE001
+        print("generate_veo_prompts error", e)
+
+    p1 = random.choice(PROMPTS).format(table=table_text, context=context)
+    p2 = random.choice(PROMPTS).format(table=table_text, context=context)
+    return p1, p2
+
+
 def generate_directors_cut(history: list[dict]) -> str:
     """Create a short video for the latest table using Google Veo 3 when available."""
     img = _latest_table(history)
@@ -46,7 +86,7 @@ def generate_directors_cut(history: list[dict]) -> str:
 
     context = " ".join(m.get("text", "") for m in history if m.get("sender") == "user")
     context = context[-500:]
-    prompt = random.choice(PROMPTS).format(table=table_text, context=context)
+    p1, p2 = _generate_veo_prompts(table_text, context)
 
     output_dir = Path("charts")
     output_dir.mkdir(exist_ok=True)
@@ -54,37 +94,72 @@ def generate_directors_cut(history: list[dict]) -> str:
 
     if VEO_API_KEY:
         try:
-            resp = requests.post(
-                "https://api.veo.com/v3/generate",
-                headers={"Authorization": f"Bearer {VEO_API_KEY}"},
-                json={"prompt": prompt},
-                timeout=60,
-            )
-            resp.raise_for_status()
-            video_url = resp.json().get("video_url")
-            if video_url:
-                r = requests.get(video_url, timeout=60)
-                with open(outfile, "wb") as f:
+            clips: list[VideoFileClip] = []
+            for prm in (p1, p2):
+                resp = requests.post(
+                    "https://api.veo.com/v3/generate",
+                    headers={"Authorization": f"Bearer {VEO_API_KEY}"},
+                    json={"prompt": prm},
+                    timeout=60,
+                )
+                resp.raise_for_status()
+                url = resp.json().get("video_url")
+                if not url:
+                    raise ValueError("missing video_url")
+                r = requests.get(url, timeout=60)
+                tmp_path = output_dir / f"tmp_{uuid.uuid4().hex}.mp4"
+                with open(tmp_path, "wb") as f:
                     f.write(r.content)
-                return str(outfile)
+                clips.append(VideoFileClip(str(tmp_path)))
+            video = concatenate_videoclips(clips)
+            if video.duration > 15:
+                video = video.subclip(0, 15)
+            video.write_videofile(
+                str(outfile), codec="libx264", audio=False, logger=None
+            )
+            for c in clips:
+                c.close()
+            for tmp in output_dir.glob("tmp_*.mp4"):
+                tmp.unlink(missing_ok=True)
+            return str(outfile)
         except Exception as e:  # noqa: BLE001
             print("Veo 3 API error", e)
 
     # Local fallback if API not available or failed
     try:
-        clip = ImageClip(img).set_duration(8)
-        text_img = Image.new("RGB", (clip.w, 80), "black")
+        clip1 = ImageClip(img).set_duration(7.5)
+        text_img = Image.new("RGB", (clip1.w, 80), "black")
         draw = ImageDraw.Draw(text_img)
         try:
             font = ImageFont.truetype("DejaVuSans-Bold.ttf", 24)
         except Exception:
             font = ImageFont.load_default()
-        draw.text((10, 10), prompt, fill="white", font=font)
-        txt_clip = ImageClip(np.array(text_img)).set_duration(8).set_pos(("center", "bottom"))
-        video = CompositeVideoClip([clip, txt_clip])
-        video.write_videofile(str(outfile), fps=1, codec="libx264", audio=False, logger=None)
+        draw.text((10, 10), p1, fill="white", font=font)
+        txt_clip1 = (
+            ImageClip(np.array(text_img))
+            .set_duration(7.5)
+            .set_pos(("center", "bottom"))
+        )
+        video1 = CompositeVideoClip([clip1, txt_clip1])
+
+        clip2 = ImageClip(img).set_duration(7.5)
+        text_img2 = Image.new("RGB", (clip2.w, 80), "black")
+        draw2 = ImageDraw.Draw(text_img2)
+        draw2.text((10, 10), p2, fill="white", font=font)
+        txt_clip2 = (
+            ImageClip(np.array(text_img2))
+            .set_duration(7.5)
+            .set_pos(("center", "bottom"))
+        )
+        video2 = CompositeVideoClip([clip2, txt_clip2])
+
+        video = concatenate_videoclips([video1, video2])
+        if video.duration > 15:
+            video = video.subclip(0, 15)
+        video.write_videofile(
+            str(outfile), fps=1, codec="libx264", audio=False, logger=None
+        )
     except Exception:  # noqa: BLE001
         outfile.touch()
 
     return str(outfile)
-

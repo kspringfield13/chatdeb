@@ -20,6 +20,7 @@ from .visualize import (
 )
 from .infograph import generate_infograph_questions, create_infographic
 from .erd import generate_erd, get_data_summary, describe_erd
+from .chatbot import _maybe_convert_text_table
 from .directorscut import generate_directors_cut
 
 app = FastAPI(title="KYDxBot API")
@@ -192,12 +193,13 @@ async def my_data():
     generic ``/summarize`` endpoint.
     """
 
-    summary = ""
+    summary: str | None = ""
     url = None
     desc = None
 
     try:
-        summary = get_data_summary()
+        summary_text = get_data_summary()
+        summary = _maybe_convert_text_table(summary_text)
     except Exception as exc:  # noqa: BLE001
         print("get_data_summary error", exc)
 

@@ -261,7 +261,12 @@ export default function ChatBox() {
       const data = await res.json();
       const newMsgs = [];
       if (data.summary) {
-        newMsgs.push({ sender: "bot", text: data.summary });
+        if (data.summary.startsWith("TABLE:")) {
+          const img = data.summary.replace("TABLE:", "");
+          newMsgs.push({ sender: "bot", text: "Here is your table:", image: img });
+        } else {
+          newMsgs.push({ sender: "bot", text: data.summary });
+        }
       }
       if (data.erd_url) {
         await loadImage(data.erd_url);

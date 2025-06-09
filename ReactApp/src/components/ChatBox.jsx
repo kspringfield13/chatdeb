@@ -538,7 +538,7 @@ export default function ChatBox() {
               color: "#000",
               border: "none",
               cursor: "pointer",
-              fontSize: "0.95rem",
+              fontSize: "0.90rem",
               opacity: myDataClicked ? 0.6 : 1,
             }}
           >
@@ -555,7 +555,7 @@ export default function ChatBox() {
                   color: "#fff",
                   border: "none",
                   cursor: "pointer",
-                  fontSize: "0.95rem",
+                  fontSize: "0.90rem",
                 }}
               >
                 Visualize?
@@ -569,7 +569,7 @@ export default function ChatBox() {
                   color: "#fff",
                   border: "none",
                   cursor: "pointer",
-                  fontSize: "0.95rem",
+                  fontSize: "0.90rem",
                 }}
               >
                 Infograph It?
@@ -583,7 +583,7 @@ export default function ChatBox() {
                   color: "#fff",
                   border: "none",
                   cursor: "pointer",
-                  fontSize: "0.95rem",
+                  fontSize: "0.90rem",
                 }}
               >
                 Summarize?
@@ -597,7 +597,7 @@ export default function ChatBox() {
                     color: "#fff",
                     border: "none",
                     cursor: "pointer",
-                    fontSize: "0.95rem",
+                    fontSize: "0.90rem",
                     marginLeft: "auto",
                   }}
                 >

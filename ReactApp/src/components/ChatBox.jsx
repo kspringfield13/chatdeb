@@ -278,7 +278,16 @@ export default function ChatBox() {
         setErdModalSrc(data.erd_url);
         setIsErdOpen(true);
       }
-      // Removed verbose ER diagram description
+      if (data.erd_desc || (data.tables && data.tables.length)) {
+        const parts = [];
+        if (data.erd_desc) {
+          parts.push(`Vision summary: ${data.erd_desc}`);
+        }
+        if (data.tables && data.tables.length) {
+          parts.push(`Tables detected: ${data.tables.join(", ")}`);
+        }
+        newMsgs.push({ sender: "bot", text: parts.join(". ") + "." });
+      }
       try {
         const historyPayload = [...chatHistory, ...newMsgs];
         const visualsPayload = data.erd_url ? [...visuals, data.erd_url] : visuals;

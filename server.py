@@ -103,6 +103,7 @@ class MyDataResponse(BaseModel):
     summary: str
     erd_url: str | None = None
     erd_desc: str | None = None
+    tables: list[str] | None = None
 
 
 class DBInfoResponse(BaseModel):
@@ -214,9 +215,16 @@ async def my_data():
     summary: str | None = ""
     url = None
     desc = None
+    tables: list[str] | None = None
 
     try:
         summary_text = get_data_summary()
+        lines = summary_text.splitlines()[2:]
+        tables = []
+        for l in lines:
+            parts = [p.strip() for p in l.split("|") if p.strip()]
+            if len(parts) >= 2:
+                tables.append(parts[0])
         summary = _maybe_convert_text_table(summary_text)
     except Exception as exc:  # noqa: BLE001
         print("get_data_summary error", exc)
@@ -235,7 +243,7 @@ async def my_data():
             desc = None
         url = f"/charts/{Path(url).name}"
 
-    return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc)
+    return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc, tables=tables)
 
 
 @app.post("/directors_cut", response_model=DirectorsCutResponse)

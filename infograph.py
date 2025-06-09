@@ -39,7 +39,7 @@ def _describe_chart(ax: plt.Axes) -> str:
         message = {
             "role": "user",
             "content": [
-                {"type": "text", "text": "Provide a concise description of this chart."},
+                {"type": "text", "text": "Provide a very concise description of this chart. Explain it in 250 characters or less"},
                 {"type": "image_url", "image_url": {"url": image_url}},
             ],
         }
@@ -47,7 +47,7 @@ def _describe_chart(ax: plt.Axes) -> str:
             model="gpt-4o",
             messages=[message],
         )
-        return resp.choices[0].message.content.strip()[:500]
+        return resp.choices[0].message.content.strip()[:250]
     except Exception as exc:  # noqa: BLE001
         print("vision description error", exc)
         return ""
@@ -61,9 +61,9 @@ def _add_description(ax: plt.Axes) -> None:
             0.5,
             -0.15,
             desc,
-            ha="center",
+            ha="left",
             va="top",
-            fontsize=8,
+            fontsize=9,
             fontname="Arial",
             color="white",
             wrap=True,

@@ -218,6 +218,7 @@ def create_table_visual(
     charts_dir = Path("charts")
     charts_dir.mkdir(exist_ok=True)
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
+    text_path = file_path.with_suffix(".txt")
 
     try:
         fig, ax = plt.subplots()
@@ -249,6 +250,10 @@ def create_table_visual(
 
         fig.tight_layout()
         fig.savefig(file_path, bbox_inches="tight")
+        try:
+            df.to_csv(text_path, index=False)
+        except Exception as e:
+            print("create_table_visual text error", e)
     except Exception as e:  # noqa: BLE001
         print("create_table_visual save error", e)
         return ""

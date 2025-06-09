@@ -1,23 +1,7 @@
 import React from "react";
 
-export default function ImageModal({ src, onClose }) {
+export default function VideoModal({ src, onClose }) {
   if (!src) return null;
-
-  const handleDownload = () => {
-    const dl = (url) => {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
-
-    dl(src);
-    const txt = src.replace(/\.[^.]+$/, ".txt");
-    dl(txt);
-  };
-
   return (
     <div
       style={{
@@ -50,8 +34,9 @@ export default function ImageModal({ src, onClose }) {
         >
           ×
         </button>
-        <button
-          onClick={handleDownload}
+        <a
+          href={src}
+          download
           style={{
             position: "absolute",
             top: "0.5rem",
@@ -60,9 +45,10 @@ export default function ImageModal({ src, onClose }) {
             border: "none",
             color: "#fff",
             fontSize: "1rem",
+            textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            }}
+          }}
           aria-label="Download"
         >
           <svg
@@ -80,10 +66,10 @@ export default function ImageModal({ src, onClose }) {
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-        </button>
-        <img
+        </a>
+        <video
           src={src}
-          alt="table"
+          controls
           style={{
             maxWidth: "100%",
             maxHeight: "80vh",

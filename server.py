@@ -21,6 +21,7 @@ from .chatbot import (
 from .visualize import generate_context_questions, create_matplotlib_visual
 from .infograph import generate_infograph_questions, create_infographic
 from .erd import generate_erd, get_data_summary, describe_erd
+from .directorscut import generate_directors_cut
 
 app = FastAPI(title="KYDxBot API")
 
@@ -102,6 +103,14 @@ class MyDataResponse(BaseModel):
     erd_desc: str | None = None
 
 
+class DirectorsCutRequest(BaseModel):
+    history: list[dict]
+
+
+class DirectorsCutResponse(BaseModel):
+    video_url: str | None = None
+
+
 class IntroResponse(BaseModel):
     message: str
 
@@ -181,6 +190,15 @@ async def my_data():
         url = generate_erd()
         desc = describe_erd(url)
         return MyDataResponse(summary=summary, erd_url=url, erd_desc=desc)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/directors_cut", response_model=DirectorsCutResponse)
+async def directors_cut(req: DirectorsCutRequest):
+    try:
+        url = generate_directors_cut(req.history)
+        return DirectorsCutResponse(video_url=url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

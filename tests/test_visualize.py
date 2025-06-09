@@ -1,6 +1,8 @@
 import os
 import re
 import pytest
+from pathlib import Path
+
 from ..visualize import (
     generate_context_questions,
     infer_headers,
@@ -33,6 +35,9 @@ def test_create_table_visual_file(tmp_path, monkeypatch):
     path = create_table_visual([(1, "a"), (2, "b")])
     assert path.endswith(".png")
     assert os.path.exists(path)
+    txt = Path(path).with_suffix(".txt")
+    assert txt.exists()
+    assert txt.read_text()
 
 
 def test_generate_context_questions_fallback(monkeypatch):

@@ -278,15 +278,8 @@ export default function ChatBox() {
         setErdModalSrc(data.erd_url);
         setIsErdOpen(true);
       }
-      if (data.erd_desc || (data.tables && data.tables.length)) {
-        const parts = [];
-        if (data.erd_desc) {
-          parts.push(`Vision summary: ${data.erd_desc}`);
-        }
-        if (data.tables && data.tables.length) {
-          parts.push(`Tables detected: ${data.tables.join(", ")}`);
-        }
-        newMsgs.push({ sender: "bot", text: parts.join(". ") + "." });
+      if (data.erd_desc) {
+        newMsgs.push({ sender: "bot", text: `Vision summary: ${data.erd_desc}.` });
       }
 
 

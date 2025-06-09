@@ -42,12 +42,12 @@ export default function ChatBox() {
   }, []);
 
   // Derived styles for pill buttons based on screen width
-  const BASE_WIDTH = 1440; // reference width for responsive sizing
+  const BASE_WIDTH = 1024; // reference width for responsive sizing
   const hidePillText = windowWidth < BASE_WIDTH * 0.25;
   const pillFontSize =
-    windowWidth < BASE_WIDTH * 0.35
+    windowWidth < BASE_WIDTH * 0.45
       ? "0.55rem"
-      : windowWidth < BASE_WIDTH * 0.5
+      : windowWidth < BASE_WIDTH * 0.6
       ? "0.70rem"
       : "0.90rem";
   const pillPadding = hidePillText
@@ -659,7 +659,6 @@ export default function ChatBox() {
                     color: "#fff",
                     border: "2px solid gold",
                     boxShadow: "0 0 6px gold",
-                    marginLeft: "auto",
                   }}
                   title="Director's Cut"
                 >

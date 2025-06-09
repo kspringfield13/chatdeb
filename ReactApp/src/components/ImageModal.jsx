@@ -48,7 +48,7 @@ export default function ImageModal({ src, onClose }) {
         <button
           onClick={onClose}
           style={{
-            position: "absolute",
+            position: "fixed",
             top: "0.5rem",
             right: "0.5rem",
             background: "transparent",
@@ -64,7 +64,7 @@ export default function ImageModal({ src, onClose }) {
         <button
           onClick={handleDownload}
           style={{
-            position: "absolute",
+            position: "fixed",
             top: "0.5rem",
             left: "0.5rem",
             background: "transparent",
@@ -95,7 +95,7 @@ export default function ImageModal({ src, onClose }) {
         <button
           onClick={zoomIn}
           style={{
-            position: "absolute",
+            position: "fixed",
             bottom: "0.5rem",
             left: "0.5rem",
             background: "rgba(0,0,0,0.6)",
@@ -112,7 +112,7 @@ export default function ImageModal({ src, onClose }) {
         <button
           onClick={zoomOut}
           style={{
-            position: "absolute",
+            position: "fixed",
             bottom: "0.5rem",
             left: "2.5rem",
             background: "rgba(0,0,0,0.6)",

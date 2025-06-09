@@ -100,6 +100,12 @@ def _maybe_convert_text_table(text: str) -> str:
     if text.startswith("TABLE:"):
         return text
 
+    # If a ``TABLE:`` prefix appears later in the string, extract the path
+    # so the frontend can display the image correctly.
+    m = re.search(r"TABLE:([\w/.-]+\.png)", text)
+    if m:
+        return f"TABLE:{m.group(1)}"
+
     parsed = _extract_markdown_table(text)
     if not parsed:
         return text

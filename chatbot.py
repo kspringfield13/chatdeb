@@ -13,6 +13,8 @@ from pathlib import Path
 from io import StringIO
 import pandas as pd
 
+
+
 VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
 
 def _load_metadata() -> dict:
@@ -37,17 +39,7 @@ def _metadata_summary(meta: dict) -> str:
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
 
-try:
-    from dotenv import load_dotenv
-    package_dir = Path(__file__).parent
-    dotenv_file = package_dir / ".env"
-    load_dotenv(dotenv_path=dotenv_file)
-except Exception:
-    # If python-dotenv isn't installed or .env is missing,
-    # continue without loading environment variables
-    load_dotenv = lambda *a, **kw: None
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 def load_recent_history(limit: int = 3) -> list[dict]:
@@ -100,6 +92,12 @@ def _maybe_convert_text_table(text: str) -> str:
     if text.startswith("TABLE:"):
         return text
 
+    # If a ``TABLE:`` prefix appears later in the string, extract the path
+    # so the frontend can display the image correctly.
+    m = re.search(r"TABLE:([\w/.-]+\.png)", text)
+    if m:
+        return f"TABLE:{m.group(1)}"
+
     parsed = _extract_markdown_table(text)
     if not parsed:
         return text
@@ -118,6 +116,20 @@ def _maybe_convert_text_table(text: str) -> str:
         print("markdown table conversion error", e)
 
     return text
+
+
+def _build_explanation(question: str) -> str:
+    """Return a short description of the aggregation logic."""
+    q = question.lower()
+    if any(k in q for k in ["average", "mean"]):
+        return "Calculated averages based on your request."
+    if any(k in q for k in ["sum", "total"]):
+        return "Summed values matching the criteria."
+    if any(k in q for k in ["count", "how many"]):
+        return "Counted entries that fit the filters."
+    if any(k in q for k in ["top", "highest", "lowest"]):
+        return "Retrieved ordered results for the top or bottom records."
+    return "Returned results for your query."
 
 
 def call_openai_fallback(user_question: str, history: list[dict] | None = None) -> str:
@@ -512,27 +524,28 @@ def handle_query(query_text: str) -> str:
             from .langchain_sql import query_via_sqlagent
             rows = query_via_sqlagent(q)
             n = len(rows)
+            explain = _build_explanation(q)
 
             if n == 0:
-                reply = format_zero_rows()
+                reply = f"{explain}\n{format_zero_rows()}"
                 reply = _maybe_convert_text_table(reply)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             if n == 1:
-                reply = format_single_row(rows[0])
+                reply = f"{explain}\n{format_single_row(rows[0])}"
                 reply = _maybe_convert_text_table(reply)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             if 2 <= n <= 5:
                 body = format_numbered_list(rows)
-                reply = _maybe_convert_text_table(body)
+                reply = _maybe_convert_text_table(f"{explain}\n{body}")
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
-            reply = format_markdown_table(rows, limit=None)
-            reply = _maybe_convert_text_table(reply)
+            table = format_markdown_table(rows, limit=None)
+            reply = _maybe_convert_text_table(f"{explain}\n{table}")
             _save_to_history(q, reply, confidence=None)
             return reply
 

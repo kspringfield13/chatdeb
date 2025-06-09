@@ -13,6 +13,7 @@ from moviepy import (
     concatenate_videoclips,
 )
 from PIL import Image, ImageDraw, ImageFont
+from .config import CHARTS_DIR
 import numpy as np
 from openai import OpenAI
 
@@ -119,8 +120,7 @@ def generate_directors_cut(history: list[dict]) -> str:
     context = context[-500:]
     p1, p2 = _generate_veo_prompts(table_text, context)
 
-    output_dir = Path("charts")
-    output_dir.mkdir(exist_ok=True)
+    output_dir = CHARTS_DIR
     outfile = output_dir / f"directorscut_{uuid.uuid4().hex}.mp4"
 
     if VEO_API_KEY:

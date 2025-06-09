@@ -1,16 +1,10 @@
-import os
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from pathlib import Path
-from dotenv import load_dotenv
 
-# Load .env from the “kydxbot” package directory
-package_dir = Path(__file__).parent       # this is C:\Users\kspri\Dev\kydxbot
-dotenv_path = package_dir / ".env"
-load_dotenv(dotenv_path=dotenv_path)
+from .config import CHARTS_DIR
 
 from .chatbot import (
     handle_query,
@@ -30,9 +24,8 @@ from .directorscut import generate_directors_cut
 app = FastAPI(title="KYDxBot API")
 
 # Serve generated chart and table images
-charts_dir = Path("charts")
-charts_dir.mkdir(exist_ok=True)
-app.mount("/charts", StaticFiles(directory=str(charts_dir)), name="charts")
+CHARTS_DIR.mkdir(exist_ok=True)
+app.mount("/charts", StaticFiles(directory=str(CHARTS_DIR)), name="charts")
 
 # 1) Define which origins are allowed to talk to this API.
 #    If you’re in development, you might allow just localhost:3000.

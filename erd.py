@@ -12,39 +12,37 @@ except Exception:  # pragma: no cover - optional dep may be missing
 
 from .chart_style import set_default_style
 from .db import DUCKDB_PATH
+from .config import CHARTS_DIR
 
 set_default_style()
 # Save ER diagrams in the same ``charts`` folder used by other modules so the
 # FastAPI server can serve them under the ``/charts`` route.
-OUTPUT_DIR = Path("charts")
+OUTPUT_DIR = CHARTS_DIR
 # Watermark lives next to the logo in ReactApp/public
 WATERMARK_PATH = Path(__file__).resolve().parent / "ReactApp" / "public" / "watermark.png"
 
 def get_data_summary(db_path: str = DUCKDB_PATH) -> str:
-    """Return a human readable summary of the tables in the DuckDB database."""
+    """Return a markdown table listing each table and its row count."""
     con = duckdb.connect(db_path)
     tables = sorted(row[0] for row in con.execute("SHOW TABLES").fetchall())
 
-    details = []
+    info: list[tuple[str, str | int]] = []
     for tbl in tables:
-        cols = [row[0] for row in con.execute(f"DESCRIBE {tbl}").fetchall()]
-        cols = sorted(cols)
         try:
             count = con.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
         except Exception:
             count = "?"
-        sample_cols = ", ".join(cols[:5])
-        details.append(
-            f"The '{tbl}' table contains {count} rows and columns such as {sample_cols}."
-        )
+        info.append((tbl, count))
 
     con.close()
 
-    if not tables:
-        return "The database is empty." 
+    if not info:
+        return "The database is empty."
 
-    intro = f"The database contains {len(tables)} tables: {', '.join(tables)}."
-    return " ".join([intro] + details)
+    header = "| Tables | Rows |"
+    divider = "|---|---|"
+    rows = [f"| {name} | {rows} |" for name, rows in info]
+    return "\n".join([header, divider, *rows])
 
 
 def generate_erd(db_path: str = DUCKDB_PATH) -> str:
@@ -97,7 +95,6 @@ def generate_erd(db_path: str = DUCKDB_PATH) -> str:
     )
     nx.draw_networkx_edges(G, pos, edge_color="white", alpha=0.1, style="dotted", width=0.5)
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
     outfile = OUTPUT_DIR / f"erd_{uuid.uuid4().hex}.png"
     plt.tight_layout()
     plt.savefig(outfile, facecolor="#1f1f1f")

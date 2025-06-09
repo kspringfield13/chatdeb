@@ -2,13 +2,12 @@ from __future__ import annotations
 import os
 import uuid
 import json
-from pathlib import Path
-
 import pandas as pd
 import matplotlib.pyplot as plt
 from openai import OpenAI
 from .db import get_engine
 from .chart_style import set_default_style
+from .config import CHARTS_DIR
 
 set_default_style()
 
@@ -168,8 +167,7 @@ def create_matplotlib_visual(answers: list[str]) -> str:
     ax.set_title(f"{y_col} vs {x_col}")
     fig.tight_layout()
 
-    charts_dir = Path("charts")
-    charts_dir.mkdir(exist_ok=True)
+    charts_dir = CHARTS_DIR
     file_path = charts_dir / f"chart_{uuid.uuid4().hex}.png"
     try:
         fig.savefig(file_path, dpi=300, facecolor="#1f1f1f")
@@ -215,8 +213,7 @@ def create_table_visual(
     else:
         df.columns = infer_headers(display_rows)
 
-    charts_dir = Path("charts")
-    charts_dir.mkdir(exist_ok=True)
+    charts_dir = CHARTS_DIR
     file_path = charts_dir / f"table_{uuid.uuid4().hex}.png"
     text_path = file_path.with_suffix(".txt")
 

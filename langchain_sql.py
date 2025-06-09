@@ -2,15 +2,8 @@
 
 import os, ast
 from pathlib import Path
-try:
-    from dotenv import load_dotenv
-    package_dir = Path(__file__).parent
-    dotenv_file = package_dir / ".env"
-    load_dotenv(dotenv_path=dotenv_file)
-except Exception:
-    # If python-dotenv isn't installed or .env is missing,
-    # continue without loading environment variables
-    load_dotenv = lambda *a, **kw: None
+
+from .config import OPENAI_API_KEY, require_env
 
 # 1) LangChain imports
 from langchain_openai import ChatOpenAI
@@ -33,9 +26,7 @@ db = SQLDatabase(
     ],
 )
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("Please set OPENAI_API_KEY in your .env")
+require_env("OPENAI_API_KEY")
 
 # 4) Create an OpenAI LLM wrapper (we’ll use gpt-3.5-turbo with temperature=0 for SQL generation)
 llm = ChatOpenAI(
@@ -70,15 +61,22 @@ def _parse_rows(result_str: str) -> list[tuple]:
         raise ValueError(f"Unable to parse SQL result: {result_str}") from exc
 
 def query_via_sqlagent(user_question: str) -> list[tuple]:
+    """Return query results for ``user_question`` using the SQL agent.
+
+    If the initial attempt fails, a second attempt is made with an
+    appended ``LIMIT`` clause to reduce the data volume.  SQL statements
+    are never returned to the caller.
     """
-    1) Call ``sql_chain.run()`` to generate SQL and execute it.
-    2) Parse the returned string into ``list[tuple]`` rows.
-    """
+
     try:
         result_str = sql_chain.run(user_question)
-        rows = _parse_rows(result_str)
-        return rows
+        return _parse_rows(result_str)
 
-    except Exception as e:
-        # If anything goes wrong, bubble up an exception
-        raise RuntimeError(f"SQLAgent error: {e}")
+    except Exception:
+        # Retry with a small LIMIT in case the generated query was invalid
+        retry_q = f"{user_question.strip()} LIMIT 10"
+        try:
+            result_str = sql_chain.run(retry_q)
+            return _parse_rows(result_str)
+        except Exception as e:
+            raise RuntimeError(f"SQLAgent error after retry: {e}") from e

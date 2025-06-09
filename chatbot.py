@@ -458,6 +458,7 @@ def format_numbered_list(rows: List[Tuple]) -> str:
 def format_markdown_table(
     rows: list[tuple],
     limit: int | None = None,
+    headers: list[str] | None = None,
 ) -> str:
     """Return a ``TABLE:`` prefixed path to a table image generated from the data."""
 
@@ -466,7 +467,7 @@ def format_markdown_table(
     if not rows:
         return "_No data returned._"
 
-    path = create_table_visual(rows, limit)
+    path = create_table_visual(rows, limit, headers=headers)
     if not path:
         return "_No data returned._"
 
@@ -533,7 +534,7 @@ def handle_query(query_text: str) -> str:
     if is_data_question(q):
         try:
             from .langchain_sql import query_via_sqlagent
-            rows = query_via_sqlagent(q)
+            headers, rows = query_via_sqlagent(q)
             n = len(rows)
             explain = _build_explanation(q)
 
@@ -555,7 +556,7 @@ def handle_query(query_text: str) -> str:
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
-            table = format_markdown_table(rows, limit=None)
+            table = format_markdown_table(rows, limit=None, headers=headers)
             reply = _maybe_convert_text_table(f"{explain}\n{table}")
             _save_to_history(q, reply, confidence=None)
             return reply

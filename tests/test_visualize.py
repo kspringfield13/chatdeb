@@ -40,6 +40,13 @@ def test_create_table_visual_file(tmp_path, monkeypatch):
     assert txt.read_text()
 
 
+def test_create_table_visual_headers(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    path = create_table_visual([(1, 2)], headers=["id", "value"])
+    txt = Path(path).with_suffix(".txt")
+    assert txt.read_text().splitlines()[0] == "Id,Value"
+
+
 def test_generate_context_questions_fallback(monkeypatch):
     class DummyClient:
         class Chat:

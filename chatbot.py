@@ -322,13 +322,13 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
 
     # 6) Test JSON serialization
     try:
-        temp = json.dumps({"queries": [q_emb], "top_k": 3})
+        temp = json.dumps({"vector": q_emb, "top_k": 3})
         print(">>> JSON serialization OK.")
     except Exception as e:
         print(">>> JSON serialization failed:", e)
 
     # 7) Finally query Pinecone
-    response = index.query(queries=[q_emb], top_k=top_k, include_metadata=True)
+    response = index.query(vector=q_emb, top_k=top_k, include_metadata=True)
     matches = getattr(response, "matches", None) or response.get("matches", [])
 
     if not matches:

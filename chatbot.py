@@ -39,6 +39,12 @@ def _metadata_summary(meta: dict) -> str:
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
 
+# ── Chat history configuration ──────────────────────────────────────────────
+# Maximum number of past entries to include as context. Each entry is
+# truncated to keep the token count manageable.
+MAX_HISTORY_ENTRIES = 50
+MAX_HISTORY_WORDS = 50
+
 
 
 
@@ -59,6 +65,44 @@ def load_recent_history(limit: int = 3) -> list[dict]:
         return data[-limit:]
     except Exception:
         return []
+
+
+def load_full_history(limit: int | None = MAX_HISTORY_ENTRIES) -> list[dict]:
+    """Return up to ``limit`` past conversation entries."""
+
+    path = Path("chatbot_responses.json")
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text())
+        if not isinstance(data, list):
+            return []
+        if limit is not None:
+            return data[-limit:]
+        return data
+    except Exception:
+        return []
+
+
+def _shorten_text(text: str, max_words: int = MAX_HISTORY_WORDS) -> str:
+    """Return ``text`` truncated to ``max_words`` words."""
+
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+    return " ".join(words[:max_words]) + " ..."
+
+
+def prepare_history_messages(history: list[dict]) -> list[dict]:
+    """Return chat messages with truncated history content."""
+
+    messages = []
+    for entry in history:
+        q = _shorten_text(entry.get("query_text", ""))
+        a = _shorten_text(entry.get("retrieved_response", ""))
+        messages.append({"role": "user", "content": q})
+        messages.append({"role": "assistant", "content": a})
+    return messages
 
 
 def _extract_markdown_table(text: str) -> tuple[list[str], list[list[str]]] | None:
@@ -153,13 +197,12 @@ def call_openai_fallback(user_question: str, history: list[dict] | None = None) 
         if METADATA_SUMMARY:
             system_msg += "\nHere is data the user provided:\n" + METADATA_SUMMARY
 
+        if history is None:
+            history = load_full_history()
+
         messages = [{"role": "system", "content": system_msg}]
         if history:
-            for entry in history:
-                q = entry.get("query_text", "")
-                a = entry.get("retrieved_response", "")
-                messages.append({"role": "user", "content": q})
-                messages.append({"role": "assistant", "content": a})
+            messages.extend(prepare_history_messages(history))
 
         messages.append({"role": "user", "content": user_question})
 
@@ -564,8 +607,7 @@ def handle_query(query_text: str) -> str:
         except Exception as e:
             # Any error in SQLAgent / formatting → open AI fallback
             print("⚠️ Data‐centric error:", e)
-            history = load_recent_history()
-            reply = call_openai_fallback(q, history)
+            reply = call_openai_fallback(q)
             reply = _maybe_convert_text_table(reply)
             _save_to_history(q, reply, confidence=None)
             return reply
@@ -578,8 +620,7 @@ def handle_query(query_text: str) -> str:
     except Exception as e:
         # Any error in semantic‐search → open AI fallback
         print("⚠️ Semantic‐search error:", e)
-        history = load_recent_history()
-        reply = call_openai_fallback(q, history)
+        reply = call_openai_fallback(q)
         reply = _maybe_convert_text_table(reply)
         _save_to_history(q, reply, confidence=None)
         return reply

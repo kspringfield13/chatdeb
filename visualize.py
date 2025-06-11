@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import uuid
 import json
+import textwrap
 import pandas as pd
 import matplotlib.pyplot as plt
 from openai import OpenAI
@@ -189,6 +190,7 @@ def create_table_visual(
     limit: int | None = None,
     headers: list[str] | None = None,
     cell_char_limit: int = 20,
+    header_char_limit: int = 12,
 ) -> str:
     """Create a table image from ``rows`` and return the path.
 
@@ -207,9 +209,11 @@ def create_table_visual(
     df = pd.DataFrame(display_rows)
 
     if headers and len(headers) == df.shape[1]:
-        df.columns = _prettify_headers(headers)
+        pretty_headers = _prettify_headers(headers)
     else:
-        df.columns = infer_headers(display_rows)
+        pretty_headers = infer_headers(display_rows)
+    df.columns = pretty_headers
+    wrapped_headers = [textwrap.fill(h, width=header_char_limit) for h in pretty_headers]
 
     is_numeric = [pd.api.types.is_numeric_dtype(df[col]) for col in df.columns]
 
@@ -231,7 +235,7 @@ def create_table_visual(
 
     try:
         n_rows, n_cols = df.shape
-        fig_width = min(max(n_cols * 1.2, 4), 12)
+        fig_width = min(max(n_cols * 0.8, 4), 10)
         fig_height = min(max(n_rows * 0.5 + 1, 2), 8)
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         fig.patch.set_facecolor("#1f1f1f")
@@ -239,16 +243,17 @@ def create_table_visual(
         ax.set_frame_on(True)
         ax.patch.set_facecolor("#1f1f1f")
 
+        col_width = 0.9 / n_cols if n_cols else 0.9
         table = ax.table(
             cellText=df.values,
-            colLabels=df.columns,
+            colLabels=wrapped_headers,
             cellLoc="center",
             loc="center",
+            colWidths=[col_width] * n_cols,
         )
         table.auto_set_font_size(False)
         table.set_fontsize(9)
         table.scale(1, 1)
-        table.auto_set_column_width(col=list(range(len(df.columns))))
 
         for (row, col), cell in table.get_celld().items():
             cell.set_edgecolor("#777777")

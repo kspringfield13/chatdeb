@@ -190,7 +190,7 @@ def create_table_visual(
     limit: int | None = None,
     headers: list[str] | None = None,
     cell_char_limit: int = 20,
-    header_char_limit: int = 12,
+    header_char_limit: int = 16,
 ) -> str:
     """Create a table image from ``rows`` and return the path.
 
@@ -246,14 +246,13 @@ def create_table_visual(
         ax.set_frame_on(True)
         ax.patch.set_facecolor("#1f1f1f")
 
-        col_width = 0.9 / n_cols if n_cols else 0.9
         table = ax.table(
             cellText=df.values,
             colLabels=wrapped_headers,
             cellLoc="center",
             loc="center",
-            colWidths=[col_width] * n_cols,
         )
+        table.auto_set_column_width(col=list(range(n_cols)))
         table.auto_set_font_size(False)
         table.set_fontsize(9)
         table.scale(1, 1)
@@ -261,9 +260,10 @@ def create_table_visual(
         for (row, col), cell in table.get_celld().items():
             cell.set_edgecolor("#777777")
             cell.set_linewidth(0.5)
+            cell.PAD = 0.3
             if row == 0:
                 cell.set_facecolor("#333333")
-                cell.set_text_props(weight="bold", color="white")
+                cell.set_text_props(weight="bold", color="white", ha="center")
                 cell.set_height(cell.get_height() * header_line_counts[col])
             else:
                 cell.set_facecolor("#1f1f1f")

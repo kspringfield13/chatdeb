@@ -214,6 +214,8 @@ def create_table_visual(
         pretty_headers = infer_headers(display_rows)
     df.columns = pretty_headers
     wrapped_headers = [textwrap.fill(h, width=header_char_limit) for h in pretty_headers]
+    header_line_counts = [h.count("\n") + 1 for h in wrapped_headers]
+    max_header_lines = max(header_line_counts)
 
     is_numeric = [pd.api.types.is_numeric_dtype(df[col]) for col in df.columns]
 
@@ -236,7 +238,8 @@ def create_table_visual(
     try:
         n_rows, n_cols = df.shape
         fig_width = min(max(n_cols * 0.8, 4), 10)
-        fig_height = min(max(n_rows * 0.5 + 1, 2), 8)
+        extra_height = (max_header_lines - 1) * 0.5
+        fig_height = min(max(n_rows * 0.5 + 1 + extra_height, 2), 8)
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         fig.patch.set_facecolor("#1f1f1f")
         ax.axis("off")
@@ -261,6 +264,7 @@ def create_table_visual(
             if row == 0:
                 cell.set_facecolor("#333333")
                 cell.set_text_props(weight="bold", color="white")
+                cell.set_height(cell.get_height() * header_line_counts[col])
             else:
                 cell.set_facecolor("#1f1f1f")
                 cell.set_text_props(color="#e0e0e0")

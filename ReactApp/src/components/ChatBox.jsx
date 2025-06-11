@@ -536,6 +536,10 @@ export default function ChatBox() {
                     borderRadius: 8,
                     backgroundColor: "#1f1f1f",
                   }}
+                  onLoad={() => {
+                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                    handleScroll();
+                  }}
                 />
                 <button
                   onClick={() => setImageModalSrc(msg.image)}

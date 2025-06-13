@@ -159,24 +159,29 @@ def create_matplotlib_visual(answers: list[str]) -> str:
 
     sql_query, x_col, y_col, chart_type = answers[:4]
 
-    if sql_query.strip().lower().startswith("select"):
+    # Support both string and Path input for the SQL/table parameter
+    if isinstance(sql_query, (os.PathLike, Path)):
+        sql_query = str(sql_query)
+
+    if isinstance(sql_query, str) and sql_query.strip().lower().startswith("select"):
         try:
             engine = get_engine()
             df = pd.read_sql_query(sql_query, engine)
         except Exception as e:  # noqa: BLE001
             raise ValueError(f"Query failed: {e}") from e
     else:
-        path = sql_query.replace("TABLE:", "").strip()
+        path = str(sql_query).replace("TABLE:", "").strip()
+        p = Path(path)
         if path.startswith("/charts/"):
-            path = CHARTS_DIR / Path(path).name
-        if path.endswith(".png"):
-            path = Path(path).with_suffix(".txt")
-        if not os.path.exists(path):
+            p = CHARTS_DIR / p.name
+        if p.suffix == ".png":
+            p = p.with_suffix(".txt")
+        if not p.exists():
             raise ValueError(
                 "Query must be a SELECT statement or a valid table path"
             )
         try:
-            df = pd.read_csv(path)
+            df = pd.read_csv(p)
         except Exception as e:  # noqa: BLE001
             raise ValueError(f"Loading data failed: {e}") from e
 

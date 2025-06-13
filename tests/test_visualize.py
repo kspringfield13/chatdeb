@@ -99,3 +99,11 @@ def test_generate_context_questions_fallback(monkeypatch):
 def test_create_matplotlib_visual_invalid_sql(monkeypatch):
     with pytest.raises(ValueError):
         create_matplotlib_visual(["missing.csv", "x", "y", "bar"])
+
+
+def test_create_matplotlib_visual_path_object(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    txt = tmp_path / "table.txt"
+    txt.write_text("a,b\n1,2")
+    path = create_matplotlib_visual([txt, "a", "b", "bar"])
+    assert Path(path).exists()

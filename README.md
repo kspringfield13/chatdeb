@@ -24,7 +24,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Data Ingestion & dbt
 
-  * ```data_ingest/load_data.py``` loads raw CSV files from ```raw_data/``` into staging tables in DuckDB and verifies row counts
+  * ```data_ingest/load_data.py``` loads raw CSV files from ```raw_data/``` into the ingested DuckDB database under ```ingested_data/ingest.db``` and verifies row counts
 
   * ```data_ingest/drop_all_data.py``` drops all tables/views in DuckDB for a clean slate
 
@@ -40,7 +40,7 @@ KYDxBot integrates a FastAPI backend, LangChain/OpenAI for querying, DuckDB for 
 
 * Data & Logs
 
-  * ```raw_data/``` holds sample CSVs for customers, products, etc.
+  * ```raw_data/``` holds sample CSVs for customers, products, etc.  Running ```load_data.py``` will ingest these into ```ingested_data/ingest.db```
 
   * ```logs/dbt.log``` shows past dbt invocations.
 
@@ -108,7 +108,7 @@ VEO_API_KEY=
 
 * Provided a cross-platform script called `load_data.py` located in the
   `data_ingest/` folder.
-* It loads CSV, Excel or JSON files from `raw_data/` into DuckDB and will skip
+* It loads CSV, Excel or JSON files from `raw_data/` into the `ingested_data/ingest.db` database and will skip
   any missing files instead of failing. Excel support requires the
   `openpyxl` and `xlrd` packages which are now included in `requirements.txt`.
 
@@ -215,8 +215,8 @@ history so that the next ingest starts from a clean slate.
 **Query the DuckDB database manually via CLI:**
 
 ```bash
-cd data
-duckdb data.db
+cd ingested_data
+duckdb ingest.db
 
 .tables
 SELECT * FROM customers LIMIT 5;

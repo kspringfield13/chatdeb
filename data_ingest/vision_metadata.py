@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 from openai import OpenAI
 
 RAW_DIR = Path(__file__).resolve().parent / "../raw_data"
-OUT_FILE = Path(__file__).resolve().parent / "../data/metadata.json"
+# Store extracted metadata alongside the ingested database so that the chatbot
+# always references the latest ingested dataset.
+OUT_FILE = Path(__file__).resolve().parent / "../ingested_data/metadata.json"
 
 
 def _capture_preview_image(df: pd.DataFrame) -> str:

@@ -4,8 +4,9 @@
 import os
 import duckdb
 
-# Path to your DuckDB file
-DB_PATH = os.path.join(os.path.dirname(__file__), "../data/data.db")
+# Path to your DuckDB file.  The chatbot now uses the ingested database by
+# default so we drop tables/views from that location.
+DB_PATH = os.path.join(os.path.dirname(__file__), "../ingested_data/ingest.db")
 
 def drop_all_tables_and_views(db_path: str):
     """

@@ -3,5 +3,5 @@ data_models:
   outputs:
     dev:
       type: duckdb
-      path: "{{ env_var('DBT_DUCKDB_PATH', '../data/data.db') }}"
+      path: "{{ env_var('DBT_DUCKDB_PATH', '../ingested_data/ingest.db') }}"
       schema: main

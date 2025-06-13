@@ -15,7 +15,9 @@ import pandas as pd
 from .visualize import generate_context_questions
 
 
-VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
+# Metadata about uploaded files lives next to the ingested database so that
+# introductory messages reflect the most recently provided data set.
+VISION_METADATA_FILE = Path(__file__).parent / "ingested_data" / "metadata.json"
 
 
 def _load_metadata() -> dict:
@@ -790,7 +792,10 @@ def _aggregate_metrics() -> dict:
     except Exception:
         return {}
 
-    db_path = Path("data/data.db")
+    # Use the same DuckDB path as the rest of the application.  This defaults to
+    # ``ingested_data/ingest.db`` but respects the ``DUCKDB_PATH`` environment
+    # variable when set.
+    db_path = Path(os.getenv("DUCKDB_PATH", "ingested_data/ingest.db"))
     if not db_path.exists():
         return {}
 

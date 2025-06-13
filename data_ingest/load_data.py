@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
-DUCKDB_PATH = ROOT / "data" / "data.db"
+# Ingested data is stored under ``ingested_data/ingest.db`` so that any
+# downstream processes (chatbot, ERD generation, etc.) operate on the
+# transformed tables rather than the raw CSVs.
+DUCKDB_PATH = ROOT / "ingested_data" / "ingest.db"
 
 # Location of the raw files to load
 RAW_DIR = ROOT / "raw_data"

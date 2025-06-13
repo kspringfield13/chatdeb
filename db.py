@@ -5,7 +5,10 @@ from pathlib import Path
 import duckdb
 from sqlalchemy import create_engine
 
-DEFAULT_DB_PATH = Path(__file__).resolve().parent / "data" / "data.db"
+# Default database used across the application.  Historically this lived under
+# ``data/data.db`` but all processes now work exclusively with the ingested
+# dataset in ``ingested_data/ingest.db``.
+DEFAULT_DB_PATH = Path(__file__).resolve().parent / "ingested_data" / "ingest.db"
 # Backwards compat constant
 DUCKDB_PATH = str(DEFAULT_DB_PATH)
 

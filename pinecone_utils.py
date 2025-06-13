@@ -349,8 +349,9 @@ def semantic_search(query: str, top_k: int = 3):
 # 7) If you run this script directly, only ingest customers & products
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    # Adjust this path if your DuckDB file lives elsewhere
-    duckdb_path = os.path.join(os.path.dirname(__file__), "data/data.db")
+    # Adjust this path if your DuckDB file lives elsewhere.  The repository now
+    # uses the ingested database stored in ``ingested_data/ingest.db``.
+    duckdb_path = os.path.join(os.path.dirname(__file__), "ingested_data/ingest.db")
 
     # 1) Embed all customers
     ingest_customer_texts(duckdb_path)

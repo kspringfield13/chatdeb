@@ -13,7 +13,7 @@ def is_data_question(query_text: str) -> bool:
         "invoices", "inventory", "expenses", "transactions", "employees",
         "payroll", "income", "metrics",
         "database", "duckdb", "dataset", "datasets", "db", "my db", "my database", "my data",
-        "loaded data", "uploaded data", "imported data", "shared data", "the data",
+        "loaded data", "ingested data", "imported data", "shared data", "the data",
         "my datasets", "my dataset", "this data", "the tables", "my tables",
     ]
 

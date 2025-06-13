@@ -15,8 +15,8 @@ import pandas as pd
 from .visualize import generate_context_questions
 
 
-
 VISION_METADATA_FILE = Path(__file__).parent / "data" / "metadata.json"
+
 
 def _load_metadata() -> dict:
     if VISION_METADATA_FILE.exists():
@@ -27,7 +27,9 @@ def _load_metadata() -> dict:
             print("metadata load error", e)
     return {}
 
+
 VISION_METADATA = _load_metadata()
+
 
 def _metadata_summary(meta: dict) -> str:
     lines = []
@@ -37,6 +39,7 @@ def _metadata_summary(meta: dict) -> str:
         piece = f"{name}: columns {cols}. {summary}".strip()
         lines.append(piece)
     return "\n".join(lines)
+
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
 
@@ -54,7 +57,9 @@ def should_prompt_for_context(question: str) -> bool:
     return False
 
 
-def generate_clarifying_questions(question: str, history: list[dict] | None = None) -> list[str]:
+def generate_clarifying_questions(
+    question: str, history: list[dict] | None = None
+) -> list[str]:
     """Return short follow-up questions to refine the user's request."""
     base = [
         "Which table or dataset should I query?",
@@ -104,13 +109,12 @@ def maybe_add_chart_prompt(reply: str, question: str, rows: list[tuple]) -> str:
     hint = "Would a bar or line chart help illustrate this data? Use the 'Visualize?' button to create one."
     return f"{reply}\n{hint}"
 
+
 # ── Chat history configuration ──────────────────────────────────────────────
 # Maximum number of past entries to include as context. Each entry is
 # truncated to keep the token count manageable.
 MAX_HISTORY_ENTRIES = 50
 MAX_HISTORY_WORDS = 50
-
-
 
 
 def load_recent_history(limit: int = 3) -> list[dict]:
@@ -177,9 +181,7 @@ def _extract_markdown_table(text: str) -> tuple[list[str], list[list[str]]] | No
     if len(lines) < 2:
         return None
 
-    rows = [
-        [cell.strip() for cell in ln.strip().strip("|").split("|")] for ln in lines
-    ]
+    rows = [[cell.strip() for cell in ln.strip().strip("|").split("|")] for ln in lines]
 
     if len(rows) >= 2 and all(re.fullmatch(r":?-+:?", c) for c in rows[1]):
         rows.pop(1)
@@ -199,8 +201,9 @@ def _maybe_convert_text_table(text: str) -> str:
     """Convert any Markdown table in ``text`` to an image path."""
 
     if text.startswith("TABLE:"):
-        path = text[len("TABLE:"):]
+        path = text[len("TABLE:") :]
         from pathlib import Path
+
         # Normalize any absolute path to the filename so the frontend can
         # request it from the ``/charts`` static route.
         return f"TABLE:/charts/{Path(path).name}"
@@ -285,6 +288,7 @@ def call_openai_fallback(user_question: str, history: list[dict] | None = None) 
         print(f"⚠️ OpenAI fallback error: {e}")
         return "Sorry, I’m having trouble right now. Please try again later."
 
+
 def extract_limit_from_question(q: str) -> int | None:
     """
     Simple regex to find a leading number in the question.
@@ -296,6 +300,7 @@ def extract_limit_from_question(q: str) -> int | None:
         # the regex has two capture groups; only one will be non‐None
         return int(m.group(1) or m.group(2))
     return None
+
 
 def is_data_question(query_text: str) -> bool:
     """Return ``True`` if a question is data‑centric.
@@ -315,14 +320,41 @@ def is_data_question(query_text: str) -> bool:
 
     q = query_text.lower()
     data_keywords = [
-        "average", "sum(", "count(", "how many", "what is", "list",
-        "top", "highest", "lowest", "per", "between", "profit",
-        "sales", "customers", "products", "revenue", "orders",
-        "invoices", "inventory", "expenses", "transactions", "employees",
-        "payroll", "income", "metrics",
+        "average",
+        "sum(",
+        "count(",
+        "how many",
+        "what is",
+        "list",
+        "top",
+        "highest",
+        "lowest",
+        "per",
+        "between",
+        "profit",
+        "sales",
+        "customers",
+        "products",
+        "revenue",
+        "orders",
+        "invoices",
+        "inventory",
+        "expenses",
+        "transactions",
+        "employees",
+        "payroll",
+        "income",
+        "metrics",
         # Consider references to generic data or database terms
-        "database", "duckdb", "dataset", "datasets", "db",
-        "loaded data", "imported data", "shared data", "the data",
+        "database",
+        "duckdb",
+        "dataset",
+        "datasets",
+        "db",
+        "loaded data",
+        "imported data",
+        "shared data",
+        "the data",
     ]
     if any(kw in q for kw in data_keywords):
         return True
@@ -349,17 +381,18 @@ def is_db_path_question(query_text: str) -> bool:
     ]
     return any(kw in q for kw in keywords)
 
+
 def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     """
-    1) Embed the query  
-    2) Query Pinecone → top_k matches  
-    3) If ID starts with 'cust_' → fetch that customer row via SQLAlchemy engine  
-    4) If ID starts with 'prod_' → fetch that product row via SQLAlchemy engine  
+    1) Embed the query
+    2) Query Pinecone → top_k matches
+    3) If ID starts with 'cust_' → fetch that customer row via SQLAlchemy engine
+    4) If ID starts with 'prod_' → fetch that product row via SQLAlchemy engine
     5) Return a plain‐text summary (one line per match)
     """
     # ── 1) Compute the embedding vector for query_text ─────────────────────────────
     q_emb = get_embedding(query_text)
-    
+
     if hasattr(q_emb, "tolist"):
         q_emb = q_emb.tolist()
 
@@ -369,7 +402,11 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
         print(f">>> q_emb[{i}] = {x} ({type(x)})")
 
     # 3) Check NaN/Inf
-    bad = [i for i, x in enumerate(q_emb) if isinstance(x, float) and (math.isnan(x) or math.isinf(x))]
+    bad = [
+        i
+        for i, x in enumerate(q_emb)
+        if isinstance(x, float) and (math.isnan(x) or math.isinf(x))
+    ]
     if bad:
         print(f">>> Found invalid entries (NaN/Inf) at indices: {bad[:10]} …")
 
@@ -404,6 +441,9 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
 
     # ── 4) For each Pinecone match, look up details via ENGINE ──────────────────
     lines: List[str] = []
+    fallback_rows: list[tuple[str, dict, float]] = []
+    fallback_headers: list[str] = []
+
     for m in matches:
         mid = m.id
         score = getattr(m, "score", m.get("score", 0.0))
@@ -417,7 +457,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 lines.append(f"Unparsable customer ID='{mid}', metadata: {meta}")
                 continue
 
-            sql = text("""
+            sql = text(
+                """
                 SELECT 
                     user_id,
                     customer_first_name,
@@ -427,7 +468,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                     num_web_sessions
                 FROM customers
                 WHERE user_id = :uid
-            """)
+            """
+            )
             with ENGINE.connect() as conn:
                 result = conn.execute(sql, {"uid": user_id}).fetchone()
 
@@ -450,7 +492,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 lines.append(f"Unparsable product ID='{mid}', metadata: {meta}")
                 continue
 
-            sql = text("""
+            sql = text(
+                """
                 SELECT 
                     product_id,
                     product_name,
@@ -460,7 +503,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                     profit
                 FROM products
                 WHERE product_id = :pid
-            """)
+            """
+            )
             with ENGINE.connect() as conn:
                 result = conn.execute(sql, {"pid": product_id}).fetchone()
 
@@ -479,10 +523,13 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                 dc_id = int(mid.split("_", 1)[1])
             except ValueError:
                 meta = m.metadata or m.get("metadata", {})
-                lines.append(f"Unparsable distribution center ID='{mid}', metadata: {meta}")
+                lines.append(
+                    f"Unparsable distribution center ID='{mid}', metadata: {meta}"
+                )
                 continue
 
-            sql = text("""
+            sql = text(
+                """
                 SELECT
                     distribution_center_id,
                     distribution_center_name,
@@ -491,7 +538,8 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                     total_inventory_cost
                 FROM distribution_center_inventory
                 WHERE distribution_center_id = :dcid
-            """)
+            """
+            )
             with ENGINE.connect() as conn:
                 result = conn.execute(sql, {"dcid": dc_id}).fetchone()
 
@@ -502,18 +550,36 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
                     f"(score={score:.3f})"
                 )
             else:
-                lines.append(f"Distribution center ID {dc_id} not found (score={score:.3f})")
-                
+                lines.append(
+                    f"Distribution center ID {dc_id} not found (score={score:.3f})"
+                )
+
         # --- 4c) Fallback if Pinecone returns an unexpected ID format
         else:
             meta = m.metadata if hasattr(m, "metadata") else m.get("metadata", {})
-            lines.append(f"(Match ID={mid}, score={score:.3f}, metadata={meta})")
+            if isinstance(meta, dict) and meta:
+                for k in meta.keys():
+                    if k not in fallback_headers:
+                        fallback_headers.append(k)
+                fallback_rows.append((mid, meta, score))
+            else:
+                lines.append(f"(Match ID={mid}, score={score:.3f}, metadata={meta})")
+
+    if fallback_rows:
+        table_rows: list[tuple] = []
+        for fid, meta, sc in fallback_rows:
+            row = [fid] + [meta.get(h, "") for h in fallback_headers] + [f"{sc:.3f}"]
+            table_rows.append(tuple(row))
+        headers = ["Match ID"] + fallback_headers + ["Score"]
+        lines.append(format_markdown_table(table_rows, headers=headers))
 
     # ── 5) Join all lines into a single multi-line string ─────────────────────────
     return "\n".join(lines)
 
+
 def format_zero_rows() -> str:
     return "No records found."
+
 
 def _format_generic_row(row: Tuple) -> str:
     """Format an arbitrary tuple of values safely."""
@@ -552,6 +618,7 @@ def format_single_row(row: Tuple) -> str:
 
     return _format_generic_row(row)
 
+
 def format_numbered_list(rows: List[Tuple]) -> str:
     """
     2–5 customers. Each row is (id, first, last, total).
@@ -562,6 +629,7 @@ def format_numbered_list(rows: List[Tuple]) -> str:
         single = format_single_row(row)
         lines.append(f"{i}. {single}  ")
     return "\n".join(lines)
+
 
 def format_markdown_table(
     rows: list[tuple],
@@ -580,9 +648,11 @@ def format_markdown_table(
         return "_No data returned._"
 
     from pathlib import Path
+
     fname = Path(path).name
     return f"TABLE:/charts/{fname}"
-    
+
+
 def _save_to_history(query: str, response: str, confidence: float | None):
     """
     Appends a new chat entry into chatbot_responses.json.
@@ -598,7 +668,7 @@ def _save_to_history(query: str, response: str, confidence: float | None):
         "query_text": query,
         "retrieved_response": response,
         "timestamp": datetime.datetime.now().isoformat(),
-        "confidence_score": confidence
+        "confidence_score": confidence,
     }
 
     fname = "chatbot_responses.json"
@@ -625,6 +695,7 @@ def _save_to_history(query: str, response: str, confidence: float | None):
     except Exception as e:
         print(f"⚠️ Couldn’t write to {fname}: {e}")
 
+
 def handle_query(query_text: str) -> str:
     q = query_text.strip()
     if not q:
@@ -643,11 +714,14 @@ def handle_query(query_text: str) -> str:
         if should_prompt_for_context(q):
             qs = generate_clarifying_questions(q, load_recent_history(2))
             bullet = "\n".join(f"- {line}" for line in qs)
-            reply = f"I have a couple quick questions before running the query:\n{bullet}"
+            reply = (
+                f"I have a couple quick questions before running the query:\n{bullet}"
+            )
             _save_to_history(q, reply, confidence=None)
             return reply
         try:
             from .langchain_sql import query_via_sqlagent
+
             headers, rows = query_via_sqlagent(q)
             n = len(rows)
             explain = _build_explanation(q)
@@ -685,7 +759,7 @@ def handle_query(query_text: str) -> str:
             reply = _maybe_convert_text_table(reply)
             _save_to_history(q, reply, confidence=None)
             return reply
-        
+
     try:
         reply = handle_semantic_search(q, top_k=3)
         reply = _maybe_convert_text_table(reply)
@@ -698,6 +772,7 @@ def handle_query(query_text: str) -> str:
         reply = _maybe_convert_text_table(reply)
         _save_to_history(q, reply, confidence=None)
         return reply
+
 
 def clear_conversation():
     """Reset any conversation state (currently no-op)."""
@@ -718,9 +793,15 @@ def _aggregate_metrics() -> dict:
     con = duckdb.connect(str(db_path))
     metrics = {}
     try:
-        metrics["customer_count"] = con.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
-        metrics["product_count"] = con.execute("SELECT COUNT(*) FROM products").fetchone()[0]
-        metrics["total_sales"] = con.execute("SELECT SUM(sales_amount) FROM products").fetchone()[0] or 0
+        metrics["customer_count"] = con.execute(
+            "SELECT COUNT(*) FROM customers"
+        ).fetchone()[0]
+        metrics["product_count"] = con.execute(
+            "SELECT COUNT(*) FROM products"
+        ).fetchone()[0]
+        metrics["total_sales"] = (
+            con.execute("SELECT SUM(sales_amount) FROM products").fetchone()[0] or 0
+        )
     except Exception:
         return {}
     finally:
@@ -776,7 +857,9 @@ def get_intro_message() -> str:
     )
 
 
-def summarize_conversation(history: list[dict], visuals: list[str] | None = None) -> str:
+def summarize_conversation(
+    history: list[dict], visuals: list[str] | None = None
+) -> str:
     """Return a short text summary of the conversation history.
 
     ``history`` should be a list of objects with ``sender`` and ``text`` keys.

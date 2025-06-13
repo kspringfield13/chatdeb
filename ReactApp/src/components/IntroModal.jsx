@@ -149,7 +149,6 @@ export default function IntroModal({ onIngested }) {
               borderRadius: "5px",
               fontSize: "1rem",
               cursor: "pointer",
-              transition: "background-color 0.3s ease",
               marginLeft: "1rem", // optional spacing from the button
             }}
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}

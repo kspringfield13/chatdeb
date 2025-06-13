@@ -36,6 +36,7 @@ SAMPLE_DATASETS = {
     f"dataset{i}": SAMPLE_DATASETS_DIR / f"dataset{i}"
     for i in range(1, 6)
 }
+SAMPLE_DATASETS["Orders Snapshot"] = SAMPLE_DATASETS_DIR / "dataset1"
 
 
 

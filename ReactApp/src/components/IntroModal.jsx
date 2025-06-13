@@ -90,8 +90,9 @@ export default function IntroModal({ onIngested }) {
           textAlign: "center",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Welcome to Deb,
-          Your Free, Open Source Data Engineer Bot
+        <h2 style={{ marginTop: 0 }}>Welcome to Deb,<br />
+          Your Free, Open Source<br />
+          Data Engineer Bot
         </h2>
         <h3>
           Please select your data files to get started.<br />
@@ -114,12 +115,29 @@ export default function IntroModal({ onIngested }) {
           style={{
             display: "flex",
             justifyContent: "left",
-            alignItems: "center",
+            alignItems: "left",
             gap: "0.5rem",
-            marginTop: "1rem",
+            marginTop: "0.5rem",
           }}
         >
-          <button onClick={handleClick}>Add Data</button>
+          <button
+            onClick={handleClick}
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: "#007BFF",
+              color: "#004080",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "1rem",
+              cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+              transition: "background-color 0.3s ease",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#007BFF")}
+          >
+            Add Data
+          </button>
           <select value={sample} onChange={handleSample}>
             <option value="">Select Sample Dataset</option>
             {SAMPLE_OPTIONS.map((opt) => (
@@ -132,7 +150,7 @@ export default function IntroModal({ onIngested }) {
         <div
           style={{
             display: "flex",
-            justifyContent: "left",
+            justifyContent: "center",
             alignItems: "center",
             marginTop: "1rem",
             gap: "0.5rem",
@@ -143,13 +161,28 @@ export default function IntroModal({ onIngested }) {
             type="checkbox"
             checked={digest}
             onChange={(e) => setDigest(e.target.checked)}
+            style={{
+              width: "20px",
+              height: "20px",
+              accentColor: "#007BFF", // modern browsers support this
+              cursor: "pointer",
+              marginRight: "0.5rem",
+            }}
           />
-          <label htmlFor="digestCheckbox">Digest My Data</label>
-          <span style={{ opacity: 0.4 }}>
+          <label
+            htmlFor="digestCheckbox"
+            style={{
+              fontSize: "1rem",
+              cursor: "pointer",
+            }}
+          >
+            Digest My Data
+          </label>
+          <span style={{ fontSize: "0.75rem", opacity: 0.4 }}>
             Deeper data analysis & improved results.
           </span>
         </div>
-        <p style={{ fontSize: "0.75rem", opacity: 0.7 }}>
+        <p style={{ fontSize: "0.6rem", opacity: 0.7 }}>
           Add Data process will take longer, ingested data to be organized,
           cleaned, and refined.
         </p>

@@ -1,6 +1,7 @@
 # chatbot.py
 
 import os, datetime
+import logging
 import numpy as np
 from .db import get_engine
 from .pinecone_utils import get_embedding, index
@@ -12,6 +13,9 @@ from openai import OpenAI
 from pathlib import Path
 from io import StringIO
 import pandas as pd
+from . import log_config
+
+logger = logging.getLogger(__name__)
 from .visualize import generate_context_questions
 
 
@@ -26,7 +30,7 @@ def _load_metadata() -> dict:
             with open(VISION_METADATA_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:  # noqa: BLE001
-            print("metadata load error", e)
+            logger.warning("metadata load error: %s", e)
     return {}
 
 
@@ -97,7 +101,7 @@ def generate_clarifying_questions(
         if len(lines) >= 2 and all(q.endswith("?") for q in lines[:2]):
             return lines[:2]
     except Exception as exc:  # noqa: BLE001
-        print("clarifying questions error", exc)
+        logger.warning("clarifying questions error: %s", exc)
     return base
 
 
@@ -236,7 +240,7 @@ def _maybe_convert_text_table(text: str) -> str:
             fname = Path(path).name
             return f"TABLE:/charts/{fname}"
     except Exception as e:  # noqa: BLE001
-        print("markdown table conversion error", e)
+        logger.error("markdown table conversion error: %s", e)
 
     return text
 
@@ -287,7 +291,7 @@ def call_openai_fallback(user_question: str, history: list[dict] | None = None) 
         return reply
 
     except Exception as e:
-        print(f"⚠️ OpenAI fallback error: {e}")
+        logger.warning("OpenAI fallback error: %s", e)
         return "Sorry, I’m having trouble right now. Please try again later."
 
 
@@ -304,84 +308,7 @@ def extract_limit_from_question(q: str) -> int | None:
     return None
 
 
-def is_data_question(query_text: str) -> bool:
-    """Return ``True`` if a question is data‑centric.
-
-    A query is considered *data‑centric* when the user is clearly looking for
-    numbers, lists or metrics that can be answered from the database.  Typical
-    examples for small/medium business owners include:
-
-    - "How many orders did we ship last month?"
-    - "Show me the top 10 customers by revenue."
-    - "What's the average order value?"
-    - "List employees with more than 5 sales this quarter."
-
-    When such keywords appear, the question is routed through the SQLAgent
-    chain (LangChain → DuckDB) rather than the semantic search fallback.
-    """
-
-    q = query_text.lower()
-    data_keywords = [
-        "average",
-        "sum(",
-        "count(",
-        "how many",
-        "what is",
-        "list",
-        "top",
-        "highest",
-        "lowest",
-        "per",
-        "between",
-        "profit",
-        "sales",
-        "customers",
-        "products",
-        "revenue",
-        "orders",
-        "invoices",
-        "inventory",
-        "expenses",
-        "transactions",
-        "employees",
-        "payroll",
-        "income",
-        "metrics",
-        # Consider references to generic data or database terms
-        "database",
-        "duckdb",
-        "dataset",
-        "datasets",
-        "db",
-        "loaded data",
-        "imported data",
-        "shared data",
-        "the data",
-    ]
-    if any(kw in q for kw in data_keywords):
-        return True
-
-    try:
-        return is_similar(query_text)
-    except Exception:
-        return False
-
-
-def is_db_path_question(query_text: str) -> bool:
-    """Return True if the user asks for the database file location."""
-    q = query_text.lower()
-    keywords = [
-        "db path",
-        "database path",
-        "path to database",
-        "where is the database",
-        "database location",
-        "path to db",
-        "where is your db",
-        "file path",
-        "database file",
-    ]
-    return any(kw in q for kw in keywords)
+from .detection import is_data_question, is_db_path_question
 
 
 def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
@@ -398,10 +325,10 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
     if hasattr(q_emb, "tolist"):
         q_emb = q_emb.tolist()
 
-    # 2) Print length & types
-    print(f">>> q_emb length = {len(q_emb)}")
+    # 2) Log length & types
+    logger.debug("q_emb length = %s", len(q_emb))
     for i, x in enumerate(q_emb[:5]):
-        print(f">>> q_emb[{i}] = {x} ({type(x)})")
+        logger.debug("q_emb[%s] = %s (%s)", i, x, type(x))
 
     # 3) Check NaN/Inf
     bad = [
@@ -410,26 +337,26 @@ def handle_semantic_search(query_text: str, top_k: int = 3) -> str:
         if isinstance(x, float) and (math.isnan(x) or math.isinf(x))
     ]
     if bad:
-        print(f">>> Found invalid entries (NaN/Inf) at indices: {bad[:10]} …")
+        logger.debug("Found invalid entries (NaN/Inf) at indices: %s", bad[:10])
 
     # 4) Cast to float
     try:
         q_emb = [float(x) for x in q_emb]
-        print(">>> Cast to Python floats succeeded.")
+        logger.debug("Cast to Python floats succeeded.")
     except Exception as e:
-        print(">>> Cast to Python floats failed:", e)
+        logger.debug("Cast to Python floats failed: %s", e)
 
     # 5) Check dimension
     EXPECTED_DIM = 1536
     if len(q_emb) != EXPECTED_DIM:
-        print(f">>> DIM MISMATCH: {len(q_emb)} vs {EXPECTED_DIM}")
+        logger.debug("DIM MISMATCH: %s vs %s", len(q_emb), EXPECTED_DIM)
 
     # 6) Test JSON serialization
     try:
         temp = json.dumps({"vector": q_emb, "top_k": 3})
-        print(">>> JSON serialization OK.")
+        logger.debug("JSON serialization OK.")
     except Exception as e:
-        print(">>> JSON serialization failed:", e)
+        logger.debug("JSON serialization failed: %s", e)
 
     # 7) Finally query Pinecone
     response = index.query(vector=q_emb, top_k=top_k, include_metadata=True)
@@ -695,7 +622,56 @@ def _save_to_history(query: str, response: str, confidence: float | None):
         with open(fname, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
-        print(f"⚠️ Couldn’t write to {fname}: {e}")
+        logger.warning("Couldn’t write to %s: %s", fname, e)
+
+
+def _handle_data_question(q: str) -> str:
+    """Process SQL-oriented questions."""
+
+    if should_prompt_for_context(q):
+        qs = generate_clarifying_questions(q, load_recent_history(2))
+        bullet = "\n".join(f"- {line}" for line in qs)
+        return f"I have a couple quick questions before running the query:\n{bullet}"
+
+    try:
+        from .langchain_sql import query_via_sqlagent
+
+        headers, rows = query_via_sqlagent(q)
+        n = len(rows)
+        explain = _build_explanation(q)
+
+        if n == 0:
+            return f"{explain}\n{format_zero_rows()}"
+
+        if n == 1:
+            reply = f"{explain}\n{format_single_row(rows[0])}"
+            reply = maybe_add_chart_prompt(reply, q, rows)
+            return reply
+
+        if 2 <= n <= 5:
+            body = format_numbered_list(rows)
+            reply = f"{explain}\n{body}"
+            reply = maybe_add_chart_prompt(reply, q, rows)
+            return reply
+
+        table = format_markdown_table(rows, limit=None, headers=headers)
+        reply = f"{explain}\n{table}"
+        reply = maybe_add_chart_prompt(reply, q, rows)
+        return reply
+
+    except Exception as e:
+        logger.error("Data-centric error: %s", e)
+        return call_openai_fallback(q)
+
+
+def _handle_semantic_question(q: str) -> str:
+    """Fallback to semantic search or OpenAI."""
+
+    try:
+        return handle_semantic_search(q, top_k=3)
+    except Exception as e:
+        logger.error("Semantic-search error: %s", e)
+        return call_openai_fallback(q)
 
 
 def handle_query(query_text: str) -> str:
@@ -708,72 +684,14 @@ def handle_query(query_text: str) -> str:
             "The sample data is already loaded in memory. "
             "Would you like to use this DuckDB data?"
         )
-        reply = _maybe_convert_text_table(reply)
-        _save_to_history(q, reply, confidence=None)
-        return reply
+    elif is_data_question(q):
+        reply = _handle_data_question(q)
+    else:
+        reply = _handle_semantic_question(q)
 
-    if is_data_question(q):
-        if should_prompt_for_context(q):
-            qs = generate_clarifying_questions(q, load_recent_history(2))
-            bullet = "\n".join(f"- {line}" for line in qs)
-            reply = (
-                f"I have a couple quick questions before running the query:\n{bullet}"
-            )
-            _save_to_history(q, reply, confidence=None)
-            return reply
-        try:
-            from .langchain_sql import query_via_sqlagent
-
-            headers, rows = query_via_sqlagent(q)
-            n = len(rows)
-            explain = _build_explanation(q)
-
-            if n == 0:
-                reply = f"{explain}\n{format_zero_rows()}"
-                reply = _maybe_convert_text_table(reply)
-                _save_to_history(q, reply, confidence=None)
-                return reply
-
-            if n == 1:
-                reply = f"{explain}\n{format_single_row(rows[0])}"
-                reply = _maybe_convert_text_table(reply)
-                reply = maybe_add_chart_prompt(reply, q, rows)
-                _save_to_history(q, reply, confidence=None)
-                return reply
-
-            if 2 <= n <= 5:
-                body = format_numbered_list(rows)
-                reply = _maybe_convert_text_table(f"{explain}\n{body}")
-                reply = maybe_add_chart_prompt(reply, q, rows)
-                _save_to_history(q, reply, confidence=None)
-                return reply
-
-            table = format_markdown_table(rows, limit=None, headers=headers)
-            reply = _maybe_convert_text_table(f"{explain}\n{table}")
-            reply = maybe_add_chart_prompt(reply, q, rows)
-            _save_to_history(q, reply, confidence=None)
-            return reply
-
-        except Exception as e:
-            # Any error in SQLAgent / formatting → open AI fallback
-            print("⚠️ Data‐centric error:", e)
-            reply = call_openai_fallback(q)
-            reply = _maybe_convert_text_table(reply)
-            _save_to_history(q, reply, confidence=None)
-            return reply
-
-    try:
-        reply = handle_semantic_search(q, top_k=3)
-        reply = _maybe_convert_text_table(reply)
-        _save_to_history(q, reply, confidence=None)
-        return reply
-    except Exception as e:
-        # Any error in semantic‐search → open AI fallback
-        print("⚠️ Semantic‐search error:", e)
-        reply = call_openai_fallback(q)
-        reply = _maybe_convert_text_table(reply)
-        _save_to_history(q, reply, confidence=None)
-        return reply
+    reply = _maybe_convert_text_table(reply)
+    _save_to_history(q, reply, confidence=None)
+    return reply
 
 
 def clear_conversation():
@@ -782,7 +700,7 @@ def clear_conversation():
     try:
         path.unlink(missing_ok=True)  # Python 3.8+ keyword
     except Exception as exc:  # noqa: BLE001
-        print("clear_conversation error", exc)
+        logger.warning("clear_conversation error: %s", exc)
 
 
 def _aggregate_metrics() -> dict:
@@ -900,5 +818,5 @@ def summarize_conversation(
         text = completion.choices[0].message.content.strip()
         return _maybe_convert_text_table(text)
     except Exception as e:  # noqa: BLE001
-        print("summarize_conversation error", e)
+        logger.error("summarize_conversation error: %s", e)
         return "Sorry, I couldn't generate a summary."

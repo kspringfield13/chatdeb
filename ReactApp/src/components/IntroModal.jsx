@@ -31,12 +31,14 @@ export default function IntroModal({ onIngested }) {
       if (res.ok) {
         if (onIngested) onIngested();
       } else {
-        console.error("ingest failed", await res.text());
-        alert("Failed to ingest files");
+        const msg = await res.text();
+        console.error("ingest failed", msg);
+        alert(`Failed to ingest files: ${msg}`);
       }
     } catch (err) {
       console.error("ingest error", err);
-      alert("Ingest error");
+      const msg = err?.message || String(err);
+      alert(`Ingest error: ${msg}`);
     }
   };
 
@@ -55,12 +57,14 @@ export default function IntroModal({ onIngested }) {
       if (res.ok) {
         if (onIngested) onIngested();
       } else {
-        console.error("ingest failed", await res.text());
-        alert("Failed to ingest sample");
+        const msg = await res.text();
+        console.error("ingest failed", msg);
+        alert(`Failed to ingest sample: ${msg}`);
       }
     } catch (err) {
       console.error("ingest error", err);
-      alert("Ingest error");
+      const msg = err?.message || String(err);
+      alert(`Ingest error: ${msg}`);
     }
   };
 

@@ -151,7 +151,7 @@ export default function IntroModal({ onIngested }) {
           >
             <option value="">Select Sample Dataset</option>
             {SAMPLE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt} style={{ color: "#000" }}>
+              <option key={opt} value={opt} >
                 {opt}
               </option>
             ))}

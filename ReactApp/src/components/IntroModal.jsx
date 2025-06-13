@@ -141,12 +141,13 @@ export default function IntroModal({ onIngested }) {
             style={{
               padding: "0.5rem 1rem",
               backgroundColor: "#007BFF",
-              color: "#004080",
+              color: "#F8F9FA",
               border: "none",
               borderRadius: "0px",
               fontSize: "1rem",
               cursor: "pointer",
               marginLeft: "2rem",
+              appearance: "none",
             }}
           >
             <option value="">Select Sample Dataset</option>

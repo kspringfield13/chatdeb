@@ -30,7 +30,8 @@ def analyze_file(path: Path) -> dict:
     if path.suffix.lower() == ".csv":
         df = pd.read_csv(path)
     elif path.suffix.lower() in {".xls", ".xlsx"}:
-        df = pd.read_excel(path)
+        engine = "openpyxl" if path.suffix.lower() == ".xlsx" else "xlrd"
+        df = pd.read_excel(path, engine=engine)
     elif path.suffix.lower() == ".json":
         df = pd.read_json(path, orient="records", lines=False)
     else:

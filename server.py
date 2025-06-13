@@ -156,7 +156,7 @@ async def ingest_data(
         if ext == ".csv":
             df = pd.read_csv(buf)
         elif ext in {".xls", ".xlsx"}:
-            engine = "openpyxl" if ext == ".xlsx" else None
+            engine = "openpyxl" if ext == ".xlsx" else "xlrd"
             try:
                 df = pd.read_excel(buf, engine=engine)
             except Exception as exc:
@@ -196,7 +196,7 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
             if ext == ".csv":
                 df = pd.read_csv(file)
             elif ext in {".xls", ".xlsx"}:
-                engine = "openpyxl" if ext == ".xlsx" else None
+                engine = "openpyxl" if ext == ".xlsx" else "xlrd"
                 df = pd.read_excel(file, engine=engine)
             else:
                 df = pd.read_json(file, orient="records", lines=False)

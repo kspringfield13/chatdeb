@@ -110,7 +110,7 @@ VEO_API_KEY=
   `data_ingest/` folder.
 * It loads CSV, Excel or JSON files from `raw_data/` into DuckDB and will skip
   any missing files instead of failing. Excel support requires the
-  `openpyxl` package which is now included in `requirements.txt`.
+  `openpyxl` and `xlrd` packages which are now included in `requirements.txt`.
 
 ```bash
 cd data_ingest

@@ -138,10 +138,27 @@ export default function IntroModal({ onIngested }) {
           >
             Add Data
           </button>
-          <select value={sample} onChange={handleSample}>
+          <select
+            value={sample}
+            onChange={handleSample}
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: "#007BFF",
+              color: "#004080",
+              border: "none",
+              borderRadius: "5px",
+              fontSize: "1rem",
+              cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+              transition: "background-color 0.3s ease",
+              marginLeft: "1rem", // optional spacing from the button
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#007BFF")}
+          >
             <option value="">Select Sample Dataset</option>
             {SAMPLE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt}>
+              <option key={opt} value={opt} style={{ color: "#000" }}>
                 {opt}
               </option>
             ))}
@@ -162,8 +179,8 @@ export default function IntroModal({ onIngested }) {
             checked={digest}
             onChange={(e) => setDigest(e.target.checked)}
             style={{
-              width: "20px",
-              height: "20px",
+              width: "40px",
+              height: "40px",
               accentColor: "#007BFF", // modern browsers support this
               cursor: "pointer",
               marginRight: "0.5rem",
@@ -172,7 +189,7 @@ export default function IntroModal({ onIngested }) {
           <label
             htmlFor="digestCheckbox"
             style={{
-              fontSize: "1rem",
+              fontSize: "0.8rem",
               cursor: "pointer",
             }}
           >

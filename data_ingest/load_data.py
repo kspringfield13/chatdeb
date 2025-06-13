@@ -31,7 +31,8 @@ def ingest_table(con: duckdb.DuckDBPyConnection, table_name: str, file_name: str
         if full_path.suffix.lower() == ".csv":
             df = pd.read_csv(full_path)
         elif full_path.suffix.lower() in {".xls", ".xlsx"}:
-            df = pd.read_excel(full_path)
+            engine = "openpyxl" if full_path.suffix.lower() == ".xlsx" else "xlrd"
+            df = pd.read_excel(full_path, engine=engine)
         elif full_path.suffix.lower() == ".json":
             df = pd.read_json(full_path, orient="records", lines=False)
         else:

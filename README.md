@@ -109,7 +109,8 @@ VEO_API_KEY=
 * Provided a cross-platform script called `load_data.py` located in the
   `data_ingest/` folder.
 * It loads CSV, Excel or JSON files from `raw_data/` into DuckDB and will skip
-  any missing files instead of failing.
+  any missing files instead of failing. Excel support requires the
+  `openpyxl` package which is now included in `requirements.txt`.
 
 ```bash
 cd data_ingest

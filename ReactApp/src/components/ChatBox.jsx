@@ -79,6 +79,13 @@ export default function ChatBox() {
 
   const DB_SIZE_LIMIT = 20 * 1024 * 1024; // ~20MB
 
+  // Start a fresh session on mount
+  useEffect(() => {
+    fetch("/clear_history", { method: "POST" }).catch((err) =>
+      console.error("clear history error", err)
+    );
+  }, []);
+
   // Fetch intro message on mount
   useEffect(() => {
     const fetchIntro = async () => {

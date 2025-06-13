@@ -156,7 +156,11 @@ async def ingest_data(
         if ext == ".csv":
             df = pd.read_csv(buf)
         elif ext in {".xls", ".xlsx"}:
-            df = pd.read_excel(buf)
+            engine = "openpyxl" if ext == ".xlsx" else None
+            try:
+                df = pd.read_excel(buf, engine=engine)
+            except Exception as exc:
+                raise HTTPException(status_code=400, detail=f"Failed to read Excel file: {exc}")
         elif ext == ".json":
             df = pd.read_json(buf, orient="records", lines=False)
         else:
@@ -192,7 +196,8 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
             if ext == ".csv":
                 df = pd.read_csv(file)
             elif ext in {".xls", ".xlsx"}:
-                df = pd.read_excel(file)
+                engine = "openpyxl" if ext == ".xlsx" else None
+                df = pd.read_excel(file, engine=engine)
             else:
                 df = pd.read_json(file, orient="records", lines=False)
         except Exception as exc:

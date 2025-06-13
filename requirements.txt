@@ -96,6 +96,7 @@ ordered-set==4.1.0
 orjson==3.10.18
 packaging==24.2
 pandas==2.2.3
+openpyxl==3.1.5
 parsedatetime==2.6
 parso==0.8.4
 pathspec==0.12.1

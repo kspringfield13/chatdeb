@@ -1,34 +1,45 @@
 # data_ingest/load_data.py
 
+from __future__ import annotations
+
 import os
+from pathlib import Path
 import duckdb
 import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DUCKDB_PATH = os.path.join(os.path.dirname(__file__), "../data/data.db")
+ROOT = Path(__file__).resolve().parent.parent
+DUCKDB_PATH = ROOT / "data" / "data.db"
 
-# Replace these with real paths to your raw CSV/JSONs
-RAW_DIR = os.path.join(os.path.dirname(__file__), "../raw_data")
+# Location of the raw files to load
+RAW_DIR = ROOT / "raw_data"
 
 def ingest_table(con: duckdb.DuckDBPyConnection, table_name: str, file_name: str):
     """
     Drops & recreates a staging table in DuckDB from a CSV, Excel, or JSON file.
     """
-    full_path = os.path.join(RAW_DIR, file_name)
+    full_path = RAW_DIR / file_name
+
+    if not full_path.is_file():
+        print(f"⚠️  {file_name} not found, skipping")
+        return
 
     # Determine the file type and read accordingly
-    if file_name.lower().endswith(".csv"):
-        df = pd.read_csv(full_path)
-    elif file_name.lower().endswith((".xls", ".xlsx")):
-        df = pd.read_excel(full_path)
-    elif file_name.lower().endswith(".json"):
-        # pandas will automatically infer orientation if it’s a list of records
-        df = pd.read_json(full_path, orient="records", lines=False)
-    else:
-        raise ValueError(f"Unsupported file type for {file_name}. "
-                         "Supported extensions are .csv, .xls/.xlsx, and .json.")
+    try:
+        if full_path.suffix.lower() == ".csv":
+            df = pd.read_csv(full_path)
+        elif full_path.suffix.lower() in {".xls", ".xlsx"}:
+            df = pd.read_excel(full_path)
+        elif full_path.suffix.lower() == ".json":
+            df = pd.read_json(full_path, orient="records", lines=False)
+        else:
+            print(f"⚠️  Unsupported file type for {file_name}, skipping")
+            return
+    except Exception as exc:
+        print(f"❌ Failed to load {file_name}: {exc}")
+        return
 
     # Drop if exists, then create
     con.execute(f"DROP TABLE IF EXISTS {table_name};")
@@ -39,8 +50,8 @@ def ingest_table(con: duckdb.DuckDBPyConnection, table_name: str, file_name: str
     print(f"⬢ Ingested {table_name} ({len(df)} rows) from {file_name}")
 
 def main():
-    os.makedirs(os.path.dirname(DUCKDB_PATH), exist_ok=True)
-    con = duckdb.connect(DUCKDB_PATH)
+    DUCKDB_PATH.parent.mkdir(exist_ok=True)
+    con = duckdb.connect(str(DUCKDB_PATH))
 
     # Example mapping: staging_table_name → filename.csv
     table_files = {

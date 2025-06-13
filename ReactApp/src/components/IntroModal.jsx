@@ -149,10 +149,8 @@ export default function IntroModal({ onIngested }) {
               borderRadius: "5px",
               fontSize: "1rem",
               cursor: "pointer",
-              marginLeft: "1rem", // optional spacing from the button
+              marginLeft: "2rem", // optional spacing from the button
             }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#007BFF")}
           >
             <option value="">Select Sample Dataset</option>
             {SAMPLE_OPTIONS.map((opt) => (

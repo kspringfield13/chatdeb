@@ -22,3 +22,9 @@ def set_default_style() -> None:
             "grid.linewidth": 0.5,
         }
     )
+    plt.rcParams.setdefault(
+        "axes.prop_cycle",
+        plt.cycler(
+            color=["#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f"]
+        ),
+    )

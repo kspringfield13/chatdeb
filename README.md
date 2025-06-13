@@ -207,6 +207,10 @@ application. You can also add a `watermark.png` in the same folder. When
 generating an ER diagram, this image will be overlaid in the bottom right
 corner of the chart if it exists.
 
+Every time you load the chat page a request to `/clear_history` is sent. This
+drops any tables in the temporary DuckDB database and deletes previous chat
+history so that the next ingest starts from a clean slate.
+
 
 **Query the DuckDB database manually via CLI:**
 

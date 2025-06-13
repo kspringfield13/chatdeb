@@ -24,6 +24,7 @@ from .erd import generate_erd, get_data_summary, describe_erd
 from .chatbot import _maybe_convert_text_table
 from .directorscut import generate_directors_cut
 from .db import DEFAULT_DB_PATH
+from .data_ingest.drop_all_data import drop_all_tables_and_views
 
 app = FastAPI(title="KYDxBot API")
 
@@ -127,6 +128,17 @@ class IntroResponse(BaseModel):
     message: str
 
 
+def reset_ingest_db() -> None:
+    """Drop all tables and views from the ingestion database."""
+    try:
+        INGEST_DIR.mkdir(exist_ok=True)
+        drop_all_tables_and_views(str(INGEST_DB_PATH))
+        os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
+        os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
+    except Exception as exc:  # noqa: BLE001
+        print("reset_ingest_db error", exc)
+
+
 @app.get("/intro", response_model=IntroResponse)
 async def intro():
     msg = get_intro_message()
@@ -142,8 +154,9 @@ async def ingest_data(
     import duckdb
     import io
 
-    INGEST_DIR.mkdir(exist_ok=True)
+    reset_ingest_db()
 
+    INGEST_DIR.mkdir(exist_ok=True)
     total = 0
     con = duckdb.connect(str(INGEST_DB_PATH))
     for file in files:
@@ -183,6 +196,8 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
     """Ingest all supported files from ``dir_path`` into DuckDB."""
     import pandas as pd
     import duckdb
+
+    reset_ingest_db()
 
     INGEST_DIR.mkdir(exist_ok=True)
     con = duckdb.connect(str(INGEST_DB_PATH))
@@ -381,6 +396,7 @@ async def clear_history():
     Optional: allows React frontend to reset conversation memory if needed.
     """
     clear_conversation()
+    reset_ingest_db()
     return {"status": "cleared"}
 
 

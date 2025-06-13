@@ -700,8 +700,12 @@ def handle_query(query_text: str) -> str:
         return reply
 
 def clear_conversation():
-    """Reset any conversation state (currently no-op)."""
-    pass
+    """Remove the ``chatbot_responses.json`` history file if it exists."""
+    path = Path("chatbot_responses.json")
+    try:
+        path.unlink(missing_ok=True)  # Python 3.8+ keyword
+    except Exception as exc:  # noqa: BLE001
+        print("clear_conversation error", exc)
 
 
 def _aggregate_metrics() -> dict:

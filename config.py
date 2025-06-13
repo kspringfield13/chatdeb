@@ -20,6 +20,13 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 CHARTS_DIR = ROOT / 'charts'
 CHARTS_DIR.mkdir(exist_ok=True)
 
+# Directory for temporarily uploaded user files
+UPLOAD_DIR = ROOT / 'uploaded_data'
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+# DuckDB path used for user-uploaded data
+UPLOAD_DB_PATH = UPLOAD_DIR / 'upload.db'
+
 
 def require_env(*names: str) -> None:
     """Raise ``ValueError`` if any of ``names`` are unset and not testing."""

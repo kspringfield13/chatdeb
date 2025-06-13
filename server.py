@@ -1,12 +1,12 @@
 import os
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 
-from .config import CHARTS_DIR
+from .config import CHARTS_DIR, UPLOAD_DIR, UPLOAD_DB_PATH
 
 from .chatbot import (
     handle_query,
@@ -23,7 +23,7 @@ from .infograph import generate_infograph_questions, create_infographic
 from .erd import generate_erd, get_data_summary, describe_erd
 from .chatbot import _maybe_convert_text_table
 from .directorscut import generate_directors_cut
-from .db import DUCKDB_PATH
+from .db import DEFAULT_DB_PATH
 
 app = FastAPI(title="KYDxBot API")
 
@@ -118,6 +118,10 @@ class DirectorsCutResponse(BaseModel):
     video_url: str | None = None
 
 
+class UploadResponse(BaseModel):
+    status: str
+
+
 class IntroResponse(BaseModel):
     message: str
 
@@ -126,6 +130,47 @@ class IntroResponse(BaseModel):
 async def intro():
     msg = get_intro_message()
     return IntroResponse(message=msg)
+
+
+@app.post("/upload_data", response_model=UploadResponse)
+async def upload_data(files: list[UploadFile] = File(...)):
+    """Save uploaded files and ingest them into a temporary DuckDB database."""
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    total = 0
+    saved = []
+    for file in files:
+        data = await file.read()
+        total += len(data)
+        if total > 1024 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Upload limit exceeded")
+        path = UPLOAD_DIR / file.filename
+        with open(path, "wb") as f:
+            f.write(data)
+        saved.append(path)
+
+    import pandas as pd
+    import duckdb
+
+    con = duckdb.connect(str(UPLOAD_DB_PATH))
+    for path in saved:
+        name = path.stem
+        if path.suffix.lower() == ".csv":
+            df = pd.read_csv(path)
+        elif path.suffix.lower() in {".xls", ".xlsx"}:
+            df = pd.read_excel(path)
+        elif path.suffix.lower() == ".json":
+            df = pd.read_json(path, orient="records", lines=False)
+        else:
+            continue
+        con.execute(f'DROP TABLE IF EXISTS "{name}";')
+        con.register("tmp_df", df)
+        con.execute(f'CREATE TABLE "{name}" AS SELECT * FROM tmp_df;')
+        con.unregister("tmp_df")
+    con.close()
+
+    os.environ["DUCKDB_PATH"] = str(UPLOAD_DB_PATH)
+    os.environ["DBT_DUCKDB_PATH"] = str(UPLOAD_DB_PATH)
+    return UploadResponse(status="ok")
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
@@ -195,7 +240,8 @@ async def summarize(req: SummarizeRequest):
 async def db_info():
     """Return basic information about the DuckDB database."""
     try:
-        size = os.path.getsize(DUCKDB_PATH)
+        path = os.getenv("DUCKDB_PATH", str(DEFAULT_DB_PATH))
+        size = os.path.getsize(path)
     except Exception as exc:  # noqa: BLE001
         print("getsize error", exc)
         size = 0

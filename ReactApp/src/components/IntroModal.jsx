@@ -173,11 +173,11 @@ export default function IntroModal({ onIngested }) {
             checked={digest}
             onChange={(e) => setDigest(e.target.checked)}
             style={{
-              width: "30px",
-              height: "30px",
+              width: "20px",
+              height: "20px",
               accentColor: "#007BFF",
               cursor: "pointer",
-              marginRight: "0.5rem",
+              marginRight: "0.1rem",
             }}
           />
           <label

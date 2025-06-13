@@ -20,12 +20,12 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 CHARTS_DIR = ROOT / 'charts'
 CHARTS_DIR.mkdir(exist_ok=True)
 
-# Directory for temporarily uploaded user files
-UPLOAD_DIR = ROOT / 'uploaded_data'
-UPLOAD_DIR.mkdir(exist_ok=True)
+# Directory for temporary database when ingesting user files
+INGEST_DIR = ROOT / 'ingested_data'
+INGEST_DIR.mkdir(exist_ok=True)
 
-# DuckDB path used for user-uploaded data
-UPLOAD_DB_PATH = UPLOAD_DIR / 'upload.db'
+# DuckDB path used for ingested user data
+INGEST_DB_PATH = INGEST_DIR / 'ingest.db'
 
 
 def require_env(*names: str) -> None:

@@ -823,7 +823,7 @@ export default function ChatBox() {
       <VideoModal src={directorsCutUrl} onClose={() => setIsDirectorsCutOpen(false)} />
     )}
     {showIntro && (
-      <IntroModal onUploaded={() => setShowIntro(false)} />
+      <IntroModal onIngested={() => setShowIntro(false)} />
     )}
     </>
   );

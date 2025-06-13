@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-export default function IntroModal({ onUploaded }) {
+export default function IntroModal({ onIngested }) {
   const fileRef = useRef(null);
 
   const handleClick = () => {
@@ -13,19 +13,19 @@ export default function IntroModal({ onUploaded }) {
     const form = new FormData();
     for (const f of files) form.append("files", f);
     try {
-      const res = await fetch("/upload_data", {
+      const res = await fetch("/ingest_data", {
         method: "POST",
         body: form,
       });
       if (res.ok) {
-        if (onUploaded) onUploaded();
+        if (onIngested) onIngested();
       } else {
-        console.error("upload failed", await res.text());
-        alert("Failed to upload files");
+        console.error("ingest failed", await res.text());
+        alert("Failed to ingest files");
       }
     } catch (err) {
-      console.error("upload error", err);
-      alert("Upload error");
+      console.error("ingest error", err);
+      alert("Ingest error");
     }
   };
 
@@ -55,10 +55,13 @@ export default function IntroModal({ onUploaded }) {
           textAlign: "center",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Welcome to Deb, the ultimate Data Engineer Bot</h2>
-        <p>Please add your data files to get started.</p>
+        <h2 style={{ marginTop: 0 }}>Welcome to Deb, your free, open source Data Engineer Bot</h2>
+        <p>Please select your data files to get started or select from the sample data in the 
+        dropdown below. Your file contents will be ingested (read-only) into a temporary 
+        secure database ONLY for this session.</p>
         <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>
-          Uploaded data is temporary and removed after your session.
+          Files themselves are never stored anywhere at anytime.
+          Your data is merely observed and forgotten by Deb.
         </p>
         <input
           ref={fileRef}

@@ -2,4 +2,4 @@ __pycache__/
 .env
 chatbot_env/
 charts/
-uploaded_data/
+ingested_data/

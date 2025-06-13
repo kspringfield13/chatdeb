@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 
-from .config import CHARTS_DIR, UPLOAD_DIR, UPLOAD_DB_PATH
+from .config import CHARTS_DIR, INGEST_DIR, INGEST_DB_PATH
 
 from .chatbot import (
     handle_query,
@@ -118,7 +118,8 @@ class DirectorsCutResponse(BaseModel):
     video_url: str | None = None
 
 
-class UploadResponse(BaseModel):
+
+class IngestResponse(BaseModel):
     status: str
 
 
@@ -132,45 +133,42 @@ async def intro():
     return IntroResponse(message=msg)
 
 
-@app.post("/upload_data", response_model=UploadResponse)
-async def upload_data(files: list[UploadFile] = File(...)):
-    """Save uploaded files and ingest them into a temporary DuckDB database."""
-    UPLOAD_DIR.mkdir(exist_ok=True)
+@app.post("/ingest_data", response_model=IngestResponse)
+async def ingest_data(files: list[UploadFile] = File(...)):
+    """Read ingested files and load them directly into DuckDB."""
+    import pandas as pd
+    import duckdb
+    import io
+
+    INGEST_DIR.mkdir(exist_ok=True)
+
     total = 0
-    saved = []
+    con = duckdb.connect(str(INGEST_DB_PATH))
     for file in files:
         data = await file.read()
         total += len(data)
         if total > 1024 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="Upload limit exceeded")
-        path = UPLOAD_DIR / file.filename
-        with open(path, "wb") as f:
-            f.write(data)
-        saved.append(path)
-
-    import pandas as pd
-    import duckdb
-
-    con = duckdb.connect(str(UPLOAD_DB_PATH))
-    for path in saved:
-        name = path.stem
-        if path.suffix.lower() == ".csv":
-            df = pd.read_csv(path)
-        elif path.suffix.lower() in {".xls", ".xlsx"}:
-            df = pd.read_excel(path)
-        elif path.suffix.lower() == ".json":
-            df = pd.read_json(path, orient="records", lines=False)
+            raise HTTPException(status_code=400, detail="Ingest limit exceeded")
+        ext = Path(file.filename).suffix.lower()
+        buf = io.BytesIO(data)
+        if ext == ".csv":
+            df = pd.read_csv(buf)
+        elif ext in {".xls", ".xlsx"}:
+            df = pd.read_excel(buf)
+        elif ext == ".json":
+            df = pd.read_json(buf, orient="records", lines=False)
         else:
             continue
+        name = Path(file.filename).stem
         con.execute(f'DROP TABLE IF EXISTS "{name}";')
         con.register("tmp_df", df)
         con.execute(f'CREATE TABLE "{name}" AS SELECT * FROM tmp_df;')
         con.unregister("tmp_df")
     con.close()
 
-    os.environ["DUCKDB_PATH"] = str(UPLOAD_DB_PATH)
-    os.environ["DBT_DUCKDB_PATH"] = str(UPLOAD_DB_PATH)
-    return UploadResponse(status="ok")
+    os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
+    os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
+    return IngestResponse(status="ok")
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):

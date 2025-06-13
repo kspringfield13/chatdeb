@@ -212,11 +212,16 @@ SELECT * FROM customers LIMIT 5;
 The `/visualize/complete` endpoint returns a path to a PNG chart created with
 `matplotlib`. Provide the SQL query along with x and y columns and a chart type
 (bar, line, scatter or pie). Charts use a consistent style defined in
-`chart_style.py` so visuals look polished and professional. The image is saved
+`chart_style.py` so visuals look polished and professional. A subtle color
+palette is applied to keep charts consistent. The image is saved
 in the `charts/` folder and the file path is returned to the frontend. The
 FastAPI app serves this directory under the `/charts` route so the React UI can
 load the images directly. Invalid queries or parameters result in descriptive
 errors returned by the API.
+
+If a data question returns several rows the bot suggests creating a chart to
+highlight the information. Click the **Visualize?** button when prompted and
+answer the follow-up questions to generate a chart on the fly.
 
 When you click the "Visualize?" button in the UI, the bot will prompt you with
 four short questions asking for (1) the data source or SQL query, (2) the

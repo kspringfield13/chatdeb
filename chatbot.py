@@ -12,6 +12,7 @@ from openai import OpenAI
 from pathlib import Path
 from io import StringIO
 import pandas as pd
+from .visualize import generate_context_questions
 
 
 
@@ -38,6 +39,70 @@ def _metadata_summary(meta: dict) -> str:
     return "\n".join(lines)
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
+
+
+def should_prompt_for_context(question: str) -> bool:
+    """Return True if the question lacks detail for SQL analysis."""
+    q = question.lower().strip()
+    if len(q.split()) <= 4:
+        return True
+    generic = ["data", "report", "analyze", "analysis"]
+    if any(w in q for w in generic) and not any(
+        kw in q for kw in ["last", "between", "from", "by", "for"]
+    ):
+        return True
+    return False
+
+
+def generate_clarifying_questions(question: str, history: list[dict] | None = None) -> list[str]:
+    """Return short follow-up questions to refine the user's request."""
+    base = [
+        "Which table or dataset should I query?",
+        "What time period or filters would you like applied?",
+    ]
+
+    try:
+        client = OpenAI()
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are helping clarify a data analysis question. "
+                    "Ask two short follow up questions that would help build a precise SQL query."
+                ),
+            },
+            {"role": "user", "content": question},
+        ]
+        if history:
+            for entry in history:
+                role = "user" if entry.get("sender") == "user" else "assistant"
+                messages.append({"role": role, "content": entry.get("text", "")})
+        completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages,
+        )
+        text = completion.choices[0].message.content.strip()
+        lines = [
+            line.lstrip("- ").lstrip("0123456789. ").strip()
+            for line in text.splitlines()
+            if line.strip()
+        ]
+        if len(lines) >= 2 and all(q.endswith("?") for q in lines[:2]):
+            return lines[:2]
+    except Exception as exc:  # noqa: BLE001
+        print("clarifying questions error", exc)
+    return base
+
+
+def maybe_add_chart_prompt(reply: str, question: str, rows: list[tuple]) -> str:
+    """Append a visualization hint when multiple rows are returned."""
+    q = question.lower()
+    if any(k in q for k in ["chart", "graph", "visual"]):
+        return reply
+    if len(rows) <= 1:
+        return reply
+    hint = "Would a bar or line chart help illustrate this data? Use the 'Visualize?' button to create one."
+    return f"{reply}\n{hint}"
 
 # ── Chat history configuration ──────────────────────────────────────────────
 # Maximum number of past entries to include as context. Each entry is
@@ -575,6 +640,12 @@ def handle_query(query_text: str) -> str:
         return reply
 
     if is_data_question(q):
+        if should_prompt_for_context(q):
+            qs = generate_clarifying_questions(q, load_recent_history(2))
+            bullet = "\n".join(f"- {line}" for line in qs)
+            reply = f"I have a couple quick questions before running the query:\n{bullet}"
+            _save_to_history(q, reply, confidence=None)
+            return reply
         try:
             from .langchain_sql import query_via_sqlagent
             headers, rows = query_via_sqlagent(q)
@@ -590,17 +661,20 @@ def handle_query(query_text: str) -> str:
             if n == 1:
                 reply = f"{explain}\n{format_single_row(rows[0])}"
                 reply = _maybe_convert_text_table(reply)
+                reply = maybe_add_chart_prompt(reply, q, rows)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             if 2 <= n <= 5:
                 body = format_numbered_list(rows)
                 reply = _maybe_convert_text_table(f"{explain}\n{body}")
+                reply = maybe_add_chart_prompt(reply, q, rows)
                 _save_to_history(q, reply, confidence=None)
                 return reply
 
             table = format_markdown_table(rows, limit=None, headers=headers)
             reply = _maybe_convert_text_table(f"{explain}\n{table}")
+            reply = maybe_add_chart_prompt(reply, q, rows)
             _save_to_history(q, reply, confidence=None)
             return reply
 

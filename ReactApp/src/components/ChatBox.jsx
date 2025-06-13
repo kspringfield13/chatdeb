@@ -264,8 +264,12 @@ export default function ChatBox() {
       const newMsgs = [];
       if (data.summary) {
         if (data.summary.startsWith("TABLE:")) {
-          const img = data.summary.replace("TABLE:", "");
+          // "TABLE:/charts/foo.png\nExtra text" → ["/charts/foo.png", "Extra text"]
+          const parts = data.summary.replace("TABLE:", "").split("\n");
+          const img = parts[0].trim();
           newMsgs.push({ sender: "bot", text: "Here is your table:", image: img });
+          const extra = parts.slice(1).join("\n").trim();
+          if (extra) newMsgs.push({ sender: "bot", text: extra });
         } else {
           newMsgs.push({ sender: "bot", text: data.summary });
         }
@@ -436,11 +440,17 @@ export default function ChatBox() {
 
       const data = await res.json();
       if (data.response && data.response.startsWith("TABLE:")) {
-        const img = data.response.replace("TABLE:", "");
-        setChatHistory((prev) => [
-          ...prev,
-          { sender: "bot", text: "Here is your table:", image: img },
-        ]);
+        const parts = data.response.replace("TABLE:", "").split("\n");
+        const img = parts[0].trim();
+        setChatHistory((prev) => {
+          const msgs = [
+            ...prev,
+            { sender: "bot", text: "Here is your table:", image: img },
+          ];
+          const extra = parts.slice(1).join("\n").trim();
+          if (extra) msgs.push({ sender: "bot", text: extra });
+          return msgs;
+        });
         setShowDirectorsCut(true);
         setDirectorsCutUrl(null);
       } else {

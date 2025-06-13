@@ -94,13 +94,13 @@ export default function IntroModal({ onIngested }) {
           Your Free, Open Source Data Engineer Bot
         </h2>
         <h3>
-          Please select your data files to get started.<br>
+          Please select your data files to get started.<br />
           Click button below or select from sample datasets in the dropdown.
         </h3>
         <p style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-          Your file contents will be ingested (read-only) into a temporary<br> 
+          Your file contents will be ingested (read-only) into a temporary<br />
           secure database ONLY for this session.
-          Files themselves are never stored anywhere at anytime.<br>
+          Files themselves are never stored anywhere at anytime.<br />
           Your data is merely observed and forgotten by Deb.
         </p>
         <input

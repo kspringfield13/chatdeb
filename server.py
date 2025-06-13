@@ -192,26 +192,44 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
         ext = file.suffix.lower()
         if ext not in {".csv", ".xls", ".xlsx", ".json"}:
             continue
-        try:
-            if ext == ".csv":
-                df = pd.read_csv(file)
-            elif ext in {".xls", ".xlsx"}:
-                engine = "openpyxl" if ext == ".xlsx" else "xlrd"
-                df = pd.read_excel(file, engine=engine)
-            else:
-                df = pd.read_json(file, orient="records", lines=False)
-        except Exception as exc:
-            print(f"⚠️  Failed to read {file.name}: {exc}")
+        df = None
+        for i in range(3):
+            try:
+                if ext == ".csv":
+                    df = pd.read_csv(file)
+                elif ext in {".xls", ".xlsx"}:
+                    engine = "openpyxl" if ext == ".xlsx" else "xlrd"
+                    df = pd.read_excel(file, engine=engine)
+                else:
+                    df = pd.read_json(file, orient="records", lines=False)
+                break
+            except Exception as exc:  # noqa: PERF203
+                print(
+                    f"⚠️  Failed to read {file.name} (attempt {i + 1}/3): {exc}"
+                )
+        if df is None:
+            print(f"❌ Giving up on {file.name}")
             continue
         if digest:
             df = df.drop_duplicates()
-        try:
-            con.execute(f'DROP TABLE IF EXISTS "{file.stem}";')
-            con.register("tmp_df", df)
-            con.execute(f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;')
-            con.unregister("tmp_df")
-        except Exception as exc:
-            print(f"⚠️  Failed to ingest {file.name}: {exc}")
+        for i in range(3):
+            try:
+                con.execute(f'DROP TABLE IF EXISTS "{file.stem}";')
+                con.register("tmp_df", df)
+                con.execute(
+                    f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;'
+                )
+                con.unregister("tmp_df")
+                print(
+                    f"⬢ Ingested {file.stem} ({len(df)} rows) from {file.name}"
+                )
+                break
+            except Exception as exc:  # noqa: PERF203
+                print(
+                    f"⚠️  Failed to ingest {file.name} (attempt {i + 1}/3): {exc}"
+                )
+        else:
+            print(f"❌ Giving up on {file.name}")
     con.close()
     os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
     os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)

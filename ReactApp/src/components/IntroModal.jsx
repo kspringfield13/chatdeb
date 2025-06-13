@@ -122,41 +122,65 @@ export default function IntroModal({ onIngested }) {
             style={{
               padding: "0.5rem 1rem",
               backgroundColor: "#6FBCFE",
-              color: "#F8F9FA",
+              color: "#004080",
               border: "none",
               borderRadius: "5px",
               fontSize: "1rem",
               cursor: "pointer",
               boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-              marginLeft: "1rem",
+              marginLeft: "1.5rem",
               appearance: "none",
             }}
           >
             Add Data
           </button>
-          <select
-            value={sample}
-            onChange={handleSample}
+          <div
             style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "#6FBCFE",
-              color: "#F8F9FA",
-              border: "none",
-              borderRadius: "0px",
-              fontSize: "1rem",
-              cursor: "pointer",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+              position: "relative",
+              display: "inline-block",
               marginLeft: "2rem",
-              appearance: "none",
             }}
           >
-            <option value="">Select Sample Dataset</option>
-            {SAMPLE_OPTIONS.map((opt) => (
-              <option key={opt} value={opt} >
-                {opt}
-              </option>
-            ))}
-          </select>
+            <select
+              value={sample}
+              onChange={handleSample}
+              style={{
+                padding: "0.5rem 1rem",
+                paddingRight: "2.5rem", // space for arrow
+                backgroundColor: "#6FBCFE",
+                color: "#004080",
+                border: "none",
+                borderRadius: "0px",
+                fontSize: "1rem",
+                cursor: "pointer",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                appearance: "none",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+              }}
+            >
+              <option value="">Select Sample Dataset</option>
+              {SAMPLE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            {/* Custom arrow */}
+            <div
+              style={{
+                position: "absolute",
+                right: "1rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                fontSize: "0.75rem",
+                color: "#004080",
+              }}
+            >
+              ▼
+            </div>
+          </div>
         </div>
     
         <div

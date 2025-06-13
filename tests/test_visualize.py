@@ -22,6 +22,15 @@ def test_generate_context_questions_length():
     assert len(qs) == 4
 
 
+def test_generate_context_questions_last_table():
+    history = [
+        {"sender": "bot", "text": "Here is your table:", "image": "/charts/table_x.png", "data": "/charts/table_x.txt"}
+    ]
+    qs = generate_context_questions(history)
+    assert len(qs) == 4
+    assert "x-axis" in qs[0].lower()
+
+
 def test_infer_headers_typing():
     rows = [
         (123, "abc", "2024-01-01"),
@@ -45,6 +54,14 @@ def test_create_table_visual_headers(tmp_path, monkeypatch):
     path = create_table_visual([(1, 2)], headers=["id", "value"])
     txt = Path(path).with_suffix(".txt")
     assert txt.read_text().splitlines()[0] == "Id,Value"
+
+
+def test_create_matplotlib_visual_from_table(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    png = create_table_visual([(1, 2)], headers=["a", "b"])
+    txt = Path(png).with_suffix(".txt")
+    path = create_matplotlib_visual([str(txt), "A", "B", "bar"])
+    assert Path(path).exists()
 
 
 def test_generate_context_questions_fallback(monkeypatch):
@@ -80,6 +97,5 @@ def test_generate_context_questions_fallback(monkeypatch):
 
 
 def test_create_matplotlib_visual_invalid_sql(monkeypatch):
-    with pytest.raises(ValueError) as exc:
-        create_matplotlib_visual(["table", "x", "y", "bar"])
-    assert "SELECT" in str(exc.value)
+    with pytest.raises(ValueError):
+        create_matplotlib_visual(["missing.csv", "x", "y", "bar"])

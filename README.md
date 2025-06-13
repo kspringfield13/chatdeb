@@ -114,6 +114,13 @@ cd data_ingest
 python load_data.py
 ```
 
+You can also load the included "Orders Snapshot" demo via the FastAPI
+endpoint:
+
+```bash
+curl -F dataset="Orders Snapshot" http://localhost:8000/ingest_sample
+```
+
 **Initialize or Inspect the Existing dbt Project**
 
 ```bash

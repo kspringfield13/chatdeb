@@ -1,4 +1,5 @@
 import os
+import logging
 import uvicorn
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +26,9 @@ from .chatbot import _maybe_convert_text_table
 from .directorscut import generate_directors_cut
 from .db import DEFAULT_DB_PATH
 from .data_ingest.drop_all_data import drop_all_tables_and_views
+from . import log_config
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="KYDxBot API")
 
@@ -136,7 +140,7 @@ def reset_ingest_db() -> None:
         os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
         os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
     except Exception as exc:  # noqa: BLE001
-        print("reset_ingest_db error", exc)
+        logger.error("reset_ingest_db error: %s", exc)
 
 
 @app.get("/intro", response_model=IntroResponse)
@@ -219,11 +223,11 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
                     df = pd.read_json(file, orient="records", lines=False)
                 break
             except Exception as exc:  # noqa: PERF203
-                print(
-                    f"⚠️  Failed to read {file.name} (attempt {i + 1}/3): {exc}"
+                logger.warning(
+                    "Failed to read %s (attempt %s/3): %s", file.name, i + 1, exc
                 )
         if df is None:
-            print(f"❌ Giving up on {file.name}")
+            logger.error("Giving up on %s", file.name)
             continue
         if digest:
             df = df.drop_duplicates()
@@ -235,16 +239,16 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
                     f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;'
                 )
                 con.unregister("tmp_df")
-                print(
-                    f"⬢ Ingested {file.stem} ({len(df)} rows) from {file.name}"
+                logger.info(
+                    "Ingested %s (%s rows) from %s", file.stem, len(df), file.name
                 )
                 break
             except Exception as exc:  # noqa: PERF203
-                print(
-                    f"⚠️  Failed to ingest {file.name} (attempt {i + 1}/3): {exc}"
+                logger.warning(
+                    "Failed to ingest %s (attempt %s/3): %s", file.name, i + 1, exc
                 )
         else:
-            print(f"❌ Giving up on {file.name}")
+            logger.error("Giving up on %s", file.name)
     con.close()
     os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
     os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
@@ -331,7 +335,7 @@ async def db_info():
         path = os.getenv("DUCKDB_PATH", str(DEFAULT_DB_PATH))
         size = os.path.getsize(path)
     except Exception as exc:  # noqa: BLE001
-        print("getsize error", exc)
+        logger.error("getsize error: %s", exc)
         size = 0
     return DBInfoResponse(size=size)
 
@@ -361,19 +365,19 @@ async def my_data():
                 tables.append(parts[0])
         summary = _maybe_convert_text_table(summary_text)
     except Exception as exc:  # noqa: BLE001
-        print("get_data_summary error", exc)
+        logger.error("get_data_summary error: %s", exc)
 
     try:
         url = generate_erd()
     except Exception as exc:  # noqa: BLE001
-        print("generate_erd error", exc)
+        logger.error("generate_erd error: %s", exc)
         url = None
 
     if url:
         try:
             desc = describe_erd(url)
         except Exception as exc:  # noqa: BLE001
-            print("describe_erd error", exc)
+            logger.error("describe_erd error: %s", exc)
             desc = None
         url = f"/charts/{Path(url).name}"
 

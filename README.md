@@ -256,6 +256,8 @@ recap. While the summary is being generated, "Processing..." appears at the
 bottom of the chat. The frontend posts your chat history to the `/summarize`
 endpoint which uses OpenAI to craft the summary based on the questions, answers
 and any visuals created.
+The summary also re-displays any generated charts or diagrams so you can view
+the visuals without scrolling back through the conversation.
 
 **Run the Tests**
 

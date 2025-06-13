@@ -90,7 +90,8 @@ export default function IntroModal({ onIngested }) {
           textAlign: "center",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Welcome to Deb,<br />
+        <h2 style={{ marginTop: 0 }}>
+          Welcome to Deb,<br />
           Your Free, Open Source<br />
           Data Engineer Bot
         </h2>
@@ -98,12 +99,7 @@ export default function IntroModal({ onIngested }) {
           Please select your data files to get started.<br />
           Click button below or select from sample datasets in the dropdown.
         </h3>
-        <p style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-          Your file contents will be ingested (read-only) into a temporary<br />
-          secure database ONLY for this session.
-          Files themselves are never stored anywhere at anytime.<br />
-          Your data is merely observed and forgotten by Deb.
-        </p>
+    
         <input
           ref={fileRef}
           type="file"
@@ -111,6 +107,7 @@ export default function IntroModal({ onIngested }) {
           style={{ display: "none" }}
           onChange={handleChange}
         />
+    
         <div
           style={{
             display: "flex",
@@ -149,7 +146,7 @@ export default function IntroModal({ onIngested }) {
               borderRadius: "5px",
               fontSize: "1rem",
               cursor: "pointer",
-              marginLeft: "2rem", // optional spacing from the button
+              marginLeft: "2rem",
             }}
           >
             <option value="">Select Sample Dataset</option>
@@ -160,6 +157,7 @@ export default function IntroModal({ onIngested }) {
             ))}
           </select>
         </div>
+    
         <div
           style={{
             display: "flex",
@@ -175,9 +173,9 @@ export default function IntroModal({ onIngested }) {
             checked={digest}
             onChange={(e) => setDigest(e.target.checked)}
             style={{
-              width: "40px",
-              height: "40px",
-              accentColor: "#007BFF", // modern browsers support this
+              width: "30px",
+              height: "30px",
+              accentColor: "#007BFF",
               cursor: "pointer",
               marginRight: "0.5rem",
             }}
@@ -185,19 +183,21 @@ export default function IntroModal({ onIngested }) {
           <label
             htmlFor="digestCheckbox"
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.85rem",
               cursor: "pointer",
             }}
           >
             Digest My Data
           </label>
-          <span style={{ fontSize: "0.75rem", opacity: 0.4 }}>
+          <span style={{ fontSize: "0.7rem", opacity: 0.4 }}>
             Deeper data analysis & improved results.
           </span>
         </div>
-        <p style={{ fontSize: "0.6rem", opacity: 0.7 }}>
-          Add Data process will take longer, ingested data to be organized,
-          cleaned, and refined.
+        <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "1rem" }}>
+          Your file contents will be ingested (read-only) into a temporary<br />
+          secure database ONLY for this session.<br />
+          Files themselves are never stored anywhere at anytime.<br />
+          Your data is merely observed and forgotten by Deb.
         </p>
       </div>
     </div>

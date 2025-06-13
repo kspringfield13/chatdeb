@@ -106,8 +106,10 @@ VEO_API_KEY=
 
 **Load Raw Data**
 
-* Provided a script called load_data.py located in the data_ingest/ folder
-* It will load CSVs from the raw_data folder into duckDB
+* Provided a cross-platform script called `load_data.py` located in the
+  `data_ingest/` folder.
+* It loads CSV, Excel or JSON files from `raw_data/` into DuckDB and will skip
+  any missing files instead of failing.
 
 ```bash
 cd data_ingest
@@ -115,7 +117,8 @@ python load_data.py
 ```
 
 You can also load the included "Orders Snapshot" demo via the FastAPI
-endpoint:
+endpoint. Dataset names are case insensitive and the service will
+gracefully skip any problematic files:
 
 ```bash
 curl -F dataset="Orders Snapshot" http://localhost:8000/ingest_sample

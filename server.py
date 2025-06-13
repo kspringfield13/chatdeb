@@ -188,18 +188,25 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
         ext = file.suffix.lower()
         if ext not in {".csv", ".xls", ".xlsx", ".json"}:
             continue
-        if ext == ".csv":
-            df = pd.read_csv(file)
-        elif ext in {".xls", ".xlsx"}:
-            df = pd.read_excel(file)
-        else:
-            df = pd.read_json(file, orient="records", lines=False)
+        try:
+            if ext == ".csv":
+                df = pd.read_csv(file)
+            elif ext in {".xls", ".xlsx"}:
+                df = pd.read_excel(file)
+            else:
+                df = pd.read_json(file, orient="records", lines=False)
+        except Exception as exc:
+            print(f"⚠️  Failed to read {file.name}: {exc}")
+            continue
         if digest:
             df = df.drop_duplicates()
-        con.execute(f'DROP TABLE IF EXISTS "{file.stem}";')
-        con.register("tmp_df", df)
-        con.execute(f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;')
-        con.unregister("tmp_df")
+        try:
+            con.execute(f'DROP TABLE IF EXISTS "{file.stem}";')
+            con.register("tmp_df", df)
+            con.execute(f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;')
+            con.unregister("tmp_df")
+        except Exception as exc:
+            print(f"⚠️  Failed to ingest {file.name}: {exc}")
     con.close()
     os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
     os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
@@ -208,10 +215,11 @@ def _ingest_directory(dir_path: Path, digest: bool) -> None:
 @app.post("/ingest_sample", response_model=IngestResponse)
 async def ingest_sample(dataset: str = Form(...), digest: bool = Form(False)):
     """Ingest a predefined sample dataset by name."""
-    path = SAMPLE_DATASETS.get(dataset)
+    key = dataset.strip()
+    path = SAMPLE_DATASETS.get(key) or SAMPLE_DATASETS.get(key.lower())
     if not path or not path.exists():
         raise HTTPException(status_code=400, detail="Dataset not found")
-    _ingest_directory(path, digest)
+    _ingest_directory(path.resolve(), digest)
     return IngestResponse(status="ok")
 
 @app.post("/chat", response_model=ChatResponse)

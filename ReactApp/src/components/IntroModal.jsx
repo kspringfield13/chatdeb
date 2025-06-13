@@ -6,7 +6,7 @@ export default function IntroModal({ onIngested }) {
   const [digest, setDigest] = useState(false);
 
   const SAMPLE_OPTIONS = [
-    "dataset1",
+    "Orders Snapshot",
     "dataset2",
     "dataset3",
     "dataset4",
@@ -113,7 +113,7 @@ export default function IntroModal({ onIngested }) {
         <div
           style={{
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "left",
             alignItems: "center",
             gap: "0.5rem",
             marginTop: "1rem",
@@ -132,7 +132,7 @@ export default function IntroModal({ onIngested }) {
         <div
           style={{
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "left",
             alignItems: "center",
             marginTop: "1rem",
             gap: "0.5rem",

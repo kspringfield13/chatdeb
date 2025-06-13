@@ -1,22 +1,27 @@
 # db.py
 
 import os
+from pathlib import Path
 import duckdb
 from sqlalchemy import create_engine
 
-DUCKDB_PATH = os.path.join(os.path.dirname(__file__), "data", "data.db")
+DEFAULT_DB_PATH = Path(__file__).resolve().parent / "data" / "data.db"
+# Backwards compat constant
+DUCKDB_PATH = str(DEFAULT_DB_PATH)
 
-_engine = None
-_connection = None
+
+def _get_path() -> str:
+    """Return the DuckDB file path, allowing ``DUCKDB_PATH`` env override."""
+    return os.getenv("DUCKDB_PATH", str(DEFAULT_DB_PATH))
+
 
 def get_engine():
-    global _engine
-    if _engine is None:
-        _engine = create_engine(f"duckdb:///{DUCKDB_PATH}?access_mode=read_write")
-    return _engine
+    """Return a new SQLAlchemy engine for the current DuckDB path."""
+    path = _get_path()
+    return create_engine(f"duckdb:///{path}?access_mode=read_write")
+
 
 def get_duckdb_connection():
-    global _connection
-    if _connection is None:
-        _connection = duckdb.connect(DUCKDB_PATH)
-    return _connection
+    """Return a new DuckDB connection for the current path."""
+    path = _get_path()
+    return duckdb.connect(path)

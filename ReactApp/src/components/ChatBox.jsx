@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ImageModal from "./ImageModal";
 import VideoModal from "./VideoModal";
+import IntroModal from "./IntroModal";
 // Visualization questions are now asked through the chat flow
 
 export default function ChatBox() {
@@ -29,6 +30,7 @@ export default function ChatBox() {
   const [showDirectorsCut, setShowDirectorsCut] = useState(false);
   const [directorsCutUrl, setDirectorsCutUrl] = useState(null);
   const [isDirectorsCutOpen, setIsDirectorsCutOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const messagesEndRef = useRef(null);
   const containerRef = useRef(null);
@@ -804,6 +806,9 @@ export default function ChatBox() {
     )}
     {directorsCutUrl && isDirectorsCutOpen && (
       <VideoModal src={directorsCutUrl} onClose={() => setIsDirectorsCutOpen(false)} />
+    )}
+    {showIntro && (
+      <IntroModal onUploaded={() => setShowIntro(false)} />
     )}
     </>
   );

@@ -1,12 +1,12 @@
 import os
 import uvicorn
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 
-from .config import CHARTS_DIR, INGEST_DIR, INGEST_DB_PATH
+from .config import CHARTS_DIR, INGEST_DIR, INGEST_DB_PATH, SAMPLE_DATASETS
 
 from .chatbot import (
     handle_query,
@@ -134,7 +134,9 @@ async def intro():
 
 
 @app.post("/ingest_data", response_model=IngestResponse)
-async def ingest_data(files: list[UploadFile] = File(...)):
+async def ingest_data(
+    files: list[UploadFile] = File(...), digest: bool = Form(False)
+):
     """Read ingested files and load them directly into DuckDB."""
     import pandas as pd
     import duckdb
@@ -161,6 +163,8 @@ async def ingest_data(files: list[UploadFile] = File(...)):
             continue
         name = Path(file.filename).stem
         con.execute(f'DROP TABLE IF EXISTS "{name}";')
+        if digest:
+            df = df.drop_duplicates()
         con.register("tmp_df", df)
         con.execute(f'CREATE TABLE "{name}" AS SELECT * FROM tmp_df;')
         con.unregister("tmp_df")
@@ -168,6 +172,46 @@ async def ingest_data(files: list[UploadFile] = File(...)):
 
     os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
     os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
+    return IngestResponse(status="ok")
+
+
+def _ingest_directory(dir_path: Path, digest: bool) -> None:
+    """Ingest all supported files from ``dir_path`` into DuckDB."""
+    import pandas as pd
+    import duckdb
+
+    INGEST_DIR.mkdir(exist_ok=True)
+    con = duckdb.connect(str(INGEST_DB_PATH))
+    for file in dir_path.iterdir():
+        if not file.is_file():
+            continue
+        ext = file.suffix.lower()
+        if ext not in {".csv", ".xls", ".xlsx", ".json"}:
+            continue
+        if ext == ".csv":
+            df = pd.read_csv(file)
+        elif ext in {".xls", ".xlsx"}:
+            df = pd.read_excel(file)
+        else:
+            df = pd.read_json(file, orient="records", lines=False)
+        if digest:
+            df = df.drop_duplicates()
+        con.execute(f'DROP TABLE IF EXISTS "{file.stem}";')
+        con.register("tmp_df", df)
+        con.execute(f'CREATE TABLE "{file.stem}" AS SELECT * FROM tmp_df;')
+        con.unregister("tmp_df")
+    con.close()
+    os.environ["DUCKDB_PATH"] = str(INGEST_DB_PATH)
+    os.environ["DBT_DUCKDB_PATH"] = str(INGEST_DB_PATH)
+
+
+@app.post("/ingest_sample", response_model=IngestResponse)
+async def ingest_sample(dataset: str = Form(...), digest: bool = Form(False)):
+    """Ingest a predefined sample dataset by name."""
+    path = SAMPLE_DATASETS.get(dataset)
+    if not path or not path.exists():
+        raise HTTPException(status_code=400, detail="Dataset not found")
+    _ingest_directory(path, digest)
     return IngestResponse(status="ok")
 
 @app.post("/chat", response_model=ChatResponse)

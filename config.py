@@ -27,6 +27,17 @@ INGEST_DIR.mkdir(exist_ok=True)
 # DuckDB path used for ingested user data
 INGEST_DB_PATH = INGEST_DIR / 'ingest.db'
 
+# Directory holding sample dataset folders
+SAMPLE_DATASETS_DIR = ROOT / 'sample_datasets'
+SAMPLE_DATASETS_DIR.mkdir(exist_ok=True)
+
+# Predefined sample dataset mapping. Update the folder names as needed.
+SAMPLE_DATASETS = {
+    f"dataset{i}": SAMPLE_DATASETS_DIR / f"dataset{i}"
+    for i in range(1, 6)
+}
+
+
 
 def require_env(*names: str) -> None:
     """Raise ``ValueError`` if any of ``names`` are unset and not testing."""

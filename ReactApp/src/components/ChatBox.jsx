@@ -251,7 +251,23 @@ export default function ChatBox() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+      if (data.summary && data.summary.startsWith("TABLE:")) {
+        const parts = data.summary.replace("TABLE:", "").split("\n");
+        const img = parts[0].trim();
+        const txt = img.replace(/\.png$/, ".txt");
+        setLastTablePath(txt);
+        setChatHistory((prev) => {
+          const msgs = [
+            ...prev,
+            { sender: "bot", text: "Here is your table:", image: img, data: txt },
+          ];
+          const extra = parts.slice(1).join("\n").trim();
+          if (extra) msgs.push({ sender: "bot", text: extra });
+          return msgs;
+        });
+      } else {
+        setChatHistory((prev) => [...prev, { sender: "bot", text: data.summary }]);
+      }
     } catch (err) {
       console.error("Error generating summary", err);
       setChatHistory((prev) => [

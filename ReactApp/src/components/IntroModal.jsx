@@ -144,7 +144,6 @@ export default function IntroModal({ onIngested }) {
             style={{
               padding: "0.5rem 1rem",
               backgroundColor: "#007BFF",
-              color: "#004080",
               border: "none",
               borderRadius: "5px",
               fontSize: "1rem",

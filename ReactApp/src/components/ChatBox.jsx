@@ -57,10 +57,10 @@ export default function ChatBox() {
   const BASE_WIDTH = 1024; // reference width for responsive sizing
   const hidePillText = windowWidth < BASE_WIDTH * 0.25;
   const pillFontSize =
-    windowWidth < BASE_WIDTH * 0.6
+    windowWidth < BASE_WIDTH * 0.75
+      ? "0.6rem"
+      : windowWidth < BASE_WIDTH * 0.5
       ? "0.55rem"
-      : windowWidth < BASE_WIDTH * 0.75
-      ? "0.65rem"
       : "0.90rem";
   const pillPadding = hidePillText
     ? "0.25rem"

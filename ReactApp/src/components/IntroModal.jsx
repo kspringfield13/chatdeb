@@ -55,11 +55,13 @@ export default function IntroModal({ onIngested }) {
           textAlign: "center",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Welcome to Deb, the ultimate Data Engineer Bot</h2>
-        <p>Please select data files to get started. The contents will be read
-        and copied into a temporary database only for this session.</p>
+        <h2 style={{ marginTop: 0 }}>Welcome to Deb, your free, open source Data Engineer Bot</h2>
+        <p>Please select your data files to get started or select from the sample data in the 
+        dropdown below. Your file contents will be ingested (read-only) into a temporary 
+        secure database ONLY for this session.</p>
         <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>
-          Files themselves are never stored on the server.
+          Files themselves are never stored anywhere at anytime.
+          Your data is merely observed and forgotten by Deb.
         </p>
         <input
           ref={fileRef}

@@ -30,6 +30,7 @@ export default function ChatBox() {
   const [showDirectorsCut, setShowDirectorsCut] = useState(false);
   const [directorsCutUrl, setDirectorsCutUrl] = useState(null);
   const [isDirectorsCutOpen, setIsDirectorsCutOpen] = useState(false);
+  const [lastTablePath, setLastTablePath] = useState(null);
   const [showIntro, setShowIntro] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const messagesEndRef = useRef(null);
@@ -109,7 +110,7 @@ export default function ChatBox() {
       const qs = data.questions || [];
       if (!qs.length) return;
       setVizQuestions(qs);
-      setVizAnswers([]);
+      setVizAnswers(lastTablePath ? [lastTablePath] : []);
       setVizStep(0);
       setCollectingViz(true);
 
@@ -269,7 +270,9 @@ export default function ChatBox() {
           // "TABLE:/charts/foo.png\nExtra text" → ["/charts/foo.png", "Extra text"]
           const parts = data.summary.replace("TABLE:", "").split("\n");
           const img = parts[0].trim();
-          newMsgs.push({ sender: "bot", text: "Here is your table:", image: img });
+          const txt = img.replace(/\.png$/, ".txt");
+          setLastTablePath(txt);
+          newMsgs.push({ sender: "bot", text: "Here is your table:", image: img, data: txt });
           const extra = parts.slice(1).join("\n").trim();
           if (extra) newMsgs.push({ sender: "bot", text: extra });
         } else {
@@ -444,10 +447,12 @@ export default function ChatBox() {
       if (data.response && data.response.startsWith("TABLE:")) {
         const parts = data.response.replace("TABLE:", "").split("\n");
         const img = parts[0].trim();
+        const txt = img.replace(/\.png$/, ".txt");
+        setLastTablePath(txt);
         setChatHistory((prev) => {
           const msgs = [
             ...prev,
-            { sender: "bot", text: "Here is your table:", image: img },
+            { sender: "bot", text: "Here is your table:", image: img, data: txt },
           ];
           const extra = parts.slice(1).join("\n").trim();
           if (extra) msgs.push({ sender: "bot", text: extra });

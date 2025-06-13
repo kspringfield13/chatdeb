@@ -3,6 +3,7 @@ import os
 import uuid
 import json
 import textwrap
+from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 from openai import OpenAI
@@ -49,6 +50,24 @@ def infer_headers(rows: list[tuple]) -> list[str]:
 INTRO = "To create a visualization for you, I need some more details:"
 
 
+def _find_last_table_path(history: list[dict]) -> str | None:
+    """Return the /charts path of the most recent table image if available."""
+    for entry in reversed(history or []):
+        data = entry.get("data")
+        if isinstance(data, str) and "table_" in data:
+            return data
+        img = entry.get("image")
+        if isinstance(img, str) and "table_" in img:
+            return img.replace(".png", ".txt")
+        text = entry.get("text", "")
+        if "/charts/table_" in text:
+            import re
+            m = re.search(r"/charts/table_[\w.-]+\.png", text)
+            if m:
+                return m.group(0).replace(".png", ".txt")
+    return None
+
+
 def generate_context_questions(history: list[dict]) -> list[str]:
     """Return up to 4 short context questions derived from chat history.
 
@@ -57,12 +76,21 @@ def generate_context_questions(history: list[dict]) -> list[str]:
     returned.  The first question always includes a short statement requesting
     more info so the user understands why we are asking.
     """
+    last_table = _find_last_table_path(history)
     if not history:
         return [
             f"{INTRO} Which table or SQL query should I use as the data source?",
             "Which column should be used for the x-axis?",
             "Which column or metric goes on the y-axis?",
             "What chart type would you like (bar, line, scatter, etc.)?",
+        ]
+
+    if last_table:
+        return [
+            f"{INTRO} I'll use the data from your last table. Which column should be used for the x-axis?",
+            "Which column or metric goes on the y-axis?",
+            "What chart type would you like (bar, line, scatter, etc.)?",
+            "Anything else to customize the chart?",
         ]
 
     messages = []
@@ -130,16 +158,27 @@ def create_matplotlib_visual(answers: list[str]) -> str:
         )
 
     sql_query, x_col, y_col, chart_type = answers[:4]
-    if not sql_query.strip().lower().startswith("select"):
-        raise ValueError(
-            "Query must be a SELECT statement. For example: " "SELECT * FROM your_table"
-        )
 
-    try:
-        engine = get_engine()
-        df = pd.read_sql_query(sql_query, engine)
-    except Exception as e:  # noqa: BLE001
-        raise ValueError(f"Query failed: {e}") from e
+    if sql_query.strip().lower().startswith("select"):
+        try:
+            engine = get_engine()
+            df = pd.read_sql_query(sql_query, engine)
+        except Exception as e:  # noqa: BLE001
+            raise ValueError(f"Query failed: {e}") from e
+    else:
+        path = sql_query.replace("TABLE:", "").strip()
+        if path.startswith("/charts/"):
+            path = CHARTS_DIR / Path(path).name
+        if path.endswith(".png"):
+            path = Path(path).with_suffix(".txt")
+        if not os.path.exists(path):
+            raise ValueError(
+                "Query must be a SELECT statement or a valid table path"
+            )
+        try:
+            df = pd.read_csv(path)
+        except Exception as e:  # noqa: BLE001
+            raise ValueError(f"Loading data failed: {e}") from e
 
     if df.empty:
         raise ValueError("Query returned no data")

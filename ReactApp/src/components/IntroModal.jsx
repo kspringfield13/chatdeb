@@ -144,11 +144,11 @@ export default function IntroModal({ onIngested }) {
             style={{
               padding: "0.5rem 1rem",
               backgroundColor: "#007BFF",
+              color: "#004080",
               border: "none",
               borderRadius: "5px",
               fontSize: "1rem",
               cursor: "pointer",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
               transition: "background-color 0.3s ease",
               marginLeft: "1rem", // optional spacing from the button
             }}

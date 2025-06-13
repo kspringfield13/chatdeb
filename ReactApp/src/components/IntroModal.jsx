@@ -193,7 +193,7 @@ export default function IntroModal({ onIngested }) {
             Deeper data analysis & improved results.
           </span>
         </div>
-        <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "1rem" }}>
+        <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "1rem", textAlign: "left" }}>
           Your file contents will be ingested (read-only) into a temporary<br />
           secure database ONLY for this session.<br />
           Files themselves are never stored anywhere at anytime.<br />

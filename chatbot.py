@@ -897,7 +897,8 @@ def summarize_conversation(
             model="gpt-4.1",
             messages=[{"role": "system", "content": system_prompt}] + messages,
         )
-        return completion.choices[0].message.content.strip()
+        text = completion.choices[0].message.content.strip()
+        return _maybe_convert_text_table(text)
     except Exception as e:  # noqa: BLE001
         print("summarize_conversation error", e)
         return "Sorry, I couldn't generate a summary."

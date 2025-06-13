@@ -1,7 +1,17 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 export default function IntroModal({ onIngested }) {
   const fileRef = useRef(null);
+  const [sample, setSample] = useState("");
+  const [digest, setDigest] = useState(false);
+
+  const SAMPLE_OPTIONS = [
+    "dataset1",
+    "dataset2",
+    "dataset3",
+    "dataset4",
+    "dataset5",
+  ];
 
   const handleClick = () => {
     if (fileRef.current) fileRef.current.click();
@@ -12,6 +22,7 @@ export default function IntroModal({ onIngested }) {
     if (!files || files.length === 0) return;
     const form = new FormData();
     for (const f of files) form.append("files", f);
+    form.append("digest", digest);
     try {
       const res = await fetch("/ingest_data", {
         method: "POST",
@@ -22,6 +33,30 @@ export default function IntroModal({ onIngested }) {
       } else {
         console.error("ingest failed", await res.text());
         alert("Failed to ingest files");
+      }
+    } catch (err) {
+      console.error("ingest error", err);
+      alert("Ingest error");
+    }
+  };
+
+  const handleSample = async (e) => {
+    const name = e.target.value;
+    setSample(name);
+    if (!name) return;
+    const form = new FormData();
+    form.append("dataset", name);
+    form.append("digest", digest);
+    try {
+      const res = await fetch("/ingest_sample", {
+        method: "POST",
+        body: form,
+      });
+      if (res.ok) {
+        if (onIngested) onIngested();
+      } else {
+        console.error("ingest failed", await res.text());
+        alert("Failed to ingest sample");
       }
     } catch (err) {
       console.error("ingest error", err);
@@ -75,9 +110,49 @@ export default function IntroModal({ onIngested }) {
           style={{ display: "none" }}
           onChange={handleChange}
         />
-        <button onClick={handleClick} style={{ marginTop: "1rem" }}>
-          Add Data
-        </button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginTop: "1rem",
+          }}
+        >
+          <button onClick={handleClick}>Add Data</button>
+          <select value={sample} onChange={handleSample}>
+            <option value="">Select Sample Dataset</option>
+            {SAMPLE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "1rem",
+            gap: "0.5rem",
+          }}
+        >
+          <input
+            id="digestCheckbox"
+            type="checkbox"
+            checked={digest}
+            onChange={(e) => setDigest(e.target.checked)}
+          />
+          <label htmlFor="digestCheckbox">Digest My Data</label>
+          <span style={{ opacity: 0.4 }}>
+            Deeper data analysis & improved results.
+          </span>
+        </div>
+        <p style={{ fontSize: "0.75rem", opacity: 0.7 }}>
+          Add Data process will take longer, ingested data to be organized,
+          cleaned, and refined.
+        </p>
       </div>
     </div>
   );

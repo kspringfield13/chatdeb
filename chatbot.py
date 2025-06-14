@@ -9,6 +9,7 @@ from .preloaded_questions import is_similar
 from sqlalchemy import text
 from typing import List, Tuple
 import re, math, json
+from difflib import SequenceMatcher
 from openai import OpenAI
 from pathlib import Path
 from io import StringIO
@@ -48,6 +49,26 @@ def _metadata_summary(meta: dict) -> str:
 
 
 METADATA_SUMMARY = _metadata_summary(VISION_METADATA)
+
+
+def _find_metadata_matches(text: str) -> list[str]:
+    """Return any table or column names mentioned in ``text``."""
+    q = text.lower()
+    matches: list[str] = []
+
+    for name, info in VISION_METADATA.items():
+        base = Path(name).stem.lower()
+        if base in q:
+            matches.append(base)
+        for col in info.get("headers", []):
+            col_norm = col.lower().replace("_", " ")
+            if col_norm in q:
+                matches.append(f"{base}.{col}")
+            else:
+                ratio = SequenceMatcher(None, col_norm, q).ratio()
+                if ratio >= 0.8:
+                    matches.append(f"{base}.{col}")
+    return matches
 
 
 def should_prompt_for_context(question: str) -> bool:
@@ -270,6 +291,11 @@ def call_openai_fallback(user_question: str, history: list[dict] | None = None) 
         system_msg = "You are a helpful assistant."
         if METADATA_SUMMARY:
             system_msg += "\nHere is data the user provided:\n" + METADATA_SUMMARY
+
+        matches = _find_metadata_matches(user_question)
+        if matches:
+            listed = ", ".join(matches)
+            system_msg += f"\nThe question references: {listed}"
 
         if history is None:
             history = load_full_history()
@@ -684,7 +710,7 @@ def handle_query(query_text: str) -> str:
             "The sample data is already loaded in memory. "
             "Would you like to use this DuckDB data?"
         )
-    elif is_data_question(q):
+    elif is_data_question(q) or _find_metadata_matches(q):
         reply = _handle_data_question(q)
     else:
         reply = _handle_semantic_question(q)

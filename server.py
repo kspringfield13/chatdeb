@@ -333,6 +333,10 @@ async def db_info():
     """Return basic information about the DuckDB database."""
     try:
         path = os.getenv("DUCKDB_PATH", str(DEFAULT_DB_PATH))
+        if not os.path.isfile(path):
+            fallback = Path(__file__).resolve().parent / "data" / "data.db"
+            if fallback.is_file():
+                path = str(fallback)
         size = os.path.getsize(path)
     except Exception as exc:  # noqa: BLE001
         logger.error("getsize error: %s", exc)
